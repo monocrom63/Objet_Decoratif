@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -12,18 +12,111 @@ type Product = {
   name: string;
   collection: 'Barrique' | 'Milano';
   description: string;
+  explanation: string;
   price: number;
   art: string;
   tag?: string;
   scents: string[];
+  images?: string[];
+  scentOptions?: ScentOption[];
 };
 type CartLine = { product: Product; scent: string; quantity: number };
+type ScentOption = {
+  name: string;
+  notes: string;
+  description: string;
+  image?: string;
+};
+
+const imagePath = (fileName: string) =>
+  `${import.meta.env.BASE_URL}images/products/${fileName}`;
+
+const milanoScents: ScentOption[] = [
+  {
+    name: 'Santal Cruz',
+    notes: 'Cardamom / Sandalwood / White floral',
+    description:
+      'Warm woods and mineral air with a soft floral lift. A quiet, grounded scent for slow evenings.',
+    image: imagePath('santal-cruz.webp'),
+  },
+  {
+    name: 'Cedar Salad',
+    notes: 'Ginger / Gurjum / Alaskan cedar',
+    description:
+      'Green, dry and slightly wild. Cedar leaf meets violet blossom and a delicate veil of vanilla.',
+    image: imagePath('cedar-salad.webp'),
+  },
+  {
+    name: 'The',
+    notes: 'Bergamot / Mate tea / Cedarwood',
+    description:
+      'A clear, aromatic tea accord with lavender, patchouli and a dry woody finish.',
+    image: imagePath('the.webp'),
+  },
+  {
+    name: 'Tropicale',
+    notes: 'Passion fruit / Citrus / Guaiac wood',
+    description:
+      'Bright citrus and ripe fruit settle into pepper, clove and warm guaiac wood.',
+    image: imagePath('tropicale.webp'),
+  },
+];
 
 const products: Product[] = [
-  { id: 'barrique', name: 'Barrique', collection: 'Barrique', description: 'Compact, soft and perfectly balanced', price: 68, art: 'art-barrique', tag: 'The original', scents: ['Santal Cruz', 'Hinoki', 'Fig Leaf'] },
-  { id: 'milano', name: 'Milano', collection: 'Milano', description: 'A taller study in quiet proportion', price: 82, art: 'art-milano', tag: 'New form', scents: ['Santal Cruz', 'Cedar Smoke', 'Orange Peel'] },
-  { id: 'santal', name: 'Santal Cruz', collection: 'Barrique', description: 'Warm woods, mineral air, a little salt', price: 32, art: 'art-santal', tag: 'Refill', scents: ['Santal Cruz'], },
-  { id: 'refill', name: 'Barrique Refill', collection: 'Barrique', description: 'A renewable ritual for your original form', price: 29, art: 'art-refill', tag: 'Refill', scents: ['Hinoki', 'Fig Leaf', 'Santal Cruz'] },
+  {
+    id: 'barrique',
+    name: 'Barrique',
+    collection: 'Barrique',
+    description: 'Compact, soft and perfectly balanced',
+    explanation:
+      'A compact concrete form with a soft silhouette. Barrique is made to stay on the shelf between burns and return to the ritual whenever you need it.',
+    price: 68,
+    art: 'art-barrique',
+    tag: 'The original',
+    scents: ['Santal Cruz', 'Hinoki', 'Fig Leaf'],
+  },
+  {
+    id: 'milano',
+    name: 'Milano',
+    collection: 'Milano',
+    description: 'A taller study in quiet proportion',
+    explanation:
+      'Milano is a taller, architectural vessel with a hand-finished grid texture. Choose the atmosphere, light the form, and refill it when the wax is gone.',
+    price: 82,
+    art: 'art-milano',
+    tag: 'New form',
+    images: [
+      imagePath('milano-01.webp'),
+      imagePath('milano-02.webp'),
+      imagePath('milano-03.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
+  },
+  {
+    id: 'santal',
+    name: 'Santal Cruz',
+    collection: 'Barrique',
+    description: 'Warm woods, mineral air, a little salt',
+    explanation:
+      'Santal Cruz is the signature atmosphere for the original form: warm woods, mineral air, and a soft saltiness that never overpowers a room.',
+    price: 32,
+    art: 'art-santal',
+    tag: 'Refill',
+    scents: ['Santal Cruz'],
+  },
+  {
+    id: 'refill',
+    name: 'Barrique Refill',
+    collection: 'Barrique',
+    description: 'A renewable ritual for your original form',
+    explanation:
+      'A clean refill for the Barrique vessel. Keep the object, change the mood, and repeat the ritual with less waste.',
+    price: 29,
+    art: 'art-refill',
+    tag: 'Refill',
+    scents: ['Hinoki', 'Fig Leaf', 'Santal Cruz'],
+  },
 ];
 
 const queryClient = new QueryClient();
@@ -33,6 +126,138 @@ function Sculpture({ product, flame = false }: { product: Product; flame?: boole
     <div className="vessel"><div className="wax" /><div className="wick" />{flame && <div className="flame" />}</div>
     {product.tag && <span className="product-tag">{product.tag}</span>}
   </div>;
+}
+
+function MilanoSlideshow({ product }: { product: Product }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const images = product.images ?? [];
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % images.length);
+    }, 4300);
+    return () => window.clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="object-media" role="group" aria-label={`${product.name} images`}>
+      {images.map((image, index) => (
+        <img
+          key={image}
+          className={`object-photo ${index === activeIndex ? 'active' : ''}`}
+          src={image}
+          alt={`${product.name} view ${index + 1}`}
+        />
+      ))}
+      <div className="slide-controls" aria-label="Choose product image">
+        {images.map((image, index) => (
+          <button
+            key={image}
+            className={`slide-dot ${index === activeIndex ? 'active' : ''}`}
+            type="button"
+            aria-label={`Show image ${index + 1}`}
+            aria-pressed={index === activeIndex}
+            onClick={() => setActiveIndex(index)}
+          />
+        ))}
+      </div>
+      <span className="slide-caption">Milano / 01—03</span>
+    </div>
+  );
+}
+
+function ScentSelector({
+  product,
+  selectedScent,
+  onSelect,
+}: {
+  product: Product;
+  selectedScent: string;
+  onSelect: (scent: string) => void;
+}) {
+  const options: ScentOption[] =
+    product.scentOptions ??
+    product.scents.map((name) => ({
+      name,
+      notes: 'Signature fragrance',
+      description: 'A considered fragrance for the everyday ritual.',
+    }));
+  const selected = options.find((option) => option.name === selectedScent) ?? options[0];
+
+  return (
+    <div className="scent-selector">
+      <div className="scent-selector-head">
+        <span className="option-label">Choose the atmosphere</span>
+        <span className="selected-scent">{selected?.name}</span>
+      </div>
+      <div className="scent-options-list">
+        {options.map((option) => (
+          <button
+            key={option.name}
+            type="button"
+            className={`scent-option-card ${selected?.name === option.name ? 'selected' : ''}`}
+            onClick={() => onSelect(option.name)}
+            aria-pressed={selected?.name === option.name}
+          >
+            {option.image ? (
+              <img className="scent-option-image" src={option.image} alt="" />
+            ) : (
+              <span className="scent-option-swatch" aria-hidden="true" />
+            )}
+            <span className="scent-option-copy">
+              <strong>{option.name}</strong>
+              <small>{option.notes}</small>
+            </span>
+            <ArrowRight className="scent-option-arrow" size={14} />
+          </button>
+        ))}
+      </div>
+      {selected && (
+        <div className="scent-detail" key={selected.name}>
+          <span>{selected.name}</span>
+          <p>{selected.description}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
+  const [selectedScent, setSelectedScent] = useState(product.scentOptions?.[0]?.name ?? product.scents[0]);
+
+  return (
+    <article className="object-showcase" data-testid={`object-showcase-${product.id}`}>
+      <div className="object-media-wrap">
+        <div className="object-index">Object / {product.name}</div>
+        {product.images ? (
+          <MilanoSlideshow product={product} />
+        ) : (
+          <div className="object-media object-media-fallback">
+            <Sculpture product={product} />
+          </div>
+        )}
+      </div>
+      <div className="object-details">
+        <div className="section-kicker">{product.collection} collection</div>
+        <div className="object-title-row">
+          <div>
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+          </div>
+          <span className="object-price">${product.price}</span>
+        </div>
+        <ScentSelector product={product} selectedScent={selectedScent} onSelect={setSelectedScent} />
+        <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product)} data-testid={`button-open-object-${product.id}`}>
+          Choose {product.name} <ArrowRight size={14} />
+        </button>
+      </div>
+      <div className="object-explanation">
+        <span className="object-explanation-label">About the object</span>
+        <p>{product.explanation}</p>
+      </div>
+    </article>
+  );
 }
 
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
@@ -74,18 +299,6 @@ function Hero({ onExplore }: { onExplore: () => void }) {
   </section>;
 }
 
-function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
-  return <article className="product-card" data-testid={`card-product-${product.id}`}>
-    <button onClick={() => onOpen(product)} style={{ border: 0, padding: 0, background: 'transparent', display: 'block', width: '100%', textAlign: 'left' }} data-testid={`button-open-product-${product.id}`}>
-      <div style={{ position: 'relative' }}><Sculpture product={product} /><span className="product-open"><ArrowRight size={16} /></span></div>
-    </button>
-    <div className="product-meta">
-      <div><h3 className="product-name">{product.name}</h3><p className="product-description">{product.description}</p></div>
-      <span className="product-price">${product.price}</span>
-    </div>
-  </article>;
-}
-
 function Collection({ onOpen }: { onOpen: (p: Product) => void }) {
   const [filter, setFilter] = useState<'All' | 'Barrique' | 'Milano'>('All');
   const visible = useMemo(() => filter === 'All' ? products : products.filter((p) => p.collection === filter), [filter]);
@@ -97,7 +310,7 @@ function Collection({ onOpen }: { onOpen: (p: Product) => void }) {
     <div className="filter-bar">
       {(['All', 'Barrique', 'Milano'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
     </div>
-    <div className="product-grid">{visible.map((product) => <ProductCard product={product} onOpen={onOpen} key={product.id} />)}</div>
+    <div className="object-list">{visible.map((product) => <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
   </section>;
 }
 
@@ -130,13 +343,18 @@ function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) 
 }
 
 function ProductModal({ product, onClose, onAdd }: { product: Product | null; onClose: () => void; onAdd: (p: Product, scent: string, quantity: number) => void }) {
-  const [scent, setScent] = useState(product?.scents[0] ?? '');
+  const [scent, setScent] = useState(product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
   const [quantity, setQuantity] = useState(1);
+  useEffect(() => {
+    setScent(product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
+    setQuantity(1);
+  }, [product]);
   if (!product) return null;
+  const scentOptions = product.scentOptions ?? product.scents.map((name) => ({ name }));
   return <div className="quick-view open" role="dialog" aria-modal="true" data-testid="product-modal">
     <div className="product-modal">
-      <div className={`modal-art ${product.art}`}><div className="vessel"><div className="wax" /><div className="wick" /></div></div>
-      <div className="modal-copy"><button className="close-button modal-close" onClick={onClose} aria-label="Close product details" data-testid="button-close-product"><X size={16} /></button><div className="section-kicker">{product.collection} collection</div><h2>{product.name}</h2><p className="modal-subtitle">{product.description}</p><div className="modal-price">${product.price} USD</div><span className="option-label">Choose your scent</span><div className="scent-options">{product.scents.map((item) => <button key={item} className={`scent-option ${scent === item ? 'selected' : ''}`} onClick={() => setScent(item)} data-testid={`button-scent-${item.toLowerCase().replace(' ', '-')}`}>{item}</button>)}</div><span className="option-label">Quantity</span><div className="modal-buy"><div className="modal-quantity"><button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity" data-testid="button-modal-decrease"><Minus size={13} /></button><span data-testid="text-modal-quantity">{quantity}</span><button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity" data-testid="button-modal-increase"><Plus size={13} /></button></div><button className="solid-button" onClick={() => { onAdd(product, scent, quantity); onClose(); }} data-testid="button-add-to-cart">Add to cart <ArrowRight size={14} /></button></div></div>
+      {product.images ? <img className="modal-product-image" src={product.images[0]} alt={`${product.name} product view`} /> : <div className={`modal-art ${product.art}`}><div className="vessel"><div className="wax" /><div className="wick" /></div></div>}
+      <div className="modal-copy"><button className="close-button modal-close" onClick={onClose} aria-label="Close product details" data-testid="button-close-product"><X size={16} /></button><div className="section-kicker">{product.collection} collection</div><h2>{product.name}</h2><p className="modal-subtitle">{product.description}</p><div className="modal-price">${product.price} USD</div><span className="option-label">Choose your scent</span><div className="scent-options">{scentOptions.map((item) => <button key={item.name} className={`scent-option ${scent === item.name ? 'selected' : ''}`} onClick={() => setScent(item.name)} data-testid={`button-scent-${item.name.toLowerCase().replace(' ', '-')}`}>{item.name}</button>)}</div><span className="option-label">Quantity</span><div className="modal-buy"><div className="modal-quantity"><button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity" data-testid="button-modal-decrease"><Minus size={13} /></button><span data-testid="text-modal-quantity">{quantity}</span><button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity" data-testid="button-modal-increase"><Plus size={13} /></button></div><button className="solid-button" onClick={() => { onAdd(product, scent, quantity); onClose(); }} data-testid="button-add-to-cart">Add to cart <ArrowRight size={14} /></button></div></div>
     </div>
   </div>;
 }
