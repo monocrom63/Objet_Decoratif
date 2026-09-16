@@ -203,13 +203,23 @@ function ScentSelector({
         <span className="selected-scent">{String(selectedIndex + 1).padStart(2, '0')} / {String(options.length).padStart(2, '0')}</span>
       </div>
       {selected && (
-        <div className="scent-slideshow" key={selected.name}>
+        <div className="scent-slideshow">
           <div className="scent-slide-image-wrap">
-            {selected.image ? (
-              <img className="scent-slide-image" src={selected.image} alt={`${selected.name} fragrance`} />
+            {options.map((option, index) => option.image ? (
+              <img
+                key={option.name}
+                className={`scent-slide-image ${index === selectedIndex ? 'active' : ''}`}
+                src={option.image}
+                alt={`${option.name} fragrance`}
+                aria-hidden={index !== selectedIndex}
+              />
             ) : (
-              <span className="scent-slide-swatch" aria-hidden="true" />
-            )}
+              <span
+                key={option.name}
+                className={`scent-slide-swatch ${index === selectedIndex ? 'active' : ''}`}
+                aria-hidden="true"
+              />
+            ))}
             {options.length > 1 && (
               <div className="scent-slide-arrows">
                 <button type="button" onClick={() => changeScent(-1)} aria-label="Previous scent">
