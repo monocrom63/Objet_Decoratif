@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -183,47 +183,51 @@ function ScentSelector({
       notes: 'Signature fragrance',
       description: 'A considered fragrance for the everyday ritual.',
     }));
-  const selected = options.find((option) => option.name === selectedScent) ?? options[0];
+  const selectedIndex = Math.max(0, options.findIndex((option) => option.name === selectedScent));
+  const selected = options[selectedIndex] ?? options[0];
+  const changeScent = (direction: number) => {
+    const nextIndex = (selectedIndex + direction + options.length) % options.length;
+    onSelect(options[nextIndex].name);
+  };
 
   return (
     <div className="scent-selector">
       <div className="scent-selector-head">
         <span className="option-label">Choose the atmosphere</span>
-        <span className="selected-scent">{selected?.name}</span>
-      </div>
-      <div className="scent-options-list">
-        {options.map((option) => (
-          <button
-            key={option.name}
-            type="button"
-            className={`scent-option-card ${selected?.name === option.name ? 'selected' : ''}`}
-            onClick={() => onSelect(option.name)}
-            aria-pressed={selected?.name === option.name}
-          >
-            {option.image ? (
-              <img className="scent-option-image" src={option.image} alt="" />
-            ) : (
-              <span className="scent-option-swatch" aria-hidden="true" />
-            )}
-            <span className="scent-option-copy">
-              <strong>{option.name}</strong>
-              <small>{option.notes}</small>
-            </span>
-            <ArrowRight className="scent-option-arrow" size={14} />
-          </button>
-        ))}
+        <span className="selected-scent">{String(selectedIndex + 1).padStart(2, '0')} / {String(options.length).padStart(2, '0')}</span>
       </div>
       {selected && (
-        <div className="scent-detail" key={selected.name}>
-          <span>{selected.name}</span>
-          <p>{selected.description}</p>
+        <div className="scent-slideshow" key={selected.name}>
+          <div className="scent-slide-image-wrap">
+            {selected.image ? (
+              <img className="scent-slide-image" src={selected.image} alt={`${selected.name} fragrance`} />
+            ) : (
+              <span className="scent-slide-swatch" aria-hidden="true" />
+            )}
+            {options.length > 1 && (
+              <div className="scent-slide-arrows">
+                <button type="button" onClick={() => changeScent(-1)} aria-label="Previous scent">
+                  <ArrowLeft size={15} />
+                </button>
+                <button type="button" onClick={() => changeScent(1)} aria-label="Next scent">
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="scent-slide-copy">
+            <span className="scent-slide-number">Scent / {String(selectedIndex + 1).padStart(2, '0')}</span>
+            <strong>{selected.name}</strong>
+            <small>{selected.notes}</small>
+            <p>{selected.description}</p>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
+function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Product, scent: string) => void }) {
   const [selectedScent, setSelectedScent] = useState(product.scentOptions?.[0]?.name ?? product.scents[0]);
 
   return (
@@ -248,7 +252,7 @@ function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
           <span className="object-price">${product.price}</span>
         </div>
         <ScentSelector product={product} selectedScent={selectedScent} onSelect={setSelectedScent} />
-        <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product)} data-testid={`button-open-object-${product.id}`}>
+        <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product, selectedScent)} data-testid={`button-open-object-${product.id}`}>
           Choose {product.name} <ArrowRight size={14} />
         </button>
       </div>
@@ -299,7 +303,7 @@ function Hero({ onExplore }: { onExplore: () => void }) {
   </section>;
 }
 
-function Collection({ onOpen }: { onOpen: (p: Product) => void }) {
+function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void }) {
   const [filter, setFilter] = useState<'All' | 'Barrique' | 'Milano'>('All');
   const visible = useMemo(() => filter === 'All' ? products : products.filter((p) => p.collection === filter), [filter]);
   return <section className="section" id="collection">
@@ -342,13 +346,13 @@ function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) 
   </div>;
 }
 
-function ProductModal({ product, onClose, onAdd }: { product: Product | null; onClose: () => void; onAdd: (p: Product, scent: string, quantity: number) => void }) {
-  const [scent, setScent] = useState(product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
+function ProductModal({ product, initialScent, onClose, onAdd }: { product: Product | null; initialScent?: string; onClose: () => void; onAdd: (p: Product, scent: string, quantity: number) => void }) {
+  const [scent, setScent] = useState(initialScent ?? product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
   const [quantity, setQuantity] = useState(1);
   useEffect(() => {
-    setScent(product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
+    setScent(initialScent ?? product?.scentOptions?.[0]?.name ?? product?.scents[0] ?? '');
     setQuantity(1);
-  }, [product]);
+  }, [initialScent, product]);
   if (!product) return null;
   const scentOptions = product.scentOptions ?? product.scents.map((name) => ({ name }));
   return <div className="quick-view open" role="dialog" aria-modal="true" data-testid="product-modal">
@@ -367,7 +371,7 @@ function CartDrawer({ open, lines, onClose, onChange }: { open: boolean; lines: 
 function Store() {
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selected, setSelected] = useState<Product | null>(null);
+  const [selected, setSelected] = useState<{ product: Product; scent: string } | null>(null);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [subscribed, setSubscribed] = useState(false);
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
@@ -380,12 +384,13 @@ function Store() {
     setCartOpen(true);
   };
   const changeCart = (id: string, scent: string, delta: number) => setCart((current) => current.flatMap((line) => line.product.id === id && line.scent === scent ? (line.quantity + delta > 0 ? [{ ...line, quantity: line.quantity + delta }] : []) : [line]));
+  const openProduct = (product: Product, scent: string) => setSelected({ product, scent });
   return <div className="store-shell">
     <Header cartCount={cartCount} onCart={() => setCartOpen(true)} onSearch={() => setSearchOpen((open) => !open)} />
     <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
     <main><Hero onExplore={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} /><section className="intro-strip"><div className="intro-item"><span className="intro-number">01 / Form</span><h2>Cast in concrete.<br />Built to last.</h2><p>Quiet architecture for the everyday.</p></div><div className="intro-item"><span className="intro-number">02 / Scent</span><h2>Five fragrances.</h2><p>Endlessly renewable, never overpowering.</p></div><div className="intro-item"><span className="intro-number">03 / Ritual</span><h2>Burn. Refill.<br />Repeat.</h2><p>One beautiful object, many lives.</p></div></section><Collection onOpen={setSelected} /><Ritual /><Scents /><About /><section className="newsletter" id="newsletter"><h2>Notes from the studio.</h2>{subscribed ? <span className="success-note">You’re on the list. See you soon.</span> : <form className="newsletter-form" onSubmit={(event) => { event.preventDefault(); setSubscribed(true); }}><input type="email" required placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter" /><button type="submit" data-testid="button-subscribe">Subscribe <ArrowRight size={13} /></button></form>}</section></main>
     <footer className="footer"><span>© Objet Décoratif / Made for slow evenings</span><span>Concrete candle collection — Paris / Everywhere</span></footer>
-    <ProductModal product={selected} onClose={() => setSelected(null)} onAdd={addToCart} /><CartDrawer open={cartOpen} lines={cart} onClose={() => setCartOpen(false)} onChange={changeCart} />
+     <ProductModal product={selected?.product ?? null} initialScent={selected?.scent} onClose={() => setSelected(null)} onAdd={addToCart} /><CartDrawer open={cartOpen} lines={cart} onClose={() => setCartOpen(false)} onChange={changeCart} />
   </div>;
 }
 
