@@ -73,7 +73,13 @@ const products: Product[] = [
     price: 68,
     art: 'art-barrique',
     tag: 'The original',
-    scents: ['Santal Cruz', 'Hinoki', 'Fig Leaf'],
+    images: [
+      imagePath('barrique-01.webp'),
+      imagePath('barrique-02.webp'),
+      imagePath('barrique-03.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
   },
   {
     id: 'milano',
@@ -162,7 +168,7 @@ function MilanoSlideshow({ product }: { product: Product }) {
           />
         ))}
       </div>
-      <span className="slide-caption">Milano / 01—03</span>
+      <span className="slide-caption">{product.name} / 01—{String(images.length).padStart(2, '0')}</span>
     </div>
   );
 }
