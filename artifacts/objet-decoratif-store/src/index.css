@@ -173,7 +173,7 @@ a { color: inherit; text-decoration: none; }
 .scent-slide-arrows button:hover { background:var(--saffron); color:var(--ink); transform:translateY(-2px); }
 .scent-slide-copy { display:flex; flex-direction:column; justify-content:center; min-width:0; padding:4px 0; }
 .scent-slide-number { margin-bottom:20px; color:var(--saffron); font:10px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
-.scent-slide-copy strong { margin-bottom:8px; font:400 clamp(32px, 3.2vw, 49px)/.9 var(--display); }
+.scent-slide-copy strong { margin-bottom:8px; font:400 clamp(32px, 3.2vw, 49px)/.9 var(--hero); }
 .scent-slide-copy small { color:#777369; font:9px var(--mono); letter-spacing:.06em; line-height:1.5; text-transform:uppercase; }
 .scent-slide-copy p { max-width:280px; margin:18px 0 0; color:#6f6c63; font-size:12px; line-height:1.6; }
 .object-buy-button { align-self:end; margin:0 0 0 auto; white-space:nowrap; }
@@ -197,7 +197,7 @@ a { color: inherit; text-decoration: none; }
 .scent-list { border-top:1px solid var(--line); }
 .scent-row { display:grid; grid-template-columns: 50px 1fr auto; align-items:center; gap:17px; min-height:74px; border-bottom:1px solid var(--line); }
 .scent-row span:first-child { color:var(--saffron); font:10px var(--mono); }
-.scent-row strong { font:400 24px var(--display); }
+.scent-row strong { font:400 24px var(--hero); }
 .scent-row small { color:#726e63; font:10px var(--mono); text-transform:uppercase; letter-spacing:.08em; }
 .scent-row:hover strong { font-style:italic; }
 .scent-note { max-width:245px; color:#6b685e; font-size:13px; line-height:1.6; }
@@ -227,11 +227,11 @@ a { color: inherit; text-decoration: none; }
 .close-button { width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--line); border-radius:50%; background:none; }
 .cart-items { flex:1; overflow:auto; padding:23px 25px; }
 .cart-empty { display:flex; min-height:320px; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#777369; }
-.cart-empty strong { margin-bottom:10px; color:var(--ink); font:400 30px var(--display); }
+.cart-empty strong { margin-bottom:10px; color:var(--ink); font:400 30px var(--hero); }
 .cart-item { display:grid; grid-template-columns:78px 1fr auto; gap:15px; padding:0 0 19px; margin-bottom:19px; border-bottom:1px solid var(--line); }
 .cart-thumb { display:grid; place-items:center; background:#d4c6b4; }
 .cart-thumb .vessel { width:38px; }
-.cart-item-info strong { display:block; margin-bottom:5px; font:400 20px var(--display); }
+.cart-item-info strong { display:block; margin-bottom:5px; font:400 20px var(--hero); }
 .cart-item-info small { color:#777369; font:10px var(--mono); text-transform:uppercase; }
 .cart-controls { display:flex; align-items:center; gap:10px; margin-top:13px; }
 .qty-button { width:22px; height:22px; display:grid; place-items:center; border:1px solid var(--line); background:none; }
