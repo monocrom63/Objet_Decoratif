@@ -80,6 +80,7 @@ a { color: inherit; text-decoration: none; }
   background: #555b4d;
   isolation: isolate;
 }
+.hero-video { position:absolute; inset:0; z-index:-3; width:100%; height:100%; object-fit:cover; }
 .hero::before {
   content: ''; position:absolute; inset:0; z-index:-2;
   background:

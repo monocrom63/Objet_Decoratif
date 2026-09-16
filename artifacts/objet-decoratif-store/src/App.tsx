@@ -311,6 +311,9 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
 
 function Hero({ onExplore }: { onExplore: () => void }) {
   return <section className="hero">
+    <video className="hero-video" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+      <source src="/videos/hero.mp4" type="video/mp4" />
+    </video>
     <div className="hero-copy">
       <span className="eyebrow">Concrete candle collection / 01—25</span>
       <h1>Objects<br /><em>with a glow.</em></h1>
