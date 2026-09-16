@@ -144,7 +144,7 @@ a { color: inherit; text-decoration: none; }
 .object-showcase { display:grid; grid-template-columns:minmax(0, 1.18fr) minmax(340px, .82fr); column-gap:clamp(36px, 7vw, 110px); row-gap:35px; }
 .object-media-wrap { position:relative; min-width:0; }
 .object-index { margin-bottom:12px; color:var(--saffron); font:10px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
-.object-media { position:relative; min-height:clamp(500px, 56vw, 720px); overflow:hidden; background:#d6cebe; }
+ .object-media { position:relative; height:clamp(500px, 36vw, 520px); min-height:0; overflow:hidden; background:#d6cebe; }
 .object-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transform:scale(1.06); transition:opacity .9s ease-in-out, transform 1.25s ease-in-out; }
 .object-photo.active { opacity:1; transform:scale(1); }
 .slide-controls { position:absolute; left:22px; bottom:22px; z-index:2; display:flex; gap:8px; }
