@@ -231,7 +231,7 @@ function ScentSelector({
               </div>
             )}
           </div>
-          <div className="scent-slide-copy">
+          <div className="scent-slide-copy" key={selected.name}>
             <span className="scent-slide-number">Scent / {String(selectedIndex + 1).padStart(2, '0')}</span>
             <strong>{selected.name}</strong>
             <small>{selected.notes}</small>
