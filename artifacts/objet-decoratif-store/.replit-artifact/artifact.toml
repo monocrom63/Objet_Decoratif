@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Objet Décoratif Store"
+description = "A responsive storefront prototype for Objet Décoratif, making concrete candle forms, scents, refills, and shopping feel simple and tactile across desktop and mobile."
+version = "1.0.0"
+id = "artifacts/objet-decoratif-store"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23310
+
+[services.development]
+run = "pnpm --filter @workspace/objet-decoratif-store run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/objet-decoratif-store", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/objet-decoratif-store/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23310"
+BASE_PATH = "/"
