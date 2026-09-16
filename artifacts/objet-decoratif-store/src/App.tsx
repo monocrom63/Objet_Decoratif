@@ -251,10 +251,12 @@ function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
           </div>
           <span className="object-price">${product.price}</span>
         </div>
-        <ScentSelector product={product} selectedScent={selectedScent} onSelect={setSelectedScent} />
-        <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product, selectedScent)} data-testid={`button-open-object-${product.id}`}>
-          Choose {product.name} <ArrowRight size={14} />
-        </button>
+        <div className="object-actions">
+          <ScentSelector product={product} selectedScent={selectedScent} onSelect={setSelectedScent} />
+          <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product, selectedScent)} data-testid={`button-open-object-${product.id}`}>
+            Choose {product.name} <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
       <div className="object-explanation">
         <span className="object-explanation-label">About the object</span>
