@@ -90,7 +90,7 @@ a { color: inherit; text-decoration: none; }
 .hero-copy { max-width: 720px; animation: rise .9s .1s both; }
 .eyebrow { font: 10px var(--mono); letter-spacing: .15em; text-transform: uppercase; }
 .hero h1 { margin: 20px 0 26px; max-width: 780px; font: 500 clamp(64px, 9.2vw, 148px)/.83 var(--hero); letter-spacing: -.055em; }
-.hero h1 em { color: #ded0bb; }
+.hero h1 em { color: #ded0bb; font-style:normal; }
 .hero-note { max-width: 360px; margin: 0 0 32px; color: rgba(245,241,232,.78); font-size: 14px; line-height: 1.6; }
 .outline-button, .solid-button { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:46px; padding: 0 21px; border:1px solid currentColor; font:10px var(--mono); letter-spacing:.09em; text-transform:uppercase; transition: background .25s, color .25s, transform .25s; }
 .outline-button:hover, .solid-button:hover { transform: translateY(-2px); }
