@@ -32,6 +32,14 @@ type ScentOption = {
 const imagePath = (fileName: string) =>
   `${import.meta.env.BASE_URL}images/products/${fileName}`;
 
+const careImagePath = (fileName: string) =>
+  `${import.meta.env.BASE_URL}images/care/${fileName}`;
+
+const careImages = [
+  { src: careImagePath('care-01.webp'), alt: 'Refill being placed into a sculptural candle vessel' },
+  { src: careImagePath('care-02.webp'), alt: 'Candle vessel viewed from above with a wooden wick' },
+];
+
 const milanoScents: ScentOption[] = [
   {
     name: 'Thé',
@@ -509,6 +517,55 @@ function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Prod
         </div>
       </article>
     </>
+  );
+}
+
+function CareImageSlideshow() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % careImages.length);
+    }, 4800);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const changeImage = (direction: number) => {
+    setActiveIndex((current) => (current + direction + careImages.length) % careImages.length);
+  };
+
+  return (
+    <div className="care-image-slideshow" role="group" aria-label="Candle care images">
+      {careImages.map((image, index) => (
+        <img
+          key={image.src}
+          className={`care-image-slide ${index === activeIndex ? 'active' : ''}`}
+          src={image.src}
+          alt={image.alt}
+          aria-hidden={index !== activeIndex}
+        />
+      ))}
+      <div className="care-image-arrows">
+        <button type="button" onClick={() => changeImage(-1)} aria-label="Previous care image">
+          <ArrowLeft size={15} />
+        </button>
+        <button type="button" onClick={() => changeImage(1)} aria-label="Next care image">
+          <ArrowRight size={15} />
+        </button>
+      </div>
+      <div className="care-image-dots" aria-label="Choose care image">
+        {careImages.map((image, index) => (
+          <button
+            key={image.src}
+            className={index === activeIndex ? 'active' : ''}
+            type="button"
+            aria-label={`Show care image ${index + 1}`}
+            aria-pressed={index === activeIndex}
+            onClick={() => setActiveIndex(index)}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
