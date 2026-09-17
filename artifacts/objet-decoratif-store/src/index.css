@@ -323,7 +323,10 @@ a { color: inherit; text-decoration: none; }
 .editorial-closing h2 em { color:#8c6b50; font-style:normal; }
 .editorial-closing p { max-width:560px; margin:0 0 32px; color:#6f685d; font-size:14px; line-height:1.7; }
 .about-story { background:var(--bone); }
+.about-intro-copy { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:clamp(25px, 4vw, 70px); }
+.about-intro-copy p { max-width:none; margin:0; color:#6f6b62; font-size:14px; line-height:1.75; }
 .about-principles { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; margin-top:60px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.about-story .about-principles { grid-column:1 / -1; width:calc(100% + 10vw); margin-left:-5vw; padding:0 5vw; }
 .about-principles > div { min-height:230px; display:flex; flex-direction:column; padding:18px 20px 18px 0; border-right:1px solid var(--line); }
 .about-principles > div:last-child { border-right:0; padding-right:0; }
 .about-principles span { color:var(--saffron); font:10px var(--mono); }
@@ -448,6 +451,7 @@ a { color: inherit; text-decoration: none; }
   .editorial-section-label { margin-bottom:38px; }
   .editorial-section-content h2 { font-size:55px; }
   .care-intro-copy { grid-template-columns:1fr; gap:18px; }
+  .about-intro-copy { grid-template-columns:1fr; gap:18px; }
   .care-facts { grid-column:auto; grid-template-columns:1fr 1fr; width:calc(100% + 40px); margin:40px 0 0 -20px; padding:0 20px; }
   .care-facts > div:nth-child(2) { border-right:0; padding-right:0; }
   .care-facts > div:nth-child(-n + 2) { border-bottom:1px solid var(--line); }
@@ -469,6 +473,7 @@ a { color: inherit; text-decoration: none; }
   .editorial-closing { padding:78px 20px 85px; }
   .editorial-closing h2 { font-size:60px; }
   .about-principles { grid-template-columns:1fr; }
+  .about-story .about-principles { width:calc(100% + 40px); margin-left:-20px; padding:0 20px; }
   .about-principles > div { min-height:0; padding:18px 0 25px; border-right:0; border-bottom:1px solid var(--line); }
   .about-principles > div:last-child { border-bottom:0; }
   .about-principles h3 { margin-top:30px; }

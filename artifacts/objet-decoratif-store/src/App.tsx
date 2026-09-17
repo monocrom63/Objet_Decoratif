@@ -5,7 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { Link, Route, Switch, Router as WouterRouter } from 'wouter';
+import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 
 type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura' | 'Refill';
 type Product = {
@@ -777,13 +777,15 @@ function AboutPage() {
       <div className="editorial-section-content">
         <div className="section-kicker">Curated with intention</div>
         <h2>We do not simply inhabit spaces. We fill them with meaning.</h2>
-        <p>Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.</p>
-        <p>Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.</p>
-        <div className="about-principles">
-          <div><span>01</span><h3>Curated with intention</h3><p>Only objects we would choose for our own spaces — considered, distinctive and made with care.</p></div>
-          <div><span>02</span><h3>Designed to remain</h3><p>Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.</p></div>
-          <div><span>03</span><h3>Scents from Grasse</h3><p>Our candle perfumes are developed with specialists in Grasse and selected to complement every form.</p></div>
+        <div className="about-intro-copy">
+          <p>Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.</p>
+          <p>Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.</p>
         </div>
+      </div>
+      <div className="about-principles">
+        <div><span>01</span><h3>Curated with intention</h3><p>Only objects we would choose for our own spaces — considered, distinctive and made with care.</p></div>
+        <div><span>02</span><h3>Designed to remain</h3><p>Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.</p></div>
+        <div><span>03</span><h3>Scents from Grasse</h3><p>Our candle perfumes are developed with specialists in Grasse and selected to complement every form.</p></div>
       </div>
     </section>
     <section className="editorial-closing about-closing">
@@ -855,8 +857,18 @@ function Router() {
   return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
+function ScrollToTop() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location]);
+
+  return null;
+}
+
 function App() {
-  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><ScrollToTop /><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
 }
 
 export default App;
