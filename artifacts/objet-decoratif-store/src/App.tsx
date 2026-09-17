@@ -711,27 +711,32 @@ function CarePage() {
       <div className="editorial-section-content">
         <div className="section-kicker">Care extends the ritual</div>
         <h2>A clean, even burn starts with the wick.</h2>
-        <p>We tested numerous wax and wick combinations. This pairing was selected for a steady burn and balanced scent diffusion. Caring for it well helps the candle perform as intended.</p>
-        <p>Let the wax pool become fully liquid on the first burn, keep the wick centered and remove any debris before lighting. Small adjustments make a noticeable difference.</p>
-        <div className="care-facts">
-          <div><strong>5 mm</strong><span>Wick trim only after the wax has fully set.</span></div>
-          <div><strong>1½–2 h</strong><span>Recommended burn time for regular-sized candles.</span></div>
-          <div><strong>4 h</strong><span>Do not exceed four hours in one burn.</span></div>
-          <div><strong>10 mm</strong><span>Stop burning when this amount of wax remains.</span></div>
+        <div className="care-intro-copy">
+          <p>We tested numerous wax and wick combinations. This pairing was selected for a steady burn and balanced scent diffusion. Caring for it well helps the candle perform as intended.</p>
+          <p>Let the wax pool become fully liquid on the first burn, keep the wick centered and remove any debris before lighting. Small adjustments make a noticeable difference.</p>
         </div>
+      </div>
+      <div className="care-facts">
+        <div><strong>5 mm</strong><span>Wick trim only after the wax has fully set.</span></div>
+        <div><strong>1½–2 h</strong><span>Recommended burn time for regular-sized candles.</span></div>
+        <div><strong>4 h</strong><span>Do not exceed four hours in one burn.</span></div>
+        <div><strong>10 mm</strong><span>Stop burning when this amount of wax remains.</span></div>
       </div>
     </section>
     <section className="editorial-section care-steps">
       <div className="editorial-section-label">02 / Step by step</div>
-      <div className="editorial-section-content">
-        <div className="section-kicker">Wax / Wick / Vessel</div>
-        <h2>How to care<br />for your candle.</h2>
-        <div className="care-step-list">
-          <div><span>01</span><div><h3>The first burn</h3><p>Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.</p></div></div>
-          <div><span>02</span><div><h3>Each time you burn</h3><p>Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.</p></div></div>
-          <div><span>03</span><div><h3>Care for the wick</h3><p>Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.</p></div></div>
-          <div><span>04</span><div><h3>Extinguish and finish</h3><p>Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.</p></div></div>
+      <div className="care-step-layout">
+        <div className="care-step-copy">
+          <div className="section-kicker">Wax / Wick / Vessel</div>
+          <h2>How to care<br />for your candle.</h2>
+          <div className="care-step-list">
+            <div><span>01</span><div><h3>The first burn</h3><p>Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.</p></div></div>
+            <div><span>02</span><div><h3>Each time you burn</h3><p>Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.</p></div></div>
+            <div><span>03</span><div><h3>Care for the wick</h3><p>Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.</p></div></div>
+            <div><span>04</span><div><h3>Extinguish and finish</h3><p>Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.</p></div></div>
+          </div>
         </div>
+        <CareImageSlideshow />
       </div>
     </section>
     <section className="editorial-closing care-closing">
