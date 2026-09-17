@@ -7,10 +7,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
+type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura';
 type Product = {
   id: string;
   name: string;
-  collection: 'Barrique' | 'Milano';
+  collection: ProductCollection;
   description: string;
   explanation: string;
   price: number;
@@ -100,6 +101,82 @@ const products: Product[] = [
     scentOptions: milanoScents,
   },
   {
+    id: 'boite',
+    name: 'Boite',
+    collection: 'Boite',
+    description: 'A dark, tactile form with a softened grid',
+    explanation:
+      'Boite turns a compact silhouette into a study of shadow and texture. Its rounded grid catches the light differently from every angle, making the vessel feel quietly alive between burns.',
+    price: 86,
+    art: 'art-boite',
+    tag: 'New form',
+    images: [
+      imagePath('boite-01.webp'),
+      imagePath('boite-02.webp'),
+      imagePath('boite-03.webp'),
+      imagePath('boite-04.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
+  },
+  {
+    id: 'chateu',
+    name: 'Chateu',
+    collection: 'Chateu',
+    description: 'A pale vessel drawn in fine vertical lines',
+    explanation:
+      'Chateu is shaped around rhythm: a fluted body, a quiet lid, and a soft architectural profile. A light, composed form for shelves, tables and slow evenings.',
+    price: 88,
+    art: 'art-chateu',
+    tag: 'New form',
+    images: [
+      imagePath('chateu-01.webp'),
+      imagePath('chateu-02.webp'),
+      imagePath('chateu-03.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
+  },
+  {
+    id: 'elephant',
+    name: 'Elephant',
+    collection: 'Elephant',
+    description: 'A grounded sculptural form with a strong presence',
+    explanation:
+      'Elephant is an object with weight and character. Its generous silhouette is made to hold attention even when the flame is out, then return to the ritual whenever the room needs warmth.',
+    price: 94,
+    art: 'art-elephant',
+    tag: 'New form',
+    images: [
+      imagePath('elephant-01.webp'),
+      imagePath('elephant-02.webp'),
+      imagePath('elephant-03.webp'),
+      imagePath('elephant-04.webp'),
+      imagePath('elephant-05.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
+  },
+  {
+    id: 'sakura',
+    name: 'Sakura',
+    collection: 'Sakura',
+    description: 'A gentle form with a calm, rounded silhouette',
+    explanation:
+      'Sakura brings a softer line to the collection. Its balanced shape and quiet surface are designed to sit lightly in a room while carrying the atmosphere of the flame.',
+    price: 82,
+    art: 'art-sakura',
+    tag: 'New form',
+    images: [
+      imagePath('sakura-01.webp'),
+      imagePath('sakura-02.webp'),
+      imagePath('sakura-03.webp'),
+      imagePath('sakura-04.webp'),
+    ],
+    scents: milanoScents.map((scent) => scent.name),
+    scentOptions: milanoScents,
+  },
+  {
     id: 'santal',
     name: 'Santal Cruz',
     collection: 'Barrique',
@@ -134,7 +211,7 @@ function Sculpture({ product, flame = false }: { product: Product; flame?: boole
   </div>;
 }
 
-function MilanoSlideshow({ product }: { product: Product }) {
+function ObjectSlideshow({ product }: { product: Product }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const images = product.images ?? [];
 
@@ -251,7 +328,7 @@ function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
       <div className="object-media-wrap">
         <div className="object-index">Object / {product.name}</div>
         {product.images ? (
-          <MilanoSlideshow product={product} />
+          <ObjectSlideshow product={product} />
         ) : (
           <div className="object-media object-media-fallback">
             <Sculpture product={product} />
@@ -325,7 +402,7 @@ function Hero({ onExplore }: { onExplore: () => void }) {
 }
 
 function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void }) {
-  const [filter, setFilter] = useState<'All' | 'Barrique' | 'Milano'>('All');
+  const [filter, setFilter] = useState<'All' | ProductCollection>('All');
   const visible = useMemo(() => filter === 'All' ? products : products.filter((p) => p.collection === filter), [filter]);
   return <section className="section" id="collection">
     <div className="section-header">
@@ -333,7 +410,7 @@ function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void })
       <p className="section-intro">A small family of concrete forms. Each one is designed to be lived with, then lit again.</p>
     </div>
     <div className="filter-bar">
-      {(['All', 'Barrique', 'Milano'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
+      {(['All', 'Barrique', 'Milano', 'Boite', 'Chateu', 'Elephant', 'Sakura'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
     </div>
     <div className="object-list">{visible.map((product) => <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
   </section>;
