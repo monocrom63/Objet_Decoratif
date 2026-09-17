@@ -789,10 +789,14 @@ function AboutPage() {
       </div>
     </section>
     <section className="editorial-closing about-closing">
-      <div className="section-kicker">The refill ritual / 02</div>
-      <h2>Keep the object.<br /><em>Change the atmosphere.</em></h2>
-      <p>Filling spaces with objects that genuinely make you want to have them — that is what we are all about. Not just for ourselves, but for everyone who knows that beauty and care in the details matter.</p>
-      <a className="solid-button" href="/#collection">Explore the forms <ArrowRight size={13} /></a>
+      <div className="about-closing-main">
+        <div className="section-kicker">The refill ritual / 02</div>
+        <h2>Keep the object.<br /><em>Change the atmosphere.</em></h2>
+      </div>
+      <div className="about-closing-side">
+        <p>Filling spaces with objects that genuinely make you want to have them — that is what we are all about. Not just for ourselves, but for everyone who knows that beauty and care in the details matter.</p>
+        <a className="solid-button" href="/#collection">Explore the forms <ArrowRight size={13} /></a>
+      </div>
     </section>
   </EditorialPageFrame>;
 }
