@@ -571,6 +571,19 @@ function CareImageSlideshow() {
 
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [language, setLanguage] = useState<'DE' | 'EN'>('EN');
+
+  useEffect(() => {
+    const savedLanguage = window.localStorage.getItem('objet-decoratif-language');
+    if (savedLanguage === 'DE' || savedLanguage === 'EN') {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language.toLowerCase();
+    window.localStorage.setItem('objet-decoratif-language', language);
+  }, [language]);
 
   const navTo = (id: string) => {
     const target = document.getElementById(id);
@@ -601,6 +614,20 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
       </button>
       <a href="/" className="logo" data-testid="link-logo">Objet Décoratif</a>
       <div className="header-actions">
+        <div className="language-switch" role="group" aria-label="Choose language">
+          {(['DE', 'EN'] as const).map((option) => (
+            <button
+              key={option}
+              className={`language-option ${language === option ? 'active' : ''}`}
+              type="button"
+              aria-pressed={language === option}
+              onClick={() => setLanguage(option)}
+              data-testid={`button-language-${option.toLowerCase()}`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
         <button className="header-action search-only" onClick={onSearch} data-testid="button-search"><Search size={14} strokeWidth={1.5} /> <span>Search</span></button>
         <button className="cart-button" onClick={onCart} data-testid="button-cart"><ShoppingBag size={14} strokeWidth={1.5} /><span>Cart</span><span className="cart-count" data-testid="text-cart-count">{cartCount}</span></button>
       </div>

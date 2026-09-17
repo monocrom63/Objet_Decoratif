@@ -57,6 +57,10 @@ a { color: inherit; text-decoration: none; }
 .main-nav, .header-actions { display: flex; align-items: center; gap: 20px; }
 .main-nav { justify-content: flex-start; }
 .header-actions { justify-content: flex-end; }
+.language-switch { display:flex; align-items:center; gap:3px; }
+.language-option { padding:3px 2px; border:0; background:transparent; color:#918b80; font:9px var(--mono); letter-spacing:.08em; }
+.language-option.active { color:var(--ink); }
+.language-option:not(.active):hover { color:var(--ink); }
 .nav-link, .header-action {
   position: relative;
   border: 0;
@@ -404,6 +408,7 @@ a { color: inherit; text-decoration: none; }
   .main-nav.open { display:flex; }
   .nav-link { padding:12px 0; }
   .header-actions { gap:14px; }
+  .language-option { font-size:8px; }
   .header-action.search-only { display:none; }
   .menu-button { display:block; }
   .hero { min-height:600px; padding: 60px 20px 42px; }
