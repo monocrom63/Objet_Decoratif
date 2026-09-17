@@ -7,7 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
-type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura';
+type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura' | 'Refill';
 type Product = {
   id: string;
   name: string;
@@ -177,28 +177,44 @@ const products: Product[] = [
     scentOptions: milanoScents,
   },
   {
-    id: 'santal',
-    name: 'Santal Cruz',
-    collection: 'Barrique',
-    description: 'Warm woods, mineral air, a little salt',
-    explanation:
-      'Santal Cruz is the signature atmosphere for the original form: warm woods, mineral air, and a soft saltiness that never overpowers a room.',
-    price: 32,
-    art: 'art-santal',
-    tag: 'Refill',
-    scents: ['Santal Cruz'],
-  },
-  {
     id: 'refill',
-    name: 'Barrique Refill',
-    collection: 'Barrique',
-    description: 'A renewable ritual for your original form',
+    name: 'Refill',
+    collection: 'Refill',
+    description: 'A new atmosphere for the form you already love',
     explanation:
-      'A clean refill for the Barrique vessel. Keep the object, change the mood, and repeat the ritual with less waste.',
-    price: 29,
+      'Our sculptural candles are designed to last. With a refill, you extend the life of the form quietly and sustainably, without ever replacing the object itself.',
+    price: 38,
     art: 'art-refill',
     tag: 'Refill',
-    scents: ['Hinoki', 'Fig Leaf', 'Santal Cruz'],
+    images: [
+      imagePath('refill-01.webp'),
+      imagePath('refill-02.webp'),
+      imagePath('refill-03.webp'),
+    ],
+    scents: [
+      'Small / Thé',
+      'Small / Bois Santal',
+      'Small / Tropicale',
+      'Small / Cedar Salad',
+      'Big / Thé',
+      'Big / Bois Santal',
+      'Big / Tropicale',
+      'Big / Cedar Salad',
+    ],
+    scentOptions: [
+      'Small / Thé',
+      'Small / Bois Santal',
+      'Small / Tropicale',
+      'Small / Cedar Salad',
+      'Big / Thé',
+      'Big / Bois Santal',
+      'Big / Tropicale',
+      'Big / Cedar Salad',
+    ].map((name) => ({
+      name,
+      notes: name.startsWith('Small') ? '190g refill' : '245g refill',
+      description: 'Hand-poured to renew your sculptural vessel.',
+    })),
   },
 ];
 
@@ -359,6 +375,64 @@ function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
   );
 }
 
+function RefillShowcase({ product, onOpen }: { product: Product; onOpen: (p: Product, scent: string) => void }) {
+  const [size, setSize] = useState<'Small' | 'Big'>('Small');
+  const [scent, setScent] = useState('Thé');
+  const selectedVariant = `${size} / ${scent}`;
+
+  return (
+    <article className="object-showcase refill-showcase" data-testid="object-showcase-refill">
+      <div className="object-media-wrap">
+        <div className="object-index">Object / Refill</div>
+        <ObjectSlideshow product={product} />
+      </div>
+      <div className="object-details refill-details">
+        <div className="section-kicker">Refill / for every form</div>
+        <div className="object-title-row">
+          <div>
+            <h3>Refill</h3>
+            <p>A new atmosphere for the form you already love.</p>
+          </div>
+          <span className="object-price">${product.price}</span>
+        </div>
+        <div className="refill-options">
+          <span className="option-label">Choose your refill</span>
+          <div className="refill-select-row">
+            <label>
+              <span className="refill-select-label">Size</span>
+              <select className="refill-select" value={size} onChange={(event) => setSize(event.target.value as 'Small' | 'Big')} aria-label="Refill size">
+                <option value="Small">Small (190g)</option>
+                <option value="Big">Big (245g)</option>
+              </select>
+            </label>
+            <label>
+              <span className="refill-select-label">Scent</span>
+              <select className="refill-select" value={scent} onChange={(event) => setScent(event.target.value)} aria-label="Refill scent">
+                <option>Thé</option>
+                <option>Bois Santal</option>
+                <option>Tropicale</option>
+                <option>Cedar Salad</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div className="refill-copy">
+          <p>Our sculptural candles are designed to last.</p>
+          <p>With our refills, you extend their life—quietly, sustainably, and without ever replacing the form itself.</p>
+          <p>Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures. The minimalist composition allows the fragrance to unfold evenly without overpowering the room.</p>
+        </div>
+        <button className="solid-button object-buy-button refill-buy-button" type="button" onClick={() => onOpen(product, selectedVariant)} data-testid="button-open-object-refill">
+          Choose refill <ArrowRight size={14} />
+        </button>
+      </div>
+      <div className="object-explanation">
+        <span className="object-explanation-label">About the refill</span>
+        <p>{product.explanation}</p>
+      </div>
+    </article>
+  );
+}
+
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navTo = (id: string) => {
@@ -410,9 +484,9 @@ function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void })
       <p className="section-intro">A small family of concrete forms. Each one is designed to be lived with, then lit again.</p>
     </div>
     <div className="filter-bar">
-      {(['All', 'Barrique', 'Milano', 'Boite', 'Chateu', 'Elephant', 'Sakura'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
+      {(['All', 'Barrique', 'Milano', 'Boite', 'Chateu', 'Elephant', 'Sakura', 'Refill'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
     </div>
-    <div className="object-list">{visible.map((product) => <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
+    <div className="object-list">{visible.map((product) => product.id === 'refill' ? <RefillShowcase product={product} onOpen={onOpen} key={product.id} /> : <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
   </section>;
 }
 
@@ -456,7 +530,7 @@ function ProductModal({ product, initialScent, onClose, onAdd }: { product: Prod
   return <div className="quick-view open" role="dialog" aria-modal="true" data-testid="product-modal">
     <div className="product-modal">
       {product.images ? <img className="modal-product-image" src={product.images[0]} alt={`${product.name} product view`} /> : <div className={`modal-art ${product.art}`}><div className="vessel"><div className="wax" /><div className="wick" /></div></div>}
-      <div className="modal-copy"><button className="close-button modal-close" onClick={onClose} aria-label="Close product details" data-testid="button-close-product"><X size={16} /></button><div className="section-kicker">{product.collection} collection</div><h2>{product.name}</h2><p className="modal-subtitle">{product.description}</p><div className="modal-price">${product.price} USD</div><span className="option-label">Choose your scent</span><div className="scent-options">{scentOptions.map((item) => <button key={item.name} className={`scent-option ${scent === item.name ? 'selected' : ''}`} onClick={() => setScent(item.name)} data-testid={`button-scent-${item.name.toLowerCase().replace(' ', '-')}`}>{item.name}</button>)}</div><span className="option-label">Quantity</span><div className="modal-buy"><div className="modal-quantity"><button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity" data-testid="button-modal-decrease"><Minus size={13} /></button><span data-testid="text-modal-quantity">{quantity}</span><button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity" data-testid="button-modal-increase"><Plus size={13} /></button></div><button className="solid-button" onClick={() => { onAdd(product, scent, quantity); onClose(); }} data-testid="button-add-to-cart">Add to cart <ArrowRight size={14} /></button></div></div>
+      <div className="modal-copy"><button className="close-button modal-close" onClick={onClose} aria-label="Close product details" data-testid="button-close-product"><X size={16} /></button><div className="section-kicker">{product.collection} collection</div><h2>{product.name}</h2><p className="modal-subtitle">{product.description}</p><div className="modal-price">${product.price} USD</div><span className="option-label">{product.id === 'refill' ? 'Choose size & scent' : 'Choose your scent'}</span><div className="scent-options">{scentOptions.map((item) => <button key={item.name} className={`scent-option ${scent === item.name ? 'selected' : ''}`} onClick={() => setScent(item.name)} data-testid={`button-scent-${item.name.toLowerCase().replace(' ', '-')}`}>{item.name}</button>)}</div><span className="option-label">Quantity</span><div className="modal-buy"><div className="modal-quantity"><button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity" data-testid="button-modal-decrease"><Minus size={13} /></button><span data-testid="text-modal-quantity">{quantity}</span><button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity" data-testid="button-modal-increase"><Plus size={13} /></button></div><button className="solid-button" onClick={() => { onAdd(product, scent, quantity); onClose(); }} data-testid="button-add-to-cart">Add to cart <ArrowRight size={14} /></button></div></div>
     </div>
   </div>;
 }
