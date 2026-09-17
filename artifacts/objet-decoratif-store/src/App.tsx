@@ -774,10 +774,10 @@ function CarePage() {
         <h2>Never leave a burning candle unattended.</h2>
       </div>
       <div className="care-safety-list">
-        <div><span>01</span><div><p>Keep away from children, pets and flammable materials.</p></div></div>
-        <div><span>02</span><div><p>Place on a stable, heat-resistant surface.</p></div></div>
-        <div><span>03</span><div><p>Extinguish if the flame becomes unusually high or the wick moves close to the vessel wall.</p></div></div>
-        <div><span>04</span><div><p>Allow the vessel and wax to cool completely before handling.</p></div></div>
+        <div><span>01</span><div><h3>Keep a clear space</h3><p>Keep away from children, pets and flammable materials.</p></div></div>
+        <div><span>02</span><div><h3>Use a stable surface</h3><p>Place on a stable, heat-resistant surface.</p></div></div>
+        <div><span>03</span><div><h3>Watch the flame</h3><p>Extinguish if the flame becomes unusually high or the wick moves close to the vessel wall.</p></div></div>
+        <div><span>04</span><div><h3>Let the vessel cool</h3><p>Allow the vessel and wax to cool completely before handling.</p></div></div>
       </div>
     </section>
     <section className="care-split care-closing">
