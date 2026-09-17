@@ -873,7 +873,14 @@ function ScrollToTop() {
     const hash = window.location.hash.slice(1);
     if (hash) {
       window.requestAnimationFrame(() => {
-        document.getElementById(hash)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+        const target = document.getElementById(hash);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        target.classList.remove('nav-target-fade');
+        window.requestAnimationFrame(() => {
+          target.classList.add('nav-target-fade');
+          window.setTimeout(() => target.classList.remove('nav-target-fade'), 900);
+        });
       });
       return;
     }
