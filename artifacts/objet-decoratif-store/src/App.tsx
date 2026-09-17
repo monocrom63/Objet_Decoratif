@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowDown, ArrowLeft, ArrowRight, ChevronDown, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -514,6 +514,26 @@ function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Prod
 
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+  const shopMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeShopMenu = (event: MouseEvent) => {
+      if (shopMenuRef.current && !shopMenuRef.current.contains(event.target as Node)) {
+        setShopOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShopOpen(false);
+    };
+    document.addEventListener('mousedown', closeShopMenu);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeShopMenu);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
+
   const navTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
@@ -522,13 +542,35 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
       window.location.href = `${import.meta.env.BASE_URL}#${id}`;
     }
     setMobileOpen(false);
+    setShopOpen(false);
   };
+
   return <header>
     <div className="announcement">Free shipping on forms & refills over $100</div>
     <div className="site-header">
        <nav className={`main-nav ${mobileOpen ? 'open' : ''}`} data-testid="nav-main">
-        <button className="nav-link" onClick={() => navTo('collection')} data-testid="link-shop-collection">Shop Collection</button>
-        <button className="nav-link" onClick={() => navTo('scents')} data-testid="link-signature-scents">Signature Scents</button>
+        <div className={`nav-dropdown ${shopOpen ? 'is-open' : ''}`} ref={shopMenuRef}>
+          <button
+            className="nav-link nav-dropdown-trigger"
+            onClick={() => setShopOpen((open) => !open)}
+            aria-expanded={shopOpen}
+            aria-controls="shop-submenu"
+            data-testid="link-shop-collection"
+          >
+            Shop <ChevronDown size={12} aria-hidden="true" />
+          </button>
+          <div className="shop-submenu" id="shop-submenu" aria-hidden={!shopOpen}>
+            <button className="submenu-link" type="button" tabIndex={shopOpen ? 0 : -1} onClick={() => navTo('collection')}>
+              <span>The Forms</span><small>01</small>
+            </button>
+            <button className="submenu-link" type="button" tabIndex={shopOpen ? 0 : -1} onClick={() => navTo('scents')} data-testid="link-signature-scents">
+              <span>Signature Scents</span><small>02</small>
+            </button>
+            <button className="submenu-link" type="button" tabIndex={shopOpen ? 0 : -1} onClick={() => navTo('refill')}>
+              <span>Refills</span><small>03</small>
+            </button>
+          </div>
+        </div>
          <Link href="/care" className="nav-link" onClick={() => setMobileOpen(false)} data-testid="link-care">Care</Link>
          <Link href="/about" className="nav-link" onClick={() => setMobileOpen(false)} data-testid="link-about">About</Link>
       </nav>
