@@ -450,14 +450,14 @@ function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Prod
 
   return (
     <>
-      <div className="scent-showcase-heading">
+      <div className="scent-showcase-heading" id="scents">
         <div>
           <div className="section-kicker">The atmosphere / 02</div>
           <h2 className="section-title">Signature<br /><em>scents.</em></h2>
         </div>
         <p className="section-intro">Four scent compositions, each unfolding slowly through the warmth of the candle.</p>
       </div>
-      <article className="object-showcase scent-showcase" id="scents" data-testid="scent-showcase">
+      <article className="object-showcase scent-showcase" data-testid="scent-showcase">
         <div className="object-media-wrap">
           <div className="object-index">Atmosphere / {String(activeIndex + 1).padStart(2, '0')}</div>
           <div className="object-media scent-showcase-media" role="group" aria-label="Signature scent images">
@@ -575,7 +575,12 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
   const navTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.classList.remove('nav-target-fade');
+      window.requestAnimationFrame(() => {
+        target.classList.add('nav-target-fade');
+        window.setTimeout(() => target.classList.remove('nav-target-fade'), 900);
+      });
     } else {
       window.location.href = `${import.meta.env.BASE_URL}#${id}`;
     }
@@ -865,6 +870,13 @@ function ScrollToTop() {
   const [location] = useLocation();
 
   useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      window.requestAnimationFrame(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      });
+      return;
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [location]);
 
