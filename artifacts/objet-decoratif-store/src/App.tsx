@@ -631,15 +631,23 @@ function EditorialPageFrame({ children }: { children: ReactNode }) {
 
 function CarePage() {
   return <EditorialPageFrame>
-    <section className="editorial-hero care-hero">
-      <div className="editorial-hero-copy">
+    <section className="care-top">
+      <div className="care-video-panel">
+        <video className="care-video" autoPlay muted loop playsInline preload="metadata" poster="/videos/care-01-poster.jpg" aria-label="Objet Décoratif candle care">
+          <source src="/videos/care-01.mp4" type="video/mp4" />
+        </video>
+        <span className="care-video-label">Care / 01</span>
+      </div>
+      <div className="care-top-copy">
+        <div className="editorial-hero-copy">
         <div className="section-kicker">Candle care / Objet Décoratif</div>
         <span className="eyebrow">A considered flame / Care guide</span>
         <h1>Care for<br /><em>the flame.</em></h1>
         <p>A few considered habits help every candle burn evenly, keep the vessel clean and let the perfume unfold as intended.</p>
         <a className="outline-button" href="#care-essentials">View the essentials <ArrowDown size={13} /></a>
+        </div>
+        <div className="editorial-hero-note">Even burn / Clean vessel / Balanced scent</div>
       </div>
-      <div className="editorial-hero-note">Even burn / Clean vessel / Balanced scent</div>
     </section>
     <section className="editorial-section care-essentials" id="care-essentials">
       <div className="editorial-section-label">01 / The essentials<br /><span>Wax / Wick / Vessel</span></div>
