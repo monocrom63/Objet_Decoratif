@@ -227,6 +227,19 @@ const products: Product[] = [
 ];
 
 const queryClient = new QueryClient();
+const CART_STORAGE_KEY = 'objet-decoratif-cart';
+
+function readStoredCart(): CartLine[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 function Sculpture({ product, flame = false }: { product: Product; flame?: boolean }) {
   return <div className={`product-art ${product.art}`} data-testid={`img-product-${product.id}`}>
@@ -860,15 +873,196 @@ function ProductModal({ product, initialScent, onClose, onAdd }: { product: Prod
 
 function CartDrawer({ open, lines, onClose, onChange }: { open: boolean; lines: CartLine[]; onClose: () => void; onChange: (id: string, scent: string, delta: number) => void }) {
   const total = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
-  return <><div className={`overlay ${open ? 'open' : ''}`} onClick={onClose} /><aside className={`cart-drawer ${open ? 'open' : ''}`} aria-label="Shopping cart" data-testid="cart-drawer"><div className="drawer-head"><h2>Your cart</h2><button className="close-button" onClick={onClose} aria-label="Close cart" data-testid="button-close-cart"><X size={16} /></button></div><div className="cart-items">{lines.length === 0 ? <div className="cart-empty"><strong>Your cart is quiet.</strong><span>Add a form to begin the ritual.</span></div> : lines.map((line) => <div className="cart-item" key={`${line.product.id}-${line.scent}`} data-testid={`cart-item-${line.product.id}`}><div className="cart-thumb">{line.product.images?.[0] ? <img src={line.product.images[0]} alt={`${line.product.name} product view`} /> : <div className={`cart-thumb-art ${line.product.art}`}><div className="vessel"><div className="wax" /></div></div>}</div><div className="cart-item-info"><strong>{line.product.name}</strong><small>{line.scent}</small><div className="cart-controls"><button className="qty-button" onClick={() => onChange(line.product.id, line.scent, -1)} aria-label="Decrease item" data-testid={`button-decrease-${line.product.id}`}><Minus size={11} /></button><span className="qty-number">{line.quantity}</span><button className="qty-button" onClick={() => onChange(line.product.id, line.scent, 1)} aria-label="Increase item" data-testid={`button-increase-${line.product.id}`}><Plus size={11} /></button></div></div><span className="cart-item-price">${line.product.price * line.quantity}</span></div>)}</div>{lines.length > 0 && <div className="drawer-foot"><div className="total-line"><span>Subtotal</span><strong data-testid="text-cart-total">${total}</strong></div><button className="solid-button full-button" onClick={() => window.alert('Checkout is coming soon — your objects are reserved.')} data-testid="button-checkout">Continue to checkout <ArrowRight size={14} /></button></div>}</aside></>;
+  return <><div className={`overlay ${open ? 'open' : ''}`} onClick={onClose} /><aside className={`cart-drawer ${open ? 'open' : ''}`} aria-label="Shopping cart" data-testid="cart-drawer"><div className="drawer-head"><h2>Your cart</h2><button className="close-button" onClick={onClose} aria-label="Close cart" data-testid="button-close-cart"><X size={16} /></button></div><div className="cart-items">{lines.length === 0 ? <div className="cart-empty"><strong>Your cart is quiet.</strong><span>Add a form to begin the ritual.</span></div> : lines.map((line) => <div className="cart-item" key={`${line.product.id}-${line.scent}`} data-testid={`cart-item-${line.product.id}`}><div className="cart-thumb">{line.product.images?.[0] ? <img src={line.product.images[0]} alt={`${line.product.name} product view`} /> : <div className={`cart-thumb-art ${line.product.art}`}><div className="vessel"><div className="wax" /></div></div>}</div><div className="cart-item-info"><strong>{line.product.name}</strong><small>{line.scent}</small><div className="cart-controls"><button className="qty-button" onClick={() => onChange(line.product.id, line.scent, -1)} aria-label="Decrease item" data-testid={`button-decrease-${line.product.id}`}><Minus size={11} /></button><span className="qty-number">{line.quantity}</span><button className="qty-button" onClick={() => onChange(line.product.id, line.scent, 1)} aria-label="Increase item" data-testid={`button-increase-${line.product.id}`}><Plus size={11} /></button></div></div><span className="cart-item-price">${line.product.price * line.quantity}</span></div>)}</div>{lines.length > 0 && <div className="drawer-foot"><div className="total-line"><span>Subtotal</span><strong data-testid="text-cart-total">${total}</strong></div><button className="solid-button full-button" onClick={() => { onClose(); window.location.href = `${import.meta.env.BASE_URL}checkout`; }} data-testid="button-checkout">Continue to checkout <ArrowRight size={14} /></button></div>}</aside></>;
+}
+
+type CheckoutForm = {
+  email: string;
+  country: string;
+  firstName: string;
+  lastName: string;
+  company: string;
+  address: string;
+  apartment: string;
+  postalCode: string;
+  city: string;
+  phone: string;
+  cardNumber: string;
+  expiration: string;
+  securityCode: string;
+  cardName: string;
+};
+
+const emptyCheckoutForm: CheckoutForm = {
+  email: '',
+  country: 'Germany',
+  firstName: '',
+  lastName: '',
+  company: '',
+  address: '',
+  apartment: '',
+  postalCode: '',
+  city: '',
+  phone: '',
+  cardNumber: '',
+  expiration: '',
+  securityCode: '',
+  cardName: '',
+};
+
+function CheckoutPage() {
+  const [lines] = useState<CartLine[]>(readStoredCart);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'klarna'>('card');
+  const [form, setForm] = useState<CheckoutForm>(emptyCheckoutForm);
+  const [submitted, setSubmitted] = useState(false);
+  const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
+  const hasAddress = Boolean(form.address.trim() && form.postalCode.trim() && form.city.trim());
+  const shipping = hasAddress ? 8 : 0;
+  const total = subtotal + shipping;
+  const updateField = (field: keyof CheckoutForm, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  if (lines.length === 0) {
+    return <div className="checkout-page checkout-empty-page">
+      <header className="checkout-header">
+        <Link href="/" className="checkout-logo">Objet Décoratif</Link>
+      </header>
+      <main className="checkout-empty-state">
+        <span className="section-kicker">Checkout</span>
+        <h1>Your cart is quiet.</h1>
+        <p>Add a form before continuing to checkout.</p>
+        <Link href="/#collection" className="solid-button">Explore the collection <ArrowRight size={14} /></Link>
+      </main>
+    </div>;
+  }
+
+  return <div className="checkout-page">
+    <header className="checkout-header">
+      <Link href="/" className="checkout-logo">Objet Décoratif</Link>
+      <Link href="/" className="checkout-back">Return to store</Link>
+    </header>
+    <main className="checkout-layout">
+      <form className="checkout-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}>
+        <section className="checkout-section checkout-express">
+          <span className="checkout-overline">Express checkout</span>
+          <div className="express-buttons">
+            <button type="button" className="express-button shop-pay">shop</button>
+            <button type="button" className="express-button paypal-pay">PayPal</button>
+            <button type="button" className="express-button gpay"><span className="gpay-mark">G</span> Pay</button>
+          </div>
+          <div className="checkout-or"><span>OR</span></div>
+        </section>
+
+        <section className="checkout-section">
+          <h2>Contact</h2>
+          <label className="checkout-field">
+            <span className="sr-only">Email</span>
+            <input required type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} placeholder="Email" autoComplete="email" />
+            <span className="field-help">?</span>
+          </label>
+          <label className="checkout-checkbox"><input type="checkbox" /> <span>Email me with news and offers</span></label>
+        </section>
+
+        <section className="checkout-section">
+          <h2>Delivery</h2>
+          <label className="checkout-field checkout-select">
+            <span>Country/Region</span>
+            <select value={form.country} onChange={(event) => updateField('country', event.target.value)} autoComplete="country">
+              <option>Germany</option>
+              <option>Austria</option>
+              <option>Switzerland</option>
+              <option>France</option>
+              <option>United Kingdom</option>
+            </select>
+          </label>
+          <div className="checkout-field-grid">
+            <label className="checkout-field"><span className="sr-only">First name</span><input required value={form.firstName} onChange={(event) => updateField('firstName', event.target.value)} placeholder="First name" autoComplete="given-name" /></label>
+            <label className="checkout-field"><span className="sr-only">Last name</span><input required value={form.lastName} onChange={(event) => updateField('lastName', event.target.value)} placeholder="Last name" autoComplete="family-name" /></label>
+          </div>
+          <label className="checkout-field"><span className="sr-only">Company</span><input value={form.company} onChange={(event) => updateField('company', event.target.value)} placeholder="Company (optional)" autoComplete="organization" /></label>
+          <label className="checkout-field"><span className="sr-only">Address</span><input required value={form.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Address" autoComplete="street-address" /><Search size={15} /></label>
+          <label className="checkout-field"><span className="sr-only">Apartment, suite, etc.</span><input value={form.apartment} onChange={(event) => updateField('apartment', event.target.value)} placeholder="Apartment, suite, etc. (optional)" autoComplete="address-line2" /></label>
+          <div className="checkout-field-grid">
+            <label className="checkout-field"><span className="sr-only">Postal code</span><input required value={form.postalCode} onChange={(event) => updateField('postalCode', event.target.value)} placeholder="Postal code" autoComplete="postal-code" /></label>
+            <label className="checkout-field"><span className="sr-only">City</span><input required value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder="City" autoComplete="address-level2" /></label>
+          </div>
+          <label className="checkout-field"><span className="sr-only">Phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Phone (optional)" autoComplete="tel" /><span className="field-help">?</span></label>
+        </section>
+
+        <section className="checkout-section checkout-shipping">
+          <h2>Shipping method</h2>
+          <div className="shipping-notice">{hasAddress ? 'Standard delivery · 3–5 working days' : 'Enter your shipping address to view available shipping methods.'}</div>
+        </section>
+
+        <section className="checkout-section checkout-payment">
+          <h2>Payment</h2>
+          <p className="payment-note">All transactions are secure and encrypted.</p>
+          <div className="payment-methods">
+            <div className={`payment-method ${paymentMethod === 'card' ? 'selected' : ''}`}>
+              <button type="button" className="payment-method-toggle" onClick={() => setPaymentMethod('card')}>
+                <span className="payment-radio" />
+                <strong>Credit card</strong>
+                <span className="card-brands"><b>VISA</b><b className="mastercard">●●</b><b className="amex">MC</b><b>+2</b></span>
+              </button>
+              {paymentMethod === 'card' && <div className="card-fields">
+                <label className="checkout-field"><span className="sr-only">Card number</span><input required value={form.cardNumber} onChange={(event) => updateField('cardNumber', event.target.value)} placeholder="Card number" autoComplete="cc-number" /><span className="field-lock">▢</span></label>
+                <div className="checkout-field-grid">
+                  <label className="checkout-field"><span className="sr-only">Expiration date</span><input required value={form.expiration} onChange={(event) => updateField('expiration', event.target.value)} placeholder="Expiration date (MM / YY)" autoComplete="cc-exp" /></label>
+                  <label className="checkout-field"><span className="sr-only">Security code</span><input required value={form.securityCode} onChange={(event) => updateField('securityCode', event.target.value)} placeholder="Security code" autoComplete="cc-csc" /><span className="field-help">?</span></label>
+                </div>
+                <label className="checkout-field"><span className="sr-only">Name on card</span><input required value={form.cardName} onChange={(event) => updateField('cardName', event.target.value)} placeholder="Name on card" autoComplete="cc-name" /></label>
+                <label className="checkout-checkbox billing-checkbox"><input type="checkbox" defaultChecked /> <span>Use shipping address as billing address</span></label>
+              </div>}
+            </div>
+            <button type="button" className={`payment-method payment-method-option ${paymentMethod === 'paypal' ? 'selected' : ''}`} onClick={() => setPaymentMethod('paypal')}><span className="payment-radio" /><strong>PayPal</strong><b className="paypal-logo">PayPal</b></button>
+            <button type="button" className={`payment-method payment-method-option ${paymentMethod === 'klarna' ? 'selected' : ''}`} onClick={() => setPaymentMethod('klarna')}><span className="payment-radio" /><strong>Klarna</strong><b className="klarna-logo">Klarna</b></button>
+          </div>
+        </section>
+
+        <section className="checkout-section checkout-save">
+          <p>Save my information for a faster checkout</p>
+          <label className="checkout-field"><span className="sr-only">Mobile phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Mobile phone (optional)" autoComplete="tel" /><span className="phone-prefix">+49</span></label>
+          <small>By providing your phone number, you agree to create a Shop account subject to Shop's <u>Terms</u> and <u>Privacy Policy</u>.</small>
+        </section>
+
+        {submitted && <div className="checkout-success" role="status">Your order is ready to review. We will keep your objects reserved.</div>}
+        <button className="checkout-review-button" type="submit">Review order</button>
+        <nav className="checkout-footer-links" aria-label="Checkout information"><a href="#refund">Refund policy</a><a href="#shipping">Shipping</a><a href="#privacy">Privacy policy</a><a href="#terms">Terms of service</a><a href="#legal">Legal notice</a><a href="#contact">Contact</a><a href="#cookies">Cookies</a></nav>
+      </form>
+
+      <aside className="checkout-summary" aria-label="Order summary">
+        <div className="checkout-summary-inner">
+          <div className="checkout-summary-items">
+            {lines.map((line) => <div className="checkout-summary-item" key={`${line.product.id}-${line.scent}`}>
+              <div className="checkout-summary-thumb">
+                {line.product.images?.[0] ? <img src={line.product.images[0]} alt={`${line.product.name} product view`} /> : <div className={`cart-thumb-art ${line.product.art}`}><div className="vessel"><div className="wax" /></div></div>}
+                <span>{line.quantity}</span>
+              </div>
+              <div><strong>{line.product.name}</strong><small>{line.scent}</small></div>
+              <b>€{(line.product.price * line.quantity).toFixed(2)}</b>
+            </div>)}
+          </div>
+          <div className="checkout-total-lines">
+            <div><span>Subtotal</span><b>€{subtotal.toFixed(2)}</b></div>
+            <div><span>Shipping <small>?</small></span><span className={hasAddress ? '' : 'checkout-muted'}>{hasAddress ? `€${shipping.toFixed(2)}` : 'Enter shipping address'}</span></div>
+            <div className="checkout-grand-total"><strong>Total</strong><b><small>EUR</small> €{total.toFixed(2)}</b></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>;
 }
 
 function Store() {
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [selected, setSelected] = useState<{ product: Product; scent: string } | null>(null);
-  const [cart, setCart] = useState<CartLine[]>([]);
+  const [cart, setCart] = useState<CartLine[]>(readStoredCart);
   const [subscribed, setSubscribed] = useState(false);
+  useEffect(() => {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
   const addToCart = (product: Product, scent: string, quantity: number) => {
     setCart((current) => {
@@ -890,7 +1084,7 @@ function Store() {
 }
 
 function Router() {
-  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function ScrollToTop() {
