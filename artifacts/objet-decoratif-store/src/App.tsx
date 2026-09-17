@@ -723,27 +723,39 @@ function CarePage() {
         <div><strong>10 mm</strong><span>Stop burning when this amount of wax remains.</span></div>
       </div>
     </section>
-    <section className="editorial-section care-steps">
-      <div className="editorial-section-label">02 / Step by step</div>
-      <div className="care-step-layout">
-        <div className="care-step-copy">
-          <div className="section-kicker">Wax / Wick / Vessel</div>
-          <h2>How to care<br />for your candle.</h2>
-          <div className="care-step-list">
-            <div><span>01</span><div><h3>The first burn</h3><p>Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.</p></div></div>
-            <div><span>02</span><div><h3>Each time you burn</h3><p>Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.</p></div></div>
-            <div><span>03</span><div><h3>Care for the wick</h3><p>Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.</p></div></div>
-            <div><span>04</span><div><h3>Extinguish and finish</h3><p>Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.</p></div></div>
-          </div>
+    <section className="care-split care-steps">
+      <div className="care-step-copy">
+        <div className="section-kicker">02 / Step by step / Wax / Wick / Vessel</div>
+        <h2>How to care<br />for your candle.</h2>
+        <div className="care-step-list">
+          <div><span>01</span><div><h3>The first burn</h3><p>Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.</p></div></div>
+          <div><span>02</span><div><h3>Each time you burn</h3><p>Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.</p></div></div>
+          <div><span>03</span><div><h3>Care for the wick</h3><p>Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.</p></div></div>
+          <div><span>04</span><div><h3>Extinguish and finish</h3><p>Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.</p></div></div>
         </div>
-        <CareImageSlideshow />
+      </div>
+      <CareImageSlideshow />
+    </section>
+    <section className="care-split care-safety">
+      <div className="care-safety-copy">
+        <div className="section-kicker">03 / Safety first</div>
+        <h2>Never leave a burning candle unattended.</h2>
+      </div>
+      <div className="care-safety-list">
+        <div><span>01</span><p>Keep away from children, pets and flammable materials.</p></div>
+        <div><span>02</span><p>Place on a stable, heat-resistant surface.</p></div>
+        <div><span>03</span><p>Extinguish if the flame becomes unusually high or the wick moves close to the vessel wall.</p></div>
+        <div><span>04</span><p>Allow the vessel and wax to cool completely before handling.</p></div>
       </div>
     </section>
-    <section className="editorial-closing care-closing">
-      <div className="section-kicker">04 / Continue the ritual / Form / Scent</div>
-      <h2>Keep the vessel.<br /><em>Renew the scent.</em></h2>
-      <p>Once the candle is finished and the vessel has cooled completely, continue with a new refill. The object remains; only the atmosphere changes.</p>
-      <a className="solid-button" href="/#collection">Shop refills <ArrowRight size={13} /></a>
+    <section className="care-split care-closing">
+      <CareImageSlideshow />
+      <div className="care-closing-copy">
+        <div className="section-kicker">04 / Continue the ritual / Form / Scent</div>
+        <h2>Keep the vessel.<br /><em>Renew the scent.</em></h2>
+        <p>Once the candle is finished and the vessel has cooled completely, continue with a new refill. The object remains; only the atmosphere changes.</p>
+        <a className="solid-button" href="/#collection">Shop refills <ArrowRight size={13} /></a>
+      </div>
     </section>
   </EditorialPageFrame>;
 }
