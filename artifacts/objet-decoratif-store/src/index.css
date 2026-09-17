@@ -451,7 +451,7 @@ a { color: inherit; text-decoration: none; }
 .checkout-empty-state h1 { margin:0; font:400 clamp(45px, 7vw, 88px) var(--hero); letter-spacing:-.045em; }
 .checkout-empty-state p { margin:0 0 12px; color:#777369; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.checkout-page, .checkout-page * { font-family:var(--sans); }
+.checkout-page, .checkout-page * { font-family:var(--sans) !important; }
 
 .quick-view { position:fixed; z-index:45; inset:0; display:grid; place-items:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .3s; }
 .quick-view.open { opacity:1; pointer-events:auto; }
