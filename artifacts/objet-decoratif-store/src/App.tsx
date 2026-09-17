@@ -380,7 +380,7 @@ function RefillShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
   const selectedVariant = `${size} / ${scent}`;
 
   return (
-    <article className="object-showcase refill-showcase" data-testid="object-showcase-refill">
+    <article className="object-showcase refill-showcase" id="refill" data-testid="object-showcase-refill">
       <div className="object-media-wrap">
         <div className="object-index">Object / Refill</div>
         <ObjectSlideshow product={product} />
