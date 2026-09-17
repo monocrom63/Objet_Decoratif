@@ -34,32 +34,32 @@ const imagePath = (fileName: string) =>
 
 const milanoScents: ScentOption[] = [
   {
-    name: 'Santal Cruz',
-    notes: 'Cardamom / Sandalwood / White floral',
+    name: 'Thé',
+    notes: 'Bergamot / Mate tea / Green tea / Clove',
     description:
-      'Warm woods and mineral air with a soft floral lift. A quiet, grounded scent for slow evenings.',
-    image: imagePath('santal-cruz.webp'),
+      'Rose, lavandin and tea leaves open into patchouli, cedarwood and woody amber.',
+    image: imagePath('the-scent.webp'),
+  },
+  {
+    name: 'Santal Cruz',
+    notes: 'Cardamom / Frankincense / Sandalwood',
+    description:
+      'Myrtle, jasmine and white florals rest on sandalwood, amber and vanilla.',
+    image: imagePath('santal-cruz-scent.webp'),
+  },
+  {
+    name: 'Tropicale',
+    notes: 'Passion fruit / Citrus / Pepper / Clove',
+    description:
+      'Passion fruit and citrus brighten a heart of pepper and clove, grounded by guaiac wood and cedar.',
+    image: imagePath('tropicale-scent.webp'),
   },
   {
     name: 'Cedar Salad',
     notes: 'Ginger / Gurjum / Alaskan cedar',
     description:
-      'Green, dry and slightly wild. Cedar leaf meets violet blossom and a delicate veil of vanilla.',
-    image: imagePath('cedar-salad.webp'),
-  },
-  {
-    name: 'The',
-    notes: 'Bergamot / Mate tea / Cedarwood',
-    description:
-      'A clear, aromatic tea accord with lavender, patchouli and a dry woody finish.',
-    image: imagePath('the.webp'),
-  },
-  {
-    name: 'Tropicale',
-    notes: 'Passion fruit / Citrus / Guaiac wood',
-    description:
-      'Bright citrus and ripe fruit settle into pepper, clove and warm guaiac wood.',
-    image: imagePath('tropicale.webp'),
+      'Iris root, violet blossom and vanilla lead into Atlas cedar and Virginia cedar.',
+    image: imagePath('cedar-salad-scent.webp'),
   },
 ];
 
@@ -433,6 +433,87 @@ function RefillShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
   );
 }
 
+function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Product, scent: string) => void }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const selected = milanoScents[activeIndex];
+
+  const changeScent = (direction: number) => {
+    setActiveIndex((current) => (current + direction + milanoScents.length) % milanoScents.length);
+  };
+
+  return (
+    <>
+      <div className="scent-showcase-heading">
+        <div>
+          <div className="section-kicker">The atmosphere / 02</div>
+          <h2 className="section-title">Signature<br /><em>scents.</em></h2>
+        </div>
+        <p className="section-intro">Four scent compositions, each unfolding slowly through the warmth of the candle.</p>
+      </div>
+      <article className="object-showcase scent-showcase" id="scents" data-testid="scent-showcase">
+        <div className="object-media-wrap">
+          <div className="object-index">Atmosphere / {String(activeIndex + 1).padStart(2, '0')}</div>
+          <div className="object-media scent-showcase-media" role="group" aria-label="Signature scent images">
+            {milanoScents.map((option, index) => (
+              <img
+                key={option.name}
+                className={`object-photo ${index === activeIndex ? 'active' : ''}`}
+                src={option.image}
+                alt={`${option.name} scent study`}
+                aria-hidden={index !== activeIndex}
+              />
+            ))}
+            <div className="slide-controls" aria-label="Choose a scent">
+              {milanoScents.map((option, index) => (
+                <button
+                  key={option.name}
+                  className={`slide-dot ${index === activeIndex ? 'active' : ''}`}
+                  type="button"
+                  aria-label={`Show ${option.name}`}
+                  aria-pressed={index === activeIndex}
+                  onClick={() => setActiveIndex(index)}
+                />
+              ))}
+            </div>
+            <div className="scent-slide-arrows">
+              <button type="button" onClick={() => changeScent(-1)} aria-label="Previous scent">
+                <ArrowLeft size={15} />
+              </button>
+              <button type="button" onClick={() => changeScent(1)} aria-label="Next scent">
+                <ArrowRight size={15} />
+              </button>
+            </div>
+            <span className="slide-caption">{selected.name} / 01—04</span>
+          </div>
+        </div>
+        <div className="object-details scent-showcase-details">
+          <div className="section-kicker">Signature scents / composed in Grasse</div>
+          <div className="object-title-row">
+            <div>
+              <h3 key={selected.name} className="scent-showcase-title">{selected.name}</h3>
+              <p>245 gram refill · Up to 65H</p>
+            </div>
+            <span className="object-price">$38</span>
+          </div>
+          <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
+            <span className="scent-showcase-label">The atmosphere</span>
+            <p>{selected.description}</p>
+            <span className="scent-showcase-label">Scent notes</span>
+            <p>{selected.notes}</p>
+          </div>
+          <button className="solid-button object-buy-button scent-buy-button" type="button" onClick={() => onOpen(product, `Big / ${selected.name}`)} data-testid={`button-open-scent-${selected.name.toLowerCase().replace(' ', '-')}`}>
+            Choose {selected.name} <ArrowRight size={14} />
+          </button>
+        </div>
+        <div className="object-explanation">
+          <span className="object-explanation-label">Keep the form. Change the atmosphere.</span>
+          <p>When the candle is finished, place a new wax refill inside the same vessel. Choose the same scent or change the atmosphere entirely.</p>
+        </div>
+      </article>
+    </>
+  );
+}
+
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navTo = (id: string) => {
@@ -478,6 +559,7 @@ function Hero({ onExplore }: { onExplore: () => void }) {
 function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void }) {
   const [filter, setFilter] = useState<'All' | ProductCollection>('All');
   const visible = useMemo(() => filter === 'All' ? products : products.filter((p) => p.collection === filter), [filter]);
+  const refillProduct = products.find((product) => product.id === 'refill');
   return <section className="section" id="collection">
     <div className="section-header">
       <div><div className="section-kicker">The forms / 01</div><h2 className="section-title">Shop collection</h2></div>
@@ -487,23 +569,19 @@ function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void })
       {(['All', 'Barrique', 'Milano', 'Boite', 'Chateu', 'Elephant', 'Sakura', 'Refill'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
     </div>
     <div className="object-list">{visible.map((product) => product.id === 'refill' ? <RefillShowcase product={product} onOpen={onOpen} key={product.id} /> : <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
+    {(filter === 'All' || filter === 'Refill') && refillProduct && <ScentShowcase product={refillProduct} onOpen={onOpen} />}
   </section>;
 }
 
 function Ritual() {
   return <section className="ritual" id="ritual">
-    <div className="ritual-copy"><div className="section-kicker">The ritual / 02</div><h2>Keep the form.<br />Change the mood.</h2><p>Our vessels are cast to last beyond a single burn. When the wax is gone, drop in a refill and begin again.</p><button className="outline-button" onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-shop-refills">Shop refills <ArrowRight size={13} /></button></div>
+    <div className="ritual-copy"><div className="section-kicker">The ritual / 03</div><h2>Keep the form.<br />Change the mood.</h2><p>Our vessels are cast to last beyond a single burn. When the wax is gone, drop in a refill and begin again.</p><button className="outline-button" onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-shop-refills">Shop refills <ArrowRight size={13} /></button></div>
     <div className="ritual-steps">
       <div className="step"><span className="step-number">01</span><div><h3>Buy the form</h3><p>A sculptural object, poured and finished by hand in our studio.</p></div></div>
       <div className="step"><span className="step-number">02</span><div><h3>Burn the candle</h3><p>Let the wax pool reach the edge. Take your time with it.</p></div></div>
       <div className="step"><span className="step-number">03</span><div><h3>Refill & repeat</h3><p>One vessel. Many chapters. Less waste, more ritual.</p></div></div>
     </div>
   </section>;
-}
-
-function Scents() {
-  const scents = [['01', 'Santal Cruz', 'sandalwood / dry cedar'], ['02', 'Hinoki', 'cypress / mineral water'], ['03', 'Fig Leaf', 'green fig / moss'], ['04', 'Cedar Smoke', 'cedar / ember'], ['05', 'Orange Peel', 'citrus / neroli']];
-  return <section className="section scent-section" id="scents"><div className="scent-layout"><div><div className="section-kicker">The atmosphere / 03</div><h2 className="section-title">Signature<br /><em>scents.</em></h2><p className="scent-note">Five fragrances, composed to sit quietly in a room. Never loud. Always present.</p></div><div className="scent-list">{scents.map(([number, name, notes]) => <div className="scent-row" key={name} data-testid={`text-scent-${name.toLowerCase().replace(' ', '-')}`}><span>{number}</span><strong>{name}</strong><small>{notes}</small></div>)}</div></div></section>;
 }
 
 function About() {
@@ -560,7 +638,7 @@ function Store() {
   return <div className="store-shell">
     <Header cartCount={cartCount} onCart={() => setCartOpen(true)} onSearch={() => setSearchOpen((open) => !open)} />
     <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
-    <main><Hero onExplore={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} /><section className="intro-strip"><div className="intro-item"><span className="intro-number">01 / Form</span><h2>Cast in concrete.<br />Built to last.</h2><p>Quiet architecture for the everyday.</p></div><div className="intro-item"><span className="intro-number">02 / Scent</span><h2>Five fragrances.</h2><p>Endlessly renewable, never overpowering.</p></div><div className="intro-item"><span className="intro-number">03 / Ritual</span><h2>Burn. Refill.<br />Repeat.</h2><p>One beautiful object, many lives.</p></div></section><Collection onOpen={openProduct} /><Ritual /><Scents /><About /><section className="newsletter" id="newsletter"><h2>Notes from the studio.</h2>{subscribed ? <span className="success-note">You’re on the list. See you soon.</span> : <form className="newsletter-form" onSubmit={(event) => { event.preventDefault(); setSubscribed(true); }}><input type="email" required placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter" /><button type="submit" data-testid="button-subscribe">Subscribe <ArrowRight size={13} /></button></form>}</section></main>
+     <main><Hero onExplore={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} /><section className="intro-strip"><div className="intro-item"><span className="intro-number">01 / Form</span><h2>Cast in concrete.<br />Built to last.</h2><p>Quiet architecture for the everyday.</p></div><div className="intro-item"><span className="intro-number">02 / Scent</span><h2>Four fragrances.</h2><p>Endlessly renewable, never overpowering.</p></div><div className="intro-item"><span className="intro-number">03 / Ritual</span><h2>Burn. Refill.<br />Repeat.</h2><p>One beautiful object, many lives.</p></div></section><Collection onOpen={openProduct} /><Ritual /><About /><section className="newsletter" id="newsletter"><h2>Notes from the studio.</h2>{subscribed ? <span className="success-note">You’re on the list. See you soon.</span> : <form className="newsletter-form" onSubmit={(event) => { event.preventDefault(); setSubscribed(true); }}><input type="email" required placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter" /><button type="submit" data-testid="button-subscribe">Subscribe <ArrowRight size={13} /></button></form>}</section></main>
     <footer className="footer"><span>© Objet Décoratif / Made for slow evenings</span><span>Concrete candle collection — Paris / Everywhere</span></footer>
      <ProductModal product={selected?.product ?? null} initialScent={selected?.scent} onClose={() => setSelected(null)} onAdd={addToCart} /><CartDrawer open={cartOpen} lines={cart} onClose={() => setCartOpen(false)} onChange={changeCart} />
   </div>;

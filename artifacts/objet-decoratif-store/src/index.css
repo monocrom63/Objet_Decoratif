@@ -186,6 +186,16 @@ a { color: inherit; text-decoration: none; }
 .refill-copy p { margin:0; }
 .refill-copy p + p { margin-top:15px; }
 .refill-buy-button { align-self:flex-start; margin-top:30px; }
+.scent-showcase-heading { display:grid; grid-template-columns:minmax(0, 1.18fr) minmax(340px, .82fr); column-gap:clamp(36px, 7vw, 110px); align-items:end; margin:125px 0 42px; }
+.scent-showcase-heading .section-title { margin:0; }
+.scent-showcase-heading .section-intro { margin:0 0 4px; }
+.scent-showcase-media { background:#d7d0c3; }
+.scent-showcase-details { min-height:520px; }
+.scent-showcase-title { animation:scent-copy-in .9s ease-in-out; }
+.scent-showcase-copy { display:flex; flex-direction:column; gap:10px; max-width:430px; padding-top:18px; border-top:1px solid var(--line); animation:scent-copy-in .9s ease-in-out; }
+.scent-showcase-copy p { margin:0 0 18px; color:#65635b; font-size:13px; line-height:1.6; }
+.scent-showcase-label { color:var(--saffron); font:10px var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+.scent-buy-button { align-self:flex-start; margin-top:auto; }
 .object-explanation { grid-column:1 / -1; display:grid; grid-template-columns:minmax(170px, .35fr) 1fr; gap:30px; padding-top:24px; border-top:1px solid var(--line); }
 .object-explanation-label { color:var(--saffron); font:10px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
 .object-explanation p { max-width:680px; margin:0; color:#65635b; font-size:15px; line-height:1.7; }
@@ -313,6 +323,10 @@ a { color: inherit; text-decoration: none; }
   .object-media { min-height:520px; }
   .object-details { height:auto; padding:42px 0 0; }
   .object-title-row h3 { font-size:62px; }
+  .scent-showcase-heading { display:block; margin:92px 0 35px; }
+  .scent-showcase-heading .section-intro { margin-top:18px; }
+  .scent-showcase-details { min-height:0; }
+  .scent-buy-button { margin-top:10px; }
   .object-actions { display:block; }
   .scent-slideshow { grid-template-columns: minmax(120px, .8fr) 1fr; gap:14px; min-height:270px; }
   .scent-slide-image-wrap, .scent-slide-image, .scent-slide-swatch { min-height:0; }
