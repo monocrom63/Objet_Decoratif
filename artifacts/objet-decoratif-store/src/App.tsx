@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import { Link, Route, Switch, Router as WouterRouter } from 'wouter';
 
 type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura' | 'Refill';
 type Product = {
@@ -261,7 +261,6 @@ function ObjectSlideshow({ product }: { product: Product }) {
           />
         ))}
       </div>
-      <span className="slide-caption">{product.name} / 01—{String(images.length).padStart(2, '0')}</span>
     </div>
   );
 }
@@ -483,7 +482,6 @@ function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Prod
                 <ArrowRight size={15} />
               </button>
             </div>
-            <span className="slide-caption">{selected.name} / 01—04</span>
           </div>
         </div>
         <div className="object-details scent-showcase-details">
@@ -517,17 +515,22 @@ function ScentShowcase({ product, onOpen }: { product: Product; onOpen: (p: Prod
 function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: () => void; onSearch: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const target = document.getElementById(id);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = `${import.meta.env.BASE_URL}#${id}`;
+    }
     setMobileOpen(false);
   };
   return <header>
     <div className="announcement">Free shipping on forms & refills over $100</div>
     <div className="site-header">
-      <nav className={`main-nav ${mobileOpen ? 'open' : ''}`} data-testid="nav-main">
+       <nav className={`main-nav ${mobileOpen ? 'open' : ''}`} data-testid="nav-main">
         <button className="nav-link" onClick={() => navTo('collection')} data-testid="link-shop-collection">Shop Collection</button>
         <button className="nav-link" onClick={() => navTo('scents')} data-testid="link-signature-scents">Signature Scents</button>
-        <button className="nav-link" onClick={() => navTo('ritual')} data-testid="link-care">Care</button>
-        <button className="nav-link" onClick={() => navTo('about')} data-testid="link-about">About</button>
+         <Link href="/care" className="nav-link" onClick={() => setMobileOpen(false)} data-testid="link-care">Care</Link>
+         <Link href="/about" className="nav-link" onClick={() => setMobileOpen(false)} data-testid="link-about">About</Link>
       </nav>
       <button className="menu-button" onClick={() => setMobileOpen((open) => !open)} aria-label="Open menu" data-testid="button-menu">
         {mobileOpen ? <X size={19} /> : <Menu size={19} />}
@@ -542,8 +545,10 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
 }
 
 function Hero({ onExplore }: { onExplore: () => void }) {
+  const [videoReady, setVideoReady] = useState(false);
+
   return <section className="hero">
-    <video className="hero-video" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+    <video className={`hero-video ${videoReady ? 'is-ready' : ''}`} autoPlay muted loop playsInline preload="auto" onCanPlay={() => setVideoReady(true)} aria-hidden="true">
       <source src="/videos/hero.mp4" type="video/mp4" />
     </video>
     <div className="hero-copy">
@@ -573,19 +578,137 @@ function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void })
   </section>;
 }
 
-function Ritual() {
-  return <section className="ritual" id="ritual">
-    <div className="ritual-copy"><div className="section-kicker">The ritual / 03</div><h2>Keep the form.<br />Change the mood.</h2><p>Our vessels are cast to last beyond a single burn. When the wax is gone, drop in a refill and begin again.</p><button className="outline-button" onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-shop-refills">Shop refills <ArrowRight size={13} /></button></div>
-    <div className="ritual-steps">
-      <div className="step"><span className="step-number">01</span><div><h3>Buy the form</h3><p>A sculptural object, poured and finished by hand in our studio.</p></div></div>
-      <div className="step"><span className="step-number">02</span><div><h3>Burn the candle</h3><p>Let the wax pool reach the edge. Take your time with it.</p></div></div>
-      <div className="step"><span className="step-number">03</span><div><h3>Refill & repeat</h3><p>One vessel. Many chapters. Less waste, more ritual.</p></div></div>
+function Footer() {
+  return <footer className="footer editorial-footer" id="footer">
+    <div className="footer-grid">
+      <div className="footer-column">
+        <span className="footer-index">01 / Sitemap</span>
+        <div className="footer-links">
+          <a href="/">Home</a>
+          <a href="/#collection">The Forms</a>
+          <a href="/#scents">Signature Scents</a>
+          <Link href="/about">About</Link>
+          <Link href="/care">Candle Care</Link>
+        </div>
+      </div>
+      <div className="footer-column">
+        <span className="footer-index">02 / Information</span>
+        <div className="footer-links footer-muted-links">
+          <a href="/#footer">Shipping</a>
+          <a href="/#footer">Returns</a>
+          <a href="/#footer">Privacy</a>
+          <a href="/#footer">Terms</a>
+          <a href="/#footer">Legal Notice</a>
+        </div>
+      </div>
+      <div className="footer-column footer-contact">
+        <span className="footer-index">03 / Contact</span>
+        <div className="footer-links">
+          <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>
+          <a href="/#newsletter">Contact Form <span aria-hidden="true">↗</span></a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
     </div>
-  </section>;
+    <div className="footer-bottom">
+      <span>© Objet Décoratif / Made for slow evenings</span>
+      <span>Concrete candle collection — Berlin / Everywhere</span>
+    </div>
+  </footer>;
 }
 
-function About() {
-  return <section className="about-band" id="about"><div className="about-art" aria-label="Objet Décoratif studio mark" /><div className="about-copy"><div className="section-kicker">The studio / 04</div><h2>Clean forms, refillable by design.</h2><p>Objet Décoratif began with a simple question: can an everyday candle earn its place on a shelf when it is not lit?</p><p>We work slowly with concrete, fragrance and proportion to make objects that hold a room — and keep holding it.</p><button className="solid-button" onClick={() => document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-stay-close">Stay close <ArrowRight size={13} /></button></div></section>;
+function EditorialPageFrame({ children }: { children: ReactNode }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  return <div className="store-shell editorial-shell">
+    <Header cartCount={0} onCart={() => { window.location.href = `${import.meta.env.BASE_URL}#collection`; }} onSearch={() => setSearchOpen((open) => !open)} />
+    <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
+    <main>{children}</main>
+    <Footer />
+  </div>;
+}
+
+function CarePage() {
+  return <EditorialPageFrame>
+    <section className="editorial-hero care-hero">
+      <div className="editorial-hero-copy">
+        <div className="section-kicker">Candle care / Objet Décoratif</div>
+        <span className="eyebrow">A considered flame / Care guide</span>
+        <h1>Care for<br /><em>the flame.</em></h1>
+        <p>A few considered habits help every candle burn evenly, keep the vessel clean and let the perfume unfold as intended.</p>
+        <a className="outline-button" href="#care-essentials">View the essentials <ArrowDown size={13} /></a>
+      </div>
+      <div className="editorial-hero-note">Even burn / Clean vessel / Balanced scent</div>
+    </section>
+    <section className="editorial-section care-essentials" id="care-essentials">
+      <div className="editorial-section-label">01 / The essentials<br /><span>Wax / Wick / Vessel</span></div>
+      <div className="editorial-section-content">
+        <div className="section-kicker">Care extends the ritual</div>
+        <h2>A clean, even burn starts with the wick.</h2>
+        <p>We tested numerous wax and wick combinations. This pairing was selected for a steady burn and balanced scent diffusion. Caring for it well helps the candle perform as intended.</p>
+        <p>Let the wax pool become fully liquid on the first burn, keep the wick centered and remove any debris before lighting. Small adjustments make a noticeable difference.</p>
+        <div className="care-facts">
+          <div><strong>5 mm</strong><span>Wick trim only after the wax has fully set.</span></div>
+          <div><strong>1½–2 h</strong><span>Recommended burn time for regular-sized candles.</span></div>
+          <div><strong>4 h</strong><span>Do not exceed four hours in one burn.</span></div>
+          <div><strong>10 mm</strong><span>Stop burning when this amount of wax remains.</span></div>
+        </div>
+      </div>
+    </section>
+    <section className="editorial-section care-steps">
+      <div className="editorial-section-label">02 / Step by step</div>
+      <div className="editorial-section-content">
+        <div className="section-kicker">Wax / Wick / Vessel</div>
+        <h2>How to care<br />for your candle.</h2>
+        <div className="care-step-list">
+          <div><span>01</span><div><h3>The first burn</h3><p>Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.</p></div></div>
+          <div><span>02</span><div><h3>Each time you burn</h3><p>Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.</p></div></div>
+          <div><span>03</span><div><h3>Care for the wick</h3><p>Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.</p></div></div>
+          <div><span>04</span><div><h3>Extinguish and finish</h3><p>Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.</p></div></div>
+        </div>
+      </div>
+    </section>
+    <section className="editorial-closing care-closing">
+      <div className="section-kicker">04 / Continue the ritual / Form / Scent</div>
+      <h2>Keep the vessel.<br /><em>Renew the scent.</em></h2>
+      <p>Once the candle is finished and the vessel has cooled completely, continue with a new refill. The object remains; only the atmosphere changes.</p>
+      <a className="solid-button" href="/#collection">Shop refills <ArrowRight size={13} /></a>
+    </section>
+  </EditorialPageFrame>;
+}
+
+function AboutPage() {
+  return <EditorialPageFrame>
+    <section className="editorial-hero about-hero">
+      <div className="editorial-hero-copy">
+        <div className="section-kicker">About / Objet Décoratif</div>
+        <span className="eyebrow">Berlin / Grasse</span>
+        <h1>Objects<br /><em>with meaning.</em></h1>
+        <p>A long-standing passion for interiors, transformed into handpicked objects that give a space character, permanence and quiet intention.</p>
+        <a className="outline-button" href="#about-story">Read our approach <ArrowDown size={13} /></a>
+      </div>
+      <div className="editorial-hero-note">Sculptural objects / Refillable by design</div>
+    </section>
+    <section className="editorial-section about-story" id="about-story">
+      <div className="editorial-section-label">01 / Our approach</div>
+      <div className="editorial-section-content">
+        <div className="section-kicker">Curated with intention</div>
+        <h2>We do not simply inhabit spaces. We fill them with meaning.</h2>
+        <p>Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.</p>
+        <p>Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.</p>
+        <div className="about-principles">
+          <div><span>01</span><h3>Curated with intention</h3><p>Only objects we would choose for our own spaces — considered, distinctive and made with care.</p></div>
+          <div><span>02</span><h3>Designed to remain</h3><p>Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.</p></div>
+          <div><span>03</span><h3>Scents from Grasse</h3><p>Our candle perfumes are developed with specialists in Grasse and selected to complement every form.</p></div>
+        </div>
+      </div>
+    </section>
+    <section className="editorial-closing about-closing">
+      <div className="section-kicker">The refill ritual / 02</div>
+      <h2>Keep the object.<br /><em>Change the atmosphere.</em></h2>
+      <p>Filling spaces with objects that genuinely make you want to have them — that is what we are all about. Not just for ourselves, but for everyone who knows that beauty and care in the details matter.</p>
+      <a className="solid-button" href="/#collection">Explore the forms <ArrowRight size={13} /></a>
+    </section>
+  </EditorialPageFrame>;
 }
 
 function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -638,14 +761,14 @@ function Store() {
   return <div className="store-shell">
     <Header cartCount={cartCount} onCart={() => setCartOpen(true)} onSearch={() => setSearchOpen((open) => !open)} />
     <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
-     <main><Hero onExplore={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} /><section className="intro-strip"><div className="intro-item"><span className="intro-number">01 / Form</span><h2>Cast in concrete.<br />Built to last.</h2><p>Quiet architecture for the everyday.</p></div><div className="intro-item"><span className="intro-number">02 / Scent</span><h2>Four fragrances.</h2><p>Endlessly renewable, never overpowering.</p></div><div className="intro-item"><span className="intro-number">03 / Ritual</span><h2>Burn. Refill.<br />Repeat.</h2><p>One beautiful object, many lives.</p></div></section><Collection onOpen={openProduct} /><Ritual /><About /><section className="newsletter" id="newsletter"><h2>Notes from the studio.</h2>{subscribed ? <span className="success-note">You’re on the list. See you soon.</span> : <form className="newsletter-form" onSubmit={(event) => { event.preventDefault(); setSubscribed(true); }}><input type="email" required placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter" /><button type="submit" data-testid="button-subscribe">Subscribe <ArrowRight size={13} /></button></form>}</section></main>
-    <footer className="footer"><span>© Objet Décoratif / Made for slow evenings</span><span>Concrete candle collection — Paris / Everywhere</span></footer>
+     <main><Hero onExplore={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })} /><section className="intro-strip"><div className="intro-item"><span className="intro-number">01 / Form</span><h2>Cast in concrete.<br />Built to last.</h2><p>Quiet architecture for the everyday.</p></div><div className="intro-item"><span className="intro-number">02 / Scent</span><h2>Four fragrances.</h2><p>Endlessly renewable, never overpowering.</p></div><div className="intro-item"><span className="intro-number">03 / Ritual</span><h2>Burn. Refill.<br />Repeat.</h2><p>One beautiful object, many lives.</p></div></section><Collection onOpen={openProduct} /><section className="newsletter" id="newsletter"><h2>Notes from the studio.</h2>{subscribed ? <span className="success-note">You’re on the list. See you soon.</span> : <form className="newsletter-form" onSubmit={(event) => { event.preventDefault(); setSubscribed(true); }}><input type="email" required placeholder="Your email address" aria-label="Your email address" data-testid="input-newsletter" /><button type="submit" data-testid="button-subscribe">Subscribe <ArrowRight size={13} /></button></form>}</section></main>
+     <Footer />
      <ProductModal product={selected?.product ?? null} initialScent={selected?.scent} onClose={() => setSelected(null)} onAdd={addToCart} /><CartDrawer open={cartOpen} lines={cart} onClose={() => setCartOpen(false)} onChange={changeCart} />
   </div>;
 }
 
 function Router() {
-  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function App() {
