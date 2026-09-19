@@ -382,14 +382,16 @@ function ObjectShowcase({ product, onOpen }: { product: Product; onOpen: (p: Pro
         </div>
         <div className="object-actions">
           <ScentSelector product={product} selectedScent={selectedScent} onSelect={setSelectedScent} />
-          <button className="solid-button object-buy-button" type="button" onClick={() => onOpen(product, selectedScent)} data-testid={`button-open-object-${product.id}`}>
-            Choose {product.name} <ArrowRight size={14} />
-          </button>
         </div>
       </div>
-      <div className="object-explanation">
-        <span className="object-explanation-label">About the object</span>
-        <p>{product.explanation}</p>
+      <div className="object-explanation object-explanation-with-action">
+        <div className="object-explanation-copy">
+          <span className="object-explanation-label">About the object</span>
+          <p>{product.explanation}</p>
+        </div>
+        <button className="solid-button object-buy-button object-explanation-button" type="button" onClick={() => onOpen(product, selectedScent)} data-testid={`button-open-object-${product.id}`}>
+          Choose {product.name} <ArrowRight size={14} />
+        </button>
       </div>
     </article>
   );
