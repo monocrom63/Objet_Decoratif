@@ -203,7 +203,7 @@ a { color: inherit; text-decoration: none; }
 .scent-showcase-copy p { margin:0 0 18px; color:#65635b; font-size:13px; line-height:1.6; }
 .scent-showcase-label { color:var(--saffron); font:10px var(--mono); letter-spacing:.1em; text-transform:uppercase; }
 .scent-buy-button { align-self:flex-start; margin-top:auto; }
-.object-explanation { grid-column:1 / -1; display:grid; grid-template-columns:minmax(170px, .35fr) 1fr; gap:30px; padding-top:24px; border-top:1px solid var(--line); }
+.object-explanation { grid-column:1 / -1; display:grid; grid-template-columns:minmax(170px, .35fr) 1fr; gap:0px; padding-top:0px; border-top:0px solid var(--line); }
 .object-explanation-label { color:var(--saffron); font:10px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
 .object-explanation p { max-width:680px; margin:0; color:#65635b; font-size:15px; line-height:1.7; }
 
