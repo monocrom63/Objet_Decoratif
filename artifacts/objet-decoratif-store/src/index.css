@@ -122,6 +122,7 @@ a { color: inherit; text-decoration: none; }
 .filter-button.active, .filter-button:hover { color:var(--ink); }
 .filter-button.active { border-bottom:1px solid var(--saffron); }
 .product-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 58px 22px; }
+.collection-results--fade-in { animation: fade-in .65s ease-in both; }
 .product-card { min-width:0; }
 .product-art { position:relative; min-height:420px; display:grid; place-items:center; overflow:hidden; background:#d6cebe; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
 .product-card:hover .product-art { transform: translateY(-7px); }

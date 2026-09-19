@@ -677,8 +677,10 @@ function Collection({ onOpen }: { onOpen: (p: Product, scent: string) => void })
     <div className="filter-bar">
       {(['All', 'Barrique', 'Milano', 'Boite', 'Chateu', 'Elephant', 'Sakura', 'Refill'] as const).map((item) => <button key={item} className={`filter-button ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)} data-testid={`button-filter-${item.toLowerCase()}`}>{item}</button>)}
     </div>
-    <div className="object-list">{visible.map((product) => product.id === 'refill' ? <RefillShowcase product={product} onOpen={onOpen} key={product.id} /> : <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
-    {(filter === 'All' || filter === 'Refill') && refillProduct && <ScentShowcase product={refillProduct} onOpen={onOpen} />}
+    <div key={filter} className="collection-results collection-results--fade-in">
+      <div className="object-list">{visible.map((product) => product.id === 'refill' ? <RefillShowcase product={product} onOpen={onOpen} key={product.id} /> : <ObjectShowcase product={product} onOpen={onOpen} key={product.id} />)}</div>
+      {(filter === 'All' || filter === 'Refill') && refillProduct && <ScentShowcase product={refillProduct} onOpen={onOpen} />}
+    </div>
   </section>;
 }
 
