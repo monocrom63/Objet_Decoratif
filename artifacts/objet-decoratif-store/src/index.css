@@ -297,6 +297,7 @@ a { color: inherit; text-decoration: none; }
 .care-intro-copy p { max-width:none; margin:0; color:#6f6b62; font-size:14px; line-height:1.75; }
 .care-facts { grid-column:1 / -1; display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; width:calc(100% + 10vw); margin:54px 0 0 -5vw; padding:0 5vw; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
 .care-facts > div { min-height:150px; display:flex; flex-direction:column; justify-content:space-between; padding:18px 15px 18px 0; border-right:1px solid var(--line); }
+.care-facts > div:nth-child(2) { padding-left:20px; }
 .care-facts > div:last-child { border-right:0; padding-right:0; }
 .care-facts strong { font:400 clamp(25px, 3vw, 42px) var(--hero); }
 .care-facts span { max-width:145px; color:#777369; font-size:11px; line-height:1.5; }
