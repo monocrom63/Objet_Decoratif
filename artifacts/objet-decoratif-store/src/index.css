@@ -178,7 +178,7 @@ a { color: inherit; text-decoration: none; }
 .scent-slide-arrows { position:absolute; right:10px; bottom:10px; display:flex; gap:5px; }
 .scent-slide-arrows button { width:31px; height:31px; display:grid; place-items:center; border:1px solid rgba(245,241,232,.7); background:rgba(32,32,28,.62); color:var(--bone); transition:background .35s ease-in-out, color .35s ease-in-out, transform .35s ease-in-out; }
 .scent-slide-arrows button:hover { background:var(--saffron); color:var(--ink); transform:translateY(-2px); }
-.scent-slide-copy { display:flex; flex-direction:column; justify-content:center; min-width:0; padding:4px 0; animation:scent-copy-in .9s ease-in-out; }
+.scent-slide-copy { display:flex; flex-direction:column; justify-content:flex-start; min-width:0; padding:0; animation:scent-copy-in .9s ease-in-out; }
 .scent-slide-number { margin-bottom:20px; color:var(--saffron); font:10px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
 .scent-slide-copy strong { margin-bottom:8px; font:400 clamp(32px, 3.2vw, 49px)/.9 var(--hero); }
 .scent-slide-copy small { color:#777369; font:9px var(--mono); letter-spacing:.06em; line-height:1.5; text-transform:uppercase; }
@@ -215,7 +215,8 @@ a { color: inherit; text-decoration: none; }
   .object-details { min-height:0; }
   .object-actions { display:flex; flex-direction:column; align-items:stretch; gap:18px; }
   .object-actions .scent-selector { flex:1; height:auto; }
-  .object-actions .scent-slide-image-wrap { align-self:end; transform:none; }
+  .object-actions .scent-slideshow { flex:0 0 auto; margin-top:auto; }
+  .object-actions .scent-slide-image-wrap { align-self:stretch; transform:none; }
 }
 
 .ritual { display:grid; grid-template-columns: 1fr 1.2fr; min-height: 560px; background:var(--moss); color:var(--bone); }
