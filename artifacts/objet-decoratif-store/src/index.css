@@ -346,7 +346,7 @@ a { color: inherit; text-decoration: none; }
 .about-intro-copy p { max-width:none; margin:0; color:#6f6b62; font-size:14px; line-height:1.75; }
 .about-principles { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; margin-top:60px; padding:18px 20px 18px 20px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
 .about-story .about-principles { grid-column:1 / -1; width:calc(100% + 10vw); margin-left:-5vw; padding:0 5vw; }
-.about-principles > div { min-height:230px; display:flex; flex-direction:column; padding:18px 20px 18px 0; border-right:1px solid var(--line); }
+.about-principles > div { min-height:230px; display:flex; flex-direction:column; padding:18px 20px 18px 20px; border-right:1px solid var(--line); }
 .about-principles > div:last-child { border-right:0; padding-right:0; }
 .about-principles span { color:var(--saffron); font:10px var(--mono); }
 .about-principles h3 { margin:50px 0 11px; font:400 25px var(--hero); }
