@@ -720,7 +720,7 @@ function Footer() {
       <div className="footer-column footer-contact">
         <span className="footer-index">03 / Contact</span>
         <div className="footer-links">
-          <a href="mailto:info@objetdecoratif.de" target="_top">info@objetdecoratif.de</a>
+          <a href="mailto:info@objetdecoratif.de" target="_blank" rel="noopener noreferrer">info@objetdecoratif.de</a>
           <Link href="/contact">Contact Form <span aria-hidden="true">↗</span></Link>
           <a href="https://www.instagram.com/objet_decoratif/" target="_blank" rel="noreferrer">Instagram <span aria-hidden="true">↗</span></a>
         </div>
