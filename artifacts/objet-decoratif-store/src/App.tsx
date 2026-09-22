@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
+import { decodePolicyHtml, privacyPolicyData, termsPolicyData } from '@/policy-content';
 import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 
 type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura' | 'Refill';
@@ -704,8 +705,8 @@ function Footer() {
         <div className="footer-links footer-muted-links">
           <a href="/#footer">Shipping</a>
           <a href="/#footer">Returns</a>
-          <a href="/#footer">Privacy</a>
-          <a href="/#footer">Terms</a>
+          <Link href="/privacy-policy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
           <a href="/#footer">Legal Notice</a>
         </div>
       </div>
@@ -733,6 +734,62 @@ function EditorialPageFrame({ children }: { children: ReactNode }) {
     <main>{children}</main>
     <Footer />
   </div>;
+}
+
+function PolicyPage({
+  title,
+  label,
+  encodedContent,
+}: {
+  title: string;
+  label: string;
+  encodedContent: string;
+}) {
+  const [content, setContent] = useState('');
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const previousTitle = document.title;
+    document.title = `${title} — Objet Décoratif`;
+
+    decodePolicyHtml(encodedContent)
+      .then((html) => {
+        if (active) setContent(html);
+      })
+      .catch(() => {
+        if (active) setLoadError(true);
+      });
+
+    return () => {
+      active = false;
+      document.title = previousTitle;
+    };
+  }, [encodedContent, title]);
+
+  return <EditorialPageFrame>
+    <section className="policy-hero">
+      <div className="section-kicker">{label} / Objet Décoratif</div>
+      <h1>{title}</h1>
+      <p>Legal information for the Objet Décoratif store.</p>
+    </section>
+    <section className="policy-layout">
+      <div className="policy-index">{label}</div>
+      {loadError
+        ? <p className="policy-status" role="alert">The policy could not be displayed.</p>
+        : content
+          ? <article className="policy-content" dangerouslySetInnerHTML={{ __html: content }} />
+          : <p className="policy-status" role="status">Loading policy…</p>}
+    </section>
+  </EditorialPageFrame>;
+}
+
+function TermsPage() {
+  return <PolicyPage title="Terms of service" label="Terms" encodedContent={termsPolicyData} />;
+}
+
+function PrivacyPolicyPage() {
+  return <PolicyPage title="Privacy policy" label="Privacy" encodedContent={privacyPolicyData} />;
 }
 
 function CarePage() {
@@ -1029,9 +1086,9 @@ function CheckoutPage() {
           <label className="checkout-field"><span className="sr-only">Mobile phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Mobile phone (optional)" autoComplete="tel" /><span className="phone-prefix">+49</span></label>
           <small>
             By providing your phone number, you agree to create a Shop account subject to Shop&apos;s{' '}
-            <a href="https://objetdecoratif.art/policies/terms-of-service" target="_blank" rel="noopener noreferrer">Terms</a>
+            <Link href="/terms" target="_blank" rel="noopener noreferrer">Terms</Link>
             {' '}and{' '}
-            <a href="https://objetdecoratif.art/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+            <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>.
           </small>
         </section>
 
@@ -1040,8 +1097,8 @@ function CheckoutPage() {
         <nav className="checkout-footer-links" aria-label="Checkout information">
           <a href="#refund">Refund policy</a>
           <a href="#shipping">Shipping</a>
-          <a href="https://objetdecoratif.art/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy policy</a>
-          <a href="https://objetdecoratif.art/policies/terms-of-service" target="_blank" rel="noopener noreferrer">Terms of service</a>
+          <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy policy</Link>
+          <Link href="/terms" target="_blank" rel="noopener noreferrer">Terms of service</Link>
           <a href="#legal">Legal notice</a>
           <a href="#contact">Contact</a>
           <a href="#cookies">Cookies</a>
@@ -1101,7 +1158,7 @@ function Store() {
 }
 
 function Router() {
-  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route path="/terms" component={TermsPage} /><Route path="/privacy-policy" component={PrivacyPolicyPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function ScrollToTop() {
