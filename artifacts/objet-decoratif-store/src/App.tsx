@@ -1,11 +1,18 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { decodePolicyHtml, privacyPolicyData, termsPolicyData } from '@/policy-content';
+import {
+  decodePolicyHtml,
+  legalNoticeData,
+  privacyPolicyData,
+  returnsPolicyData,
+  shippingPolicyData,
+  termsPolicyData,
+} from '@/policy-content';
 import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 
 type ProductCollection = 'Barrique' | 'Milano' | 'Boite' | 'Chateu' | 'Elephant' | 'Sakura' | 'Refill';
@@ -703,18 +710,18 @@ function Footer() {
       <div className="footer-column">
         <span className="footer-index">02 / Information</span>
         <div className="footer-links footer-muted-links">
-          <a href="/#footer">Shipping</a>
-          <a href="/#footer">Returns</a>
+          <Link href="/shipping-policy">Shipping Policy</Link>
+          <Link href="/returns">Returns</Link>
           <Link href="/privacy-policy">Privacy</Link>
           <Link href="/terms">Terms</Link>
-          <a href="/#footer">Legal Notice</a>
+          <Link href="/legal-notice">Legal Notice</Link>
         </div>
       </div>
       <div className="footer-column footer-contact">
         <span className="footer-index">03 / Contact</span>
         <div className="footer-links">
-          <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>
-          <a href="/#newsletter">Contact Form <span aria-hidden="true">↗</span></a>
+          <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>
+          <Link href="/contact">Contact Form <span aria-hidden="true">↗</span></Link>
           <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram <span aria-hidden="true">↗</span></a>
         </div>
       </div>
@@ -790,6 +797,108 @@ function TermsPage() {
 
 function PrivacyPolicyPage() {
   return <PolicyPage title="Privacy policy" label="Privacy" encodedContent={privacyPolicyData} />;
+}
+
+function ShippingPolicyPage() {
+  return <PolicyPage title="Shipping policy" label="Shipping" encodedContent={shippingPolicyData} />;
+}
+
+function ReturnsPolicyPage() {
+  return <PolicyPage title="Returns" label="Returns" encodedContent={returnsPolicyData} />;
+}
+
+function LegalNoticePage() {
+  return <PolicyPage title="Legal notice" label="Legal" encodedContent={legalNoticeData} />;
+}
+
+function ContactPage() {
+  const [prepared, setPrepared] = useState(false);
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = 'Contact — Objet Décoratif';
+    return () => {
+      document.title = previousTitle;
+    };
+  }, []);
+
+  const prepareEmail = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get('name') ?? '');
+    const email = String(form.get('email') ?? '');
+    const topic = String(form.get('topic') ?? '');
+    const orderNumber = String(form.get('orderNumber') ?? '');
+    const message = String(form.get('message') ?? '');
+    const subject = encodeURIComponent(`${topic} — ${name}`);
+    const body = encodeURIComponent([
+      `Name: ${name}`,
+      `Email: ${email}`,
+      orderNumber ? `Order number: ${orderNumber}` : '',
+      `Topic: ${topic}`,
+      '',
+      message,
+    ].filter(Boolean).join('\n'));
+
+    setPrepared(true);
+    window.location.href = `mailto:info@objetdecoratif.art?subject=${subject}&body=${body}`;
+  };
+
+  return <EditorialPageFrame>
+    <section className="contact-hero">
+      <div className="section-kicker">Contact / Objet Décoratif</div>
+      <h1>Have a question<br />or need support?</h1>
+      <div className="contact-intro">
+        <p>We’re here to assist you with any inquiries about our candles, our process, or upcoming releases.</p>
+        <p>Feel free to send us a message — we respond as soon as we can.</p>
+        <p>For direct communication, you can always email us at <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>.</p>
+      </div>
+    </section>
+    <section className="contact-layout">
+      <div className="contact-aside">
+        <span>01 / Message</span>
+        <p>Tell us how we can help. Required fields are marked with an asterisk.</p>
+      </div>
+      <form className="contact-form" onSubmit={prepareEmail}>
+        <div className="contact-form-grid">
+          <label>
+            <span>Name *</span>
+            <input name="name" type="text" autoComplete="name" required />
+          </label>
+          <label>
+            <span>Email *</span>
+            <input name="email" type="email" autoComplete="email" required />
+          </label>
+        </div>
+        <div className="contact-form-grid">
+          <label>
+            <span>Topic *</span>
+            <select name="topic" defaultValue="" required>
+              <option value="" disabled>Select a topic</option>
+              <option>Product question</option>
+              <option>Order support</option>
+              <option>Candle care</option>
+              <option>Press or collaboration</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            <span>Order number</span>
+            <input name="orderNumber" type="text" autoComplete="off" placeholder="Optional" />
+          </label>
+        </div>
+        <label>
+          <span>Message *</span>
+          <textarea name="message" rows={8} required />
+        </label>
+        <div className="contact-form-actions">
+          <button className="solid-button" type="submit">Prepare email <ArrowRight size={13} /></button>
+          <small>Your email application will open with your message addressed to us.</small>
+        </div>
+        {prepared && <p className="contact-status" role="status">Your email application should now be open. If it did not open, write directly to <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>.</p>}
+      </form>
+    </section>
+  </EditorialPageFrame>;
 }
 
 function CarePage() {
@@ -1095,12 +1204,12 @@ function CheckoutPage() {
         {submitted && <div className="checkout-success" role="status">Your order is ready to review. We will keep your objects reserved.</div>}
         <button className="checkout-review-button" type="submit">Review order</button>
         <nav className="checkout-footer-links" aria-label="Checkout information">
-          <a href="#refund">Refund policy</a>
-          <a href="#shipping">Shipping</a>
+          <Link href="/returns" target="_blank" rel="noopener noreferrer">Refund policy</Link>
+          <Link href="/shipping-policy" target="_blank" rel="noopener noreferrer">Shipping</Link>
           <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy policy</Link>
           <Link href="/terms" target="_blank" rel="noopener noreferrer">Terms of service</Link>
-          <a href="#legal">Legal notice</a>
-          <a href="#contact">Contact</a>
+          <Link href="/legal-notice" target="_blank" rel="noopener noreferrer">Legal notice</Link>
+          <Link href="/contact" target="_blank" rel="noopener noreferrer">Contact</Link>
           <a href="#cookies">Cookies</a>
         </nav>
       </form>
@@ -1158,7 +1267,7 @@ function Store() {
 }
 
 function Router() {
-  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route path="/terms" component={TermsPage} /><Route path="/privacy-policy" component={PrivacyPolicyPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route path="/terms" component={TermsPage} /><Route path="/privacy-policy" component={PrivacyPolicyPage} /><Route path="/shipping-policy" component={ShippingPolicyPage} /><Route path="/returns" component={ReturnsPolicyPage} /><Route path="/legal-notice" component={LegalNoticePage} /><Route path="/contact" component={ContactPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function ScrollToTop() {
