@@ -1092,6 +1092,14 @@ function CheckoutPage() {
   const updateField = (field: keyof CheckoutForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
+  const showReview = () => {
+    setSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const editDetails = () => {
+    setSubmitted(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (lines.length === 0) {
     return <div className="checkout-page checkout-empty-page">
@@ -1113,7 +1121,8 @@ function CheckoutPage() {
       <Link href="/" className="checkout-back">Return to store</Link>
     </header>
     <main className="checkout-layout">
-      <form className="checkout-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}>
+      <form className="checkout-form" onSubmit={(event) => { event.preventDefault(); showReview(); }}>
+        {!submitted && <>
         <section className="checkout-section checkout-express">
           <span className="checkout-overline">Express checkout</span>
           <div className="express-buttons">
@@ -1157,7 +1166,7 @@ function CheckoutPage() {
             <label className="checkout-field"><span className="sr-only">Postal code</span><input required value={form.postalCode} onChange={(event) => updateField('postalCode', event.target.value)} placeholder="Postal code" autoComplete="postal-code" /></label>
             <label className="checkout-field"><span className="sr-only">City</span><input required value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder="City" autoComplete="address-level2" /></label>
           </div>
-          <label className="checkout-field"><span className="sr-only">Phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Phone (optional)" autoComplete="tel" /><span className="field-help">?</span></label>
+          <label className="checkout-field"><span className="sr-only">Phone</span><input required type="tel" minLength={6} value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Phone" autoComplete="tel" /><span className="field-help">?</span></label>
         </section>
 
         <section className="checkout-section checkout-shipping">
@@ -1190,19 +1199,67 @@ function CheckoutPage() {
           </div>
         </section>
 
-        <section className="checkout-section checkout-save">
-          <p>Save my information for a faster checkout</p>
-          <label className="checkout-field"><span className="sr-only">Mobile phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Mobile phone (optional)" autoComplete="tel" /><span className="phone-prefix">+49</span></label>
-          <small>
-            By providing your phone number, you agree to create a Shop account subject to Shop&apos;s{' '}
-            <Link href="/terms" target="_blank" rel="noopener noreferrer">Terms</Link>
-            {' '}and{' '}
-            <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>.
-          </small>
-        </section>
-
-        {submitted && <div className="checkout-success" role="status">Your order is ready to review. We will keep your objects reserved.</div>}
         <button className="checkout-review-button" type="submit">Review order</button>
+        </>}
+
+        {submitted && <section className="checkout-review" aria-labelledby="checkout-review-title">
+          <div className="checkout-review-heading">
+            <div>
+              <span className="checkout-overline">Final check</span>
+              <h1 id="checkout-review-title">Review your order</h1>
+            </div>
+            <button type="button" className="checkout-edit-button" onClick={editDetails}>Edit details</button>
+          </div>
+
+          <div className="checkout-review-block">
+            <h2>Items</h2>
+            <div className="checkout-review-items">
+              {lines.map((line) => <div key={`${line.product.id}-${line.scent}`}>
+                <span><strong>{line.product.name}</strong><small>{line.scent} · Quantity {line.quantity}</small></span>
+                <b>€{(line.product.price * line.quantity).toFixed(2)}</b>
+              </div>)}
+            </div>
+          </div>
+
+          <div className="checkout-review-grid">
+            <div className="checkout-review-block">
+              <h2>Contact</h2>
+              <p>{form.email}</p>
+              <p>{form.phone}</p>
+            </div>
+            <div className="checkout-review-block">
+              <h2>Ship to</h2>
+              <p>{form.firstName} {form.lastName}</p>
+              {form.company && <p>{form.company}</p>}
+              <p>{form.address}{form.apartment ? `, ${form.apartment}` : ''}</p>
+              <p>{form.postalCode} {form.city}</p>
+              <p>{form.country}</p>
+            </div>
+            <div className="checkout-review-block">
+              <h2>Shipping</h2>
+              <p>Standard delivery</p>
+              <p>3–5 working days · €{shipping.toFixed(2)}</p>
+            </div>
+            <div className="checkout-review-block">
+              <h2>Payment</h2>
+              <p>{paymentMethod === 'card' ? `Credit card ending in ${form.cardNumber.replace(/\s/g, '').slice(-4)}` : paymentMethod === 'paypal' ? 'PayPal' : 'Klarna'}</p>
+              {paymentMethod === 'card' && <p>{form.cardName}</p>}
+            </div>
+          </div>
+
+          <div className="checkout-review-total">
+            <div><span>Subtotal</span><b>€{subtotal.toFixed(2)}</b></div>
+            <div><span>Shipping</span><b>€{shipping.toFixed(2)}</b></div>
+            <div><strong>Total</strong><strong>EUR €{total.toFixed(2)}</strong></div>
+          </div>
+
+          <div className="checkout-review-notice" role="status">
+            <strong>No order has been placed yet.</strong>
+            <span>This page is for reviewing your details only. SMS verification and payment are not connected.</span>
+          </div>
+          <button className="checkout-review-button" type="button" onClick={editDetails}>Return to checkout details</button>
+        </section>}
+
         <nav className="checkout-footer-links" aria-label="Checkout information">
           <Link href="/returns" target="_blank" rel="noopener noreferrer">Refund policy</Link>
           <Link href="/shipping-policy" target="_blank" rel="noopener noreferrer">Shipping</Link>
