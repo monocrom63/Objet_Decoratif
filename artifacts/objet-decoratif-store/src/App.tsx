@@ -720,9 +720,9 @@ function Footer() {
       <div className="footer-column footer-contact">
         <span className="footer-index">03 / Contact</span>
         <div className="footer-links">
-          <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>
+          <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>
           <Link href="/contact">Contact Form <span aria-hidden="true">↗</span></Link>
-          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram <span aria-hidden="true">↗</span></a>
+          <a href="https://www.instagram.com/objet_decoratif/" target="_blank" rel="noreferrer">Instagram <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </div>
@@ -841,7 +841,7 @@ function ContactPage() {
     ].filter(Boolean).join('\n'));
 
     setPrepared(true);
-    window.location.href = `mailto:info@objetdecoratif.art?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:info@objetdecoratif.de?subject=${subject}&body=${body}`;
   };
 
   return <EditorialPageFrame>
@@ -851,7 +851,7 @@ function ContactPage() {
       <div className="contact-intro">
         <p>We’re here to assist you with any inquiries about our candles, our process, or upcoming releases.</p>
         <p>Feel free to send us a message — we respond as soon as we can.</p>
-        <p>For direct communication, you can always email us at <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>.</p>
+        <p>For direct communication, you can always email us at <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>.</p>
       </div>
     </section>
     <section className="contact-layout">
@@ -895,7 +895,7 @@ function ContactPage() {
           <button className="solid-button" type="submit">Prepare email <ArrowRight size={13} /></button>
           <small>Your email application will open with your message addressed to us.</small>
         </div>
-        {prepared && <p className="contact-status" role="status">Your email application should now be open. If it did not open, write directly to <a href="mailto:info@objetdecoratif.art">info@objetdecoratif.art</a>.</p>}
+        {prepared && <p className="contact-status" role="status">Your email application should now be open. If it did not open, write directly to <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>.</p>}
       </form>
     </section>
   </EditorialPageFrame>;
