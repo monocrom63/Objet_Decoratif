@@ -463,7 +463,7 @@ a { color: inherit; text-decoration: none; }
 .checkout-footer-links { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:48px; }
 .checkout-footer-links a { color:#b8ab73; font-size:10px; text-decoration:underline; }
 .checkout-summary-items { padding-bottom:25px; border-bottom:1px solid #dedbd1; }
-.checkout-summary-item { display:grid; grid-template-columns:58px minmax(0, 1fr) auto; align-items:center; gap:12px; margin-bottom:19px; }
+.checkout-summary-item { display:grid; grid-template-columns:58px minmax(0, 1fr) auto; align-items:start; gap:12px; margin-bottom:19px; }
 .checkout-summary-item:last-child { margin-bottom:0; }
 .checkout-summary-thumb { position:relative; width:58px; height:58px; overflow:visible; border:1px solid #e2dfd5; border-radius:7px; background:#d4c6b4; }
 .checkout-summary-thumb img { display:block; width:100%; height:100%; border-radius:7px; object-fit:cover; }
@@ -472,6 +472,14 @@ a { color: inherit; text-decoration: none; }
 .checkout-summary-item strong { display:block; margin-bottom:4px; font:13px var(--display); }
 .checkout-summary-item small { color:#777369; font:11px var(--display); }
 .checkout-summary-item > b { align-self:start; padding-top:8px; font:12px var(--mono); }
+.checkout-summary-item-info { min-width:0; padding-top:5px; }
+.checkout-summary-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px 11px; margin-top:10px; }
+.checkout-quantity { display:flex; align-items:center; overflow:hidden; border:1px solid #d9d7d0; border-radius:7px; background:#fff; }
+.checkout-quantity button { display:grid; place-items:center; width:27px; height:27px; border:0; background:transparent; color:#59564f; cursor:pointer; }
+.checkout-quantity button:hover { background:#f0eee7; }
+.checkout-quantity span { min-width:19px; color:#171814; text-align:center; font:10px var(--mono); }
+.checkout-remove-item { border:0; border-bottom:1px solid #9a968d; padding:2px 0; background:transparent; color:#777369; font-size:10px; cursor:pointer; }
+.checkout-remove-item:hover { color:#171814; border-color:#171814; }
 .checkout-total-lines { padding-top:22px; color:#3e3e39; font-size:12px; }
 .checkout-total-lines > div { display:flex; justify-content:space-between; margin-bottom:10px; }
 .checkout-total-lines small { color:#777369; font-size:10px; }

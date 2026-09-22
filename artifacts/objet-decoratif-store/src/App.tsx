@@ -1081,7 +1081,7 @@ const emptyCheckoutForm: CheckoutForm = {
 };
 
 function CheckoutPage() {
-  const [lines] = useState<CartLine[]>(readStoredCart);
+  const [lines, setLines] = useState<CartLine[]>(readStoredCart);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'klarna'>('card');
   const [form, setForm] = useState<CheckoutForm>(emptyCheckoutForm);
   const [submitted, setSubmitted] = useState(false);
@@ -1100,6 +1100,20 @@ function CheckoutPage() {
     setSubmitted(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const changeCheckoutLine = (id: string, scent: string, delta: number) => {
+    setLines((current) => current.flatMap((line) =>
+      line.product.id === id && line.scent === scent
+        ? (line.quantity + delta > 0 ? [{ ...line, quantity: line.quantity + delta }] : [])
+        : [line]
+    ));
+  };
+  const removeCheckoutLine = (id: string, scent: string) => {
+    setLines((current) => current.filter((line) => line.product.id !== id || line.scent !== scent));
+  };
+
+  useEffect(() => {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
+  }, [lines]);
 
   if (lines.length === 0) {
     return <div className="checkout-page checkout-empty-page">
@@ -1279,7 +1293,18 @@ function CheckoutPage() {
                 {line.product.images?.[0] ? <img src={line.product.images[0]} alt={`${line.product.name} product view`} /> : <div className={`cart-thumb-art ${line.product.art}`}><div className="vessel"><div className="wax" /></div></div>}
                 <span>{line.quantity}</span>
               </div>
-              <div><strong>{line.product.name}</strong><small>{line.scent}</small></div>
+              <div className="checkout-summary-item-info">
+                <strong>{line.product.name}</strong>
+                <small>{line.scent}</small>
+                <div className="checkout-summary-actions">
+                  <div className="checkout-quantity" aria-label={`Quantity for ${line.product.name}`}>
+                    <button type="button" onClick={() => changeCheckoutLine(line.product.id, line.scent, -1)} aria-label={`Decrease ${line.product.name} quantity`}><Minus size={10} /></button>
+                    <span>{line.quantity}</span>
+                    <button type="button" onClick={() => changeCheckoutLine(line.product.id, line.scent, 1)} aria-label={`Increase ${line.product.name} quantity`}><Plus size={10} /></button>
+                  </div>
+                  <button type="button" className="checkout-remove-item" onClick={() => removeCheckoutLine(line.product.id, line.scent)}>Remove</button>
+                </div>
+              </div>
               <b>€{(line.product.price * line.quantity).toFixed(2)}</b>
             </div>)}
           </div>
