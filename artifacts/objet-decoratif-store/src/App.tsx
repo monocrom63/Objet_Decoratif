@@ -1027,12 +1027,25 @@ function CheckoutPage() {
         <section className="checkout-section checkout-save">
           <p>Save my information for a faster checkout</p>
           <label className="checkout-field"><span className="sr-only">Mobile phone</span><input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Mobile phone (optional)" autoComplete="tel" /><span className="phone-prefix">+49</span></label>
-          <small>By providing your phone number, you agree to create a Shop account subject to Shop's <u>Terms</u> and <u>Privacy Policy</u>.</small>
+          <small>
+            By providing your phone number, you agree to create a Shop account subject to Shop&apos;s{' '}
+            <a href="https://objetdecoratif.art/policies/terms-of-service" target="_blank" rel="noopener noreferrer">Terms</a>
+            {' '}and{' '}
+            <a href="https://objetdecoratif.art/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          </small>
         </section>
 
         {submitted && <div className="checkout-success" role="status">Your order is ready to review. We will keep your objects reserved.</div>}
         <button className="checkout-review-button" type="submit">Review order</button>
-        <nav className="checkout-footer-links" aria-label="Checkout information"><a href="#refund">Refund policy</a><a href="#shipping">Shipping</a><a href="#privacy">Privacy policy</a><a href="#terms">Terms of service</a><a href="#legal">Legal notice</a><a href="#contact">Contact</a><a href="#cookies">Cookies</a></nav>
+        <nav className="checkout-footer-links" aria-label="Checkout information">
+          <a href="#refund">Refund policy</a>
+          <a href="#shipping">Shipping</a>
+          <a href="https://objetdecoratif.art/policies/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy policy</a>
+          <a href="https://objetdecoratif.art/policies/terms-of-service" target="_blank" rel="noopener noreferrer">Terms of service</a>
+          <a href="#legal">Legal notice</a>
+          <a href="#contact">Contact</a>
+          <a href="#cookies">Cookies</a>
+        </nav>
       </form>
 
       <aside className="checkout-summary" aria-label="Order summary">

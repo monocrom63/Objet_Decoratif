@@ -437,6 +437,7 @@ a { color: inherit; text-decoration: none; }
 .klarna-logo { margin-left:auto; padding:5px 7px; background:#f3a6cf; color:#171814; font-size:10px; }
 .checkout-save p { margin:0 0 12px; color:#3e3e39; font-size:12px; }
 .checkout-save small { display:block; margin-top:10px; color:#777369; font-size:10px; line-height:1.5; }
+.checkout-save small a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
 .checkout-success { margin-bottom:15px; padding:13px 15px; border-radius:8px; background:#e4f0d6; color:#53633d; font-size:12px; }
 .checkout-review-button { width:100%; min-height:48px; border:0; border-radius:10px; background:#eade91; color:#171814; font:700 14px var(--display); cursor:pointer; }
 .checkout-review-button:hover { background:#e2d47c; }
