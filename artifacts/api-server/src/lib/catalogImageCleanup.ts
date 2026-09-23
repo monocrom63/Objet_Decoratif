@@ -2,9 +2,13 @@ import { db, productsTable, scentsTable } from "@workspace/db";
 
 import { logger } from "./logger";
 import { ObjectStorageService } from "./objectStorage";
+import {
+  abandonedCatalogUploads,
+  referencedCatalogImagePaths as collectReferencedCatalogImagePaths,
+  unreferencedManagedImagePaths,
+} from "./catalogImageCleanupPolicy";
 
 const storage = new ObjectStorageService();
-const ABANDONED_UPLOAD_AGE_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const MINIMUM_CLEANUP_INTERVAL_MS = 60 * 1000;
 
@@ -22,12 +26,7 @@ async function referencedCatalogImagePaths(): Promise<Set<string>> {
     db.select({ imagePath: scentsTable.imagePath }).from(scentsTable),
   ]);
 
-  return new Set(
-    [
-      ...products.flatMap((product) => product.imagePaths),
-      ...scents.map((scent) => scent.imagePath),
-    ].filter((path): path is string => Boolean(path)),
-  );
+  return collectReferencedCatalogImagePaths({ products, scents });
 }
 
 export async function isCatalogImageReferenced(
@@ -36,19 +35,13 @@ export async function isCatalogImageReferenced(
   return (await referencedCatalogImagePaths()).has(objectPath);
 }
 
-function managedUploadPaths(paths: Iterable<string>): string[] {
-  return Array.from(new Set(paths)).filter((path) =>
-    path.startsWith("/objects/uploads/"),
-  );
-}
-
 export async function deleteUnreferencedCatalogImages(
   candidatePaths: Iterable<string>,
 ): Promise<string[]> {
-  const candidates = managedUploadPaths(candidatePaths);
+  const referenced = await referencedCatalogImagePaths();
+  const candidates = unreferencedManagedImagePaths(candidatePaths, referenced);
   if (candidates.length === 0) return [];
 
-  const referenced = await referencedCatalogImagePaths();
   const deleted: string[] = [];
   for (const path of candidates) {
     if (referenced.has(path)) continue;
@@ -63,12 +56,7 @@ async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadClea
     storage.listManagedUploads(),
     referencedCatalogImagePaths(),
   ]);
-  const candidates = uploads
-    .filter(
-      ({ objectPath, createdAt }) =>
-        !referenced.has(objectPath) &&
-        now - createdAt.getTime() >= ABANDONED_UPLOAD_AGE_MS,
-    );
+  const candidates = abandonedCatalogUploads(uploads, referenced, now);
   const deleted = (
     await Promise.all(
       candidates.map(({ objectPath }) => storage.deleteManagedUpload(objectPath)),

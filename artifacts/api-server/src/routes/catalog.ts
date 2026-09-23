@@ -22,6 +22,10 @@ import { currentUser } from "./commerce";
 import {
   deleteUnreferencedCatalogImages,
 } from "../lib/catalogImageCleanup";
+import {
+  removedProductImagePaths,
+  replacedScentImagePaths,
+} from "../lib/catalogImageCleanupPolicy";
 
 const router: IRouter = Router();
 async function admin(req: Parameters<typeof currentUser>[0]) {
@@ -127,10 +131,9 @@ router.patch("/admin/catalog/products/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Product not found" });
     return;
   }
-  const currentImages = new Set(product.imagePaths);
   await cleanupCatalogImages(
     req,
-    (existing?.imagePaths ?? []).filter((path) => !currentImages.has(path)),
+    removedProductImagePaths(existing?.imagePaths ?? [], product.imagePaths),
   );
   res.json(UpdateProductResponse.parse(product));
 });
@@ -209,9 +212,7 @@ router.patch("/admin/catalog/scents/:id", async (req, res): Promise<void> => {
   }
   await cleanupCatalogImages(
     req,
-    existing?.imagePath && existing.imagePath !== scent.imagePath
-      ? [existing.imagePath]
-      : [],
+    replacedScentImagePaths(existing?.imagePath, scent.imagePath),
   );
   res.json(UpdateScentResponse.parse(scent));
 });
