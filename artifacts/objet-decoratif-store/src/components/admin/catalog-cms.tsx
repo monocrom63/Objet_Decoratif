@@ -12,40 +12,13 @@ import {
   type Scent,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+
 import { MultiImageUploader, SingleImageUploader } from "./image-uploader";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { useToast } from "@/hooks/use-toast";
 
 const productSchema = z.object({
@@ -143,242 +116,160 @@ function ProductForm({
     }
   };
 
+  const {
+    register,
+    formState: { errors },
+    watch,
+    setValue,
+    handleSubmit,
+    getValues,
+  } = form;
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-6">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ID (Slug)</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={!!product} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="mt-8">
+      <div className="admin-form-row">
+        <div className="admin-form-group">
+          <label>ID (Slug)</label>
+          <input
+            className="admin-input"
+            {...register("id")}
+            disabled={!!product}
           />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {errors.id && <span className="error">{errors.id.message}</span>}
         </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="collection"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Collection</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="priceEuros"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price (€)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="admin-form-group">
+          <label>Name</label>
+          <input className="admin-input" {...register("name")} />
+          {errors.name && <span className="error">{errors.name.message}</span>}
         </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Short Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+      <div className="admin-form-row cols-3">
+        <div className="admin-form-group">
+          <label>Collection</label>
+          <input className="admin-input" {...register("collection")} />
+          {errors.collection && (
+            <span className="error">{errors.collection.message}</span>
           )}
-        />
-
-        <FormField
-          control={form.control}
-          name="explanation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Explanation (Long)</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="min-h-[100px]" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="tag"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tag (Optional)</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="sortOrder"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sort Order</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
-
-        <div className="flex gap-6">
-          <FormField
-            control={form.control}
-            name="active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Active</FormLabel>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="published"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Published</FormLabel>
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="scentIds"
-          render={() => (
-            <FormItem>
-              <div className="mb-4">
-                <FormLabel>Available Scents</FormLabel>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {scents.map((scent) => (
-                  <FormField
-                    key={scent.id}
-                    control={form.control}
-                    name="scentIds"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={scent.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(scent.id)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, scent.id])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== scent.id,
-                                      ),
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {scent.name}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
+        <div className="admin-form-group">
+          <label>Category</label>
+          <input className="admin-input" {...register("category")} />
+          {errors.category && (
+            <span className="error">{errors.category.message}</span>
           )}
-        />
-
-        <FormField
-          control={form.control}
-          name="imagePaths"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Images</FormLabel>
-              <FormControl>
-                <MultiImageUploader
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end pt-4 border-t">
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Saving..." : "Save Product"}
-          </Button>
         </div>
-      </form>
-    </Form>
+        <div className="admin-form-group">
+          <label>Price (€)</label>
+          <input
+            type="number"
+            step="0.01"
+            className="admin-input"
+            {...register("priceEuros")}
+          />
+          {errors.priceEuros && (
+            <span className="error">{errors.priceEuros.message}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="admin-form-group">
+        <label>Short Description</label>
+        <textarea
+          className="admin-textarea"
+          style={{ minHeight: "80px" }}
+          {...register("description")}
+        />
+        {errors.description && (
+          <span className="error">{errors.description.message}</span>
+        )}
+      </div>
+
+      <div className="admin-form-group">
+        <label>Explanation (Long)</label>
+        <textarea className="admin-textarea" {...register("explanation")} />
+        {errors.explanation && (
+          <span className="error">{errors.explanation.message}</span>
+        )}
+      </div>
+
+      <div className="admin-form-row">
+        <div className="admin-form-group">
+          <label>Tag (Optional)</label>
+          <input className="admin-input" {...register("tag")} />
+          {errors.tag && <span className="error">{errors.tag.message}</span>}
+        </div>
+        <div className="admin-form-group">
+          <label>Sort Order</label>
+          <input
+            type="number"
+            className="admin-input"
+            {...register("sortOrder")}
+          />
+          {errors.sortOrder && (
+            <span className="error">{errors.sortOrder.message}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="admin-form-row" style={{ marginTop: "12px" }}>
+        <label className="admin-checkbox-group">
+          <input type="checkbox" {...register("active")} />
+          <span>Active</span>
+        </label>
+        <label className="admin-checkbox-group">
+          <input type="checkbox" {...register("published")} />
+          <span>Published</span>
+        </label>
+      </div>
+
+      <div className="admin-form-group mt-6">
+        <label>Available Scents</label>
+        <div
+          className="admin-form-row"
+          style={{ gap: "12px", marginTop: "8px" }}
+        >
+          {scents.map((scent) => (
+            <label
+              key={scent.id}
+              className="admin-checkbox-group"
+              style={{ marginBottom: "8px" }}
+            >
+              <input
+                type="checkbox"
+                checked={watch("scentIds")?.includes(scent.id) || false}
+                onChange={(e) => {
+                  const current = getValues("scentIds") || [];
+                  if (e.target.checked) {
+                    setValue("scentIds", [...current, scent.id]);
+                  } else {
+                    setValue(
+                      "scentIds",
+                      current.filter((id) => id !== scent.id),
+                    );
+                  }
+                }}
+              />
+              <span>{scent.name}</span>
+            </label>
+          ))}
+        </div>
+        {errors.scentIds && (
+          <span className="error">{errors.scentIds.message}</span>
+        )}
+      </div>
+
+      <div className="admin-form-group mt-6">
+        <label>Images</label>
+        <MultiImageUploader
+          value={watch("imagePaths") || []}
+          onChange={(paths) => setValue("imagePaths", paths)}
+        />
+        {errors.imagePaths && (
+          <span className="error">{errors.imagePaths.message}</span>
+        )}
+      </div>
+    </form>
   );
 }
 
@@ -425,137 +316,81 @@ function ScentForm({ scent, onClose }: { scent?: Scent; onClose: () => void }) {
     }
   };
 
+  const {
+    register,
+    formState: { errors },
+    watch,
+    setValue,
+    handleSubmit,
+  } = form;
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-6">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ID (Slug)</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={!!scent} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form id="scent-form" onSubmit={handleSubmit(onSubmit)} className="mt-8">
+      <div className="admin-form-row">
+        <div className="admin-form-group">
+          <label>ID (Slug)</label>
+          <input
+            className="admin-input"
+            {...register("id")}
+            disabled={!!scent}
           />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {errors.id && <span className="error">{errors.id.message}</span>}
         </div>
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="sortOrder"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Sort Order</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex gap-6">
-          <FormField
-            control={form.control}
-            name="active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Active</FormLabel>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="published"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Published</FormLabel>
-              </FormItem>
-            )}
-          />
+        <div className="admin-form-group">
+          <label>Name</label>
+          <input className="admin-input" {...register("name")} />
+          {errors.name && <span className="error">{errors.name.message}</span>}
         </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="imagePath"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Scent Image</FormLabel>
-              <FormControl>
-                <SingleImageUploader
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="admin-form-group">
+        <label>Notes</label>
+        <input className="admin-input" {...register("notes")} />
+        {errors.notes && <span className="error">{errors.notes.message}</span>}
+      </div>
+
+      <div className="admin-form-group">
+        <label>Description</label>
+        <textarea className="admin-textarea" {...register("description")} />
+        {errors.description && (
+          <span className="error">{errors.description.message}</span>
+        )}
+      </div>
+
+      <div className="admin-form-group">
+        <label>Sort Order</label>
+        <input
+          type="number"
+          className="admin-input"
+          {...register("sortOrder")}
         />
+        {errors.sortOrder && (
+          <span className="error">{errors.sortOrder.message}</span>
+        )}
+      </div>
 
-        <div className="flex justify-end pt-4 border-t">
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Saving..." : "Save Scent"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div className="admin-form-row" style={{ marginTop: "12px" }}>
+        <label className="admin-checkbox-group">
+          <input type="checkbox" {...register("active")} />
+          <span>Active</span>
+        </label>
+        <label className="admin-checkbox-group">
+          <input type="checkbox" {...register("published")} />
+          <span>Published</span>
+        </label>
+      </div>
+
+      <div className="admin-form-group mt-6">
+        <label>Scent Image</label>
+        <SingleImageUploader
+          value={watch("imagePath")}
+          onChange={(path) => setValue("imagePath", path)}
+        />
+        {errors.imagePath && (
+          <span className="error">{errors.imagePath.message}</span>
+        )}
+      </div>
+    </form>
   );
 }
 
@@ -614,196 +449,225 @@ export function CatalogCms() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 mt-12">
-      <div>
-        <h1 className="text-3xl font-serif text-ink tracking-tight mb-2">
-          Catalog CMS
+    <div className="pb-24">
+      <div className="editorial-hero-copy" style={{ padding: 0 }}>
+        <div className="section-kicker">Administration / Objet Décoratif</div>
+        <h1 style={{ marginTop: "16px" }}>
+          Catalog
+          <br />
+          <em>management.</em>
         </h1>
-        <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">
-          Manage products and scents
-        </p>
+        <p>Curate products and signature scent profiles.</p>
       </div>
 
-      <Tabs defaultValue="products" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="scents">Scents</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="products" className="space-y-4">
-          <div className="flex justify-end">
-            <Button onClick={() => setProductSheet({ open: true })}>
-              <Plus className="h-4 w-4 mr-2" /> Add Product
-            </Button>
+      <section className="editorial-section mt-12">
+        <div className="editorial-section-label">
+          01 / Products
+          <br />
+          <span>Core Catalog</span>
+        </div>
+        <div className="editorial-section-content">
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <div className="section-kicker">Manage</div>
+              <h2>Products</h2>
+            </div>
+            <button
+              className="solid-button"
+              onClick={() => setProductSheet({ open: true })}
+            >
+              Add Product <Plus size={13} />
+            </button>
           </div>
 
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Collection</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : products.data?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      No products found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  products.data?.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell>{p.collection}</TableCell>
-                      <TableCell>€{(p.priceCents / 100).toFixed(2)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${p.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                          >
-                            {p.active ? "Active" : "Inactive"}
-                          </span>
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${p.published ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
-                          >
-                            {p.published ? "Published" : "Draft"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              setProductSheet({ open: true, product: p })
-                            }
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={() => handleDeleteProduct(p.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
+          <div className="admin-orders-list !mt-0">
+            <div className="admin-catalog-header">
+              <span>Product</span>
+              <span>Collection</span>
+              <span>Price</span>
+              <span>Status</span>
+              <span className="text-right">Actions</span>
+            </div>
 
-        <TabsContent value="scents" className="space-y-4">
-          <div className="flex justify-end">
-            <Button onClick={() => setScentSheet({ open: true })}>
-              <Plus className="h-4 w-4 mr-2" /> Add Scent
-            </Button>
+            {products.isLoading ? (
+              <div className="py-8 text-center text-sm text-[#777369]">
+                Loading products...
+              </div>
+            ) : products.data?.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[#777369]">
+                No products found.
+              </div>
+            ) : (
+              products.data?.map((p) => (
+                <div key={p.id} className="admin-catalog-row">
+                  <div>
+                    <strong>{p.name}</strong>
+                    <small>{p.id}</small>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--ink)" }}>{p.collection}</span>
+                    <small>{p.category}</small>
+                  </div>
+                  <div>€{(p.priceCents / 100).toFixed(2)}</div>
+                  <div>
+                    <div className="flex flex-col gap-1 items-start">
+                      <span
+                        className={`admin-badge ${p.active ? "active" : "inactive"}`}
+                      >
+                        {p.active ? "Active" : "Inactive"}
+                      </span>
+                      <span
+                        className={`admin-badge ${p.published ? "active" : "inactive"}`}
+                      >
+                        {p.published ? "Published" : "Draft"}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="admin-row-actions text-right">
+                      <button
+                        className="admin-action-btn"
+                        onClick={() =>
+                          setProductSheet({ open: true, product: p })
+                        }
+                        aria-label="Edit product"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        className="admin-action-btn delete"
+                        onClick={() => handleDeleteProduct(p.id)}
+                        aria-label="Delete product"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="editorial-section">
+        <div className="editorial-section-label">
+          02 / Scents
+          <br />
+          <span>Profiles</span>
+        </div>
+        <div className="editorial-section-content">
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <div className="section-kicker">Manage</div>
+              <h2>Scents</h2>
+            </div>
+            <button
+              className="solid-button"
+              onClick={() => setScentSheet({ open: true })}
+            >
+              Add Scent <Plus size={13} />
+            </button>
           </div>
 
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Scent</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {scents.isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : scents.data?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
-                      No scents found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  scents.data?.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm max-w-[300px] truncate">
-                        {s.notes}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${s.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                          >
-                            {s.active ? "Active" : "Inactive"}
-                          </span>
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${s.published ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
-                          >
-                            {s.published ? "Published" : "Draft"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              setScentSheet({ open: true, scent: s })
-                            }
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={() => handleDeleteScent(s.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-      </Tabs>
+          <div className="admin-orders-list !mt-0">
+            <div className="admin-catalog-header admin-scent-header">
+              <span>Scent</span>
+              <span>Notes</span>
+              <span>Status</span>
+              <span className="text-right">Actions</span>
+            </div>
 
-      <Sheet
-        open={productSheet.open}
-        onOpenChange={(open) => !open && setProductSheet({ open: false })}
+            {scents.isLoading ? (
+              <div className="py-8 text-center text-sm text-[#777369]">
+                Loading scents...
+              </div>
+            ) : scents.data?.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[#777369]">
+                No scents found.
+              </div>
+            ) : (
+              scents.data?.map((s) => (
+                <div key={s.id} className="admin-catalog-row admin-scent-row">
+                  <div>
+                    <strong>{s.name}</strong>
+                    <small>{s.id}</small>
+                  </div>
+                  <div>
+                    <span
+                      style={{ color: "var(--ink)", maxWidth: "300px" }}
+                      className="truncate"
+                    >
+                      {s.notes}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex flex-col gap-1 items-start">
+                      <span
+                        className={`admin-badge ${s.active ? "active" : "inactive"}`}
+                      >
+                        {s.active ? "Active" : "Inactive"}
+                      </span>
+                      <span
+                        className={`admin-badge ${s.published ? "active" : "inactive"}`}
+                      >
+                        {s.published ? "Published" : "Draft"}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="admin-row-actions text-right">
+                      <button
+                        className="admin-action-btn"
+                        onClick={() => setScentSheet({ open: true, scent: s })}
+                        aria-label="Edit scent"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        className="admin-action-btn delete"
+                        onClick={() => handleDeleteScent(s.id)}
+                        aria-label="Delete scent"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Product Drawer */}
+      <div
+        className={`overlay ${productSheet.open ? "open" : ""}`}
+        onClick={() => setProductSheet({ open: false })}
+        aria-hidden="true"
+        style={{ zIndex: 55 }}
+      />
+      <aside
+        className={`admin-drawer ${productSheet.open ? "open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!productSheet.open}
       >
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-paper border-l-line">
-          <SheetHeader>
-            <SheetTitle>
-              {productSheet.product ? "Edit Product" : "New Product"}
-            </SheetTitle>
-            <SheetDescription>
-              Make changes to the product catalog entry.
-            </SheetDescription>
-          </SheetHeader>
+        <div className="drawer-head">
+          <h2>{productSheet.product ? "Edit Product" : "New Product"}</h2>
+          <button
+            className="close-button"
+            onClick={() => setProductSheet({ open: false })}
+            aria-label="Close drawer"
+            type="button"
+          >
+            <X size={15} />
+          </button>
+        </div>
+        <div className="admin-drawer-content">
+          <p style={{ font: "13px var(--sans)", color: "#777369", margin: 0 }}>
+            Make changes to the product catalog entry.
+          </p>
           {productSheet.open && (
             <ProductForm
               product={productSheet.product}
@@ -811,30 +675,69 @@ export function CatalogCms() {
               onClose={() => setProductSheet({ open: false })}
             />
           )}
-        </SheetContent>
-      </Sheet>
+        </div>
+        <div className="admin-drawer-footer">
+          <button
+            type="button"
+            className="outline-button"
+            onClick={() => setProductSheet({ open: false })}
+          >
+            Cancel
+          </button>
+          <button type="submit" form="product-form" className="solid-button">
+            Save Product <ArrowRight size={13} />
+          </button>
+        </div>
+      </aside>
 
-      <Sheet
-        open={scentSheet.open}
-        onOpenChange={(open) => !open && setScentSheet({ open: false })}
+      {/* Scent Drawer */}
+      <div
+        className={`overlay ${scentSheet.open ? "open" : ""}`}
+        onClick={() => setScentSheet({ open: false })}
+        aria-hidden="true"
+        style={{ zIndex: 55 }}
+      />
+      <aside
+        className={`admin-drawer ${scentSheet.open ? "open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!scentSheet.open}
       >
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-paper border-l-line">
-          <SheetHeader>
-            <SheetTitle>
-              {scentSheet.scent ? "Edit Scent" : "New Scent"}
-            </SheetTitle>
-            <SheetDescription>
-              Make changes to the signature scent profile.
-            </SheetDescription>
-          </SheetHeader>
+        <div className="drawer-head">
+          <h2>{scentSheet.scent ? "Edit Scent" : "New Scent"}</h2>
+          <button
+            className="close-button"
+            onClick={() => setScentSheet({ open: false })}
+            aria-label="Close drawer"
+            type="button"
+          >
+            <X size={15} />
+          </button>
+        </div>
+        <div className="admin-drawer-content">
+          <p style={{ font: "13px var(--sans)", color: "#777369", margin: 0 }}>
+            Make changes to the signature scent profile.
+          </p>
           {scentSheet.open && (
             <ScentForm
               scent={scentSheet.scent}
               onClose={() => setScentSheet({ open: false })}
             />
           )}
-        </SheetContent>
-      </Sheet>
+        </div>
+        <div className="admin-drawer-footer">
+          <button
+            type="button"
+            className="outline-button"
+            onClick={() => setScentSheet({ open: false })}
+          >
+            Cancel
+          </button>
+          <button type="submit" form="scent-form" className="solid-button">
+            Save Scent <ArrowRight size={13} />
+          </button>
+        </div>
+      </aside>
     </div>
   );
 }

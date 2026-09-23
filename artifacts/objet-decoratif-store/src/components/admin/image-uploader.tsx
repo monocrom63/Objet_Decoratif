@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
-import { useDiscardUpload, useRequestUploadUrl } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
+import {
+  useDiscardUpload,
+  useRequestUploadUrl,
+} from "@workspace/api-client-react";
 import { Loader2, Upload, X, ArrowUp, ArrowDown } from "lucide-react";
 import { resolveImagePath } from "@/lib/catalog";
 
@@ -54,10 +56,12 @@ export function MultiImageUploader({
       onChange([...value, objectPath]);
     } catch (err) {
       if (objectPath) {
-        await discardUpload.mutateAsync({ data: { objectPath } }).catch(() => undefined);
+        await discardUpload
+          .mutateAsync({ data: { objectPath } })
+          .catch(() => undefined);
       }
       setUploading({ file, progress: 0, error: String(err) });
-      return; // leave error state visible
+      return;
     }
 
     setUploading(null);
@@ -80,102 +84,93 @@ export function MultiImageUploader({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div>
+      <div className="admin-image-grid">
         {value.map((path, index) => (
-          <div
-            key={path}
-            className="relative group rounded-md overflow-hidden border aspect-square bg-muted"
-          >
-            <img
-              src={resolveImagePath(path)}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-              <div className="flex gap-1">
-                <Button
+          <div key={path} className="admin-image-preview">
+            <img src={resolveImagePath(path)} alt="" />
+            <div className="admin-image-actions">
+              <div className="flex gap-2">
+                <button
                   type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="h-7 w-7"
+                  className="admin-icon-btn"
                   onClick={() => move(index, -1)}
                   disabled={index === 0}
+                  aria-label="Move left"
                 >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button
+                  <ArrowUp size={14} className="-rotate-90" />
+                </button>
+                <button
                   type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="h-7 w-7"
+                  className="admin-icon-btn"
                   onClick={() => move(index, 1)}
                   disabled={index === value.length - 1}
+                  aria-label="Move right"
                 >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
+                  <ArrowDown size={14} className="-rotate-90" />
+                </button>
               </div>
-              <Button
+              <button
                 type="button"
-                size="sm"
-                variant="destructive"
-                className="h-7 px-2 text-xs"
+                className="admin-text-btn"
                 onClick={() => remove(index)}
               >
-                <X className="h-3 w-3 mr-1" /> Remove
-              </Button>
+                <X size={12} /> Remove
+              </button>
             </div>
           </div>
         ))}
 
         {uploading && (
-          <div className="rounded-md border aspect-square bg-muted flex flex-col items-center justify-center p-4 text-center">
+          <div className="admin-image-uploading">
             {uploading.error ? (
               <>
-                <X className="h-8 w-8 text-destructive mb-2" />
-                <span className="text-xs text-destructive">
-                  {uploading.error}
-                </span>
-                <Button
+                <X size={20} className="admin-image-error mb-2" />
+                <span className="admin-image-error">{uploading.error}</span>
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
+                  className="admin-text-btn mt-2 !text-[#777369] hover:!text-ink"
                   onClick={() => setUploading(null)}
-                  className="mt-2"
                 >
                   Clear
-                </Button>
+                </button>
               </>
             ) : (
               <>
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
-                <span className="text-xs text-muted-foreground">
-                  Uploading...
-                </span>
+                <Loader2
+                  size={20}
+                  className="animate-spin text-[#777369] mb-2"
+                />
+                <span>Uploading...</span>
               </>
             )}
           </div>
         )}
+
+        <div
+          className="admin-image-placeholder"
+          onClick={() => {
+            if (!uploading || uploading.error) {
+              fileInputRef.current?.click();
+            }
+          }}
+          style={{
+            opacity: uploading && !uploading.error ? 0.5 : 1,
+            cursor: uploading && !uploading.error ? "not-allowed" : "pointer",
+          }}
+        >
+          <Upload size={20} className="mb-2" />
+          <span>Add Image</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="image/png, image/jpeg, image/webp"
-          onChange={handleFile}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={!!uploading && !uploading.error}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Add Image
-        </Button>
-      </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/png, image/jpeg, image/webp"
+        onChange={handleFile}
+      />
     </div>
   );
 }
@@ -222,7 +217,9 @@ export function SingleImageUploader({
       onChange(objectPath);
     } catch (err) {
       if (objectPath) {
-        await discardUpload.mutateAsync({ data: { objectPath } }).catch(() => undefined);
+        await discardUpload
+          .mutateAsync({ data: { objectPath } })
+          .catch(() => undefined);
       }
       setUploading({ file, progress: 0, error: String(err) });
       return;
@@ -233,67 +230,55 @@ export function SingleImageUploader({
   };
 
   return (
-    <div className="space-y-4">
+    <div>
       {value && !uploading ? (
-        <div className="relative group rounded-md overflow-hidden border aspect-[4/3] w-48 bg-muted">
-          <img
-            src={resolveImagePath(value)}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-            <Button
+        <div className="admin-image-preview single">
+          <img src={resolveImagePath(value)} alt="" />
+          <div className="admin-image-actions">
+            <button
               type="button"
-              size="sm"
-              variant="secondary"
+              className="admin-text-btn mb-2"
               onClick={() => fileInputRef.current?.click()}
             >
               Replace
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              size="sm"
-              variant="destructive"
+              className="admin-text-btn"
               onClick={() => onChange(null)}
             >
-              Remove
-            </Button>
+              <X size={12} /> Remove
+            </button>
           </div>
         </div>
       ) : uploading ? (
-        <div className="rounded-md border aspect-[4/3] w-48 bg-muted flex flex-col items-center justify-center p-4 text-center">
+        <div className="admin-image-uploading single">
           {uploading.error ? (
             <>
-              <X className="h-8 w-8 text-destructive mb-2" />
-              <span className="text-xs text-destructive">
-                {uploading.error}
-              </span>
-              <Button
+              <X size={20} className="admin-image-error mb-2" />
+              <span className="admin-image-error">{uploading.error}</span>
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
+                className="admin-text-btn mt-2 !text-[#777369] hover:!text-ink"
                 onClick={() => setUploading(null)}
-                className="mt-2"
               >
                 Clear
-              </Button>
+              </button>
             </>
           ) : (
             <>
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
-              <span className="text-xs text-muted-foreground">
-                Uploading...
-              </span>
+              <Loader2 size={20} className="animate-spin text-[#777369] mb-2" />
+              <span>Uploading...</span>
             </>
           )}
         </div>
       ) : (
         <div
-          className="rounded-md border border-dashed aspect-[4/3] w-48 bg-muted/50 flex flex-col items-center justify-center p-4 hover:bg-muted/80 transition-colors cursor-pointer"
+          className="admin-image-placeholder single"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-          <span className="text-sm font-medium">Upload Image</span>
+          <Upload size={20} className="mb-2" />
+          <span>Upload Image</span>
         </div>
       )}
 
