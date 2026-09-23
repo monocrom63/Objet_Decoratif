@@ -21,7 +21,6 @@ import {
 import { currentUser } from "./commerce";
 import {
   deleteUnreferencedCatalogImages,
-  sweepAbandonedCatalogUploads,
 } from "../lib/catalogImageCleanup";
 
 const router: IRouter = Router();
@@ -40,13 +39,10 @@ async function cleanupCatalogImages(
   candidatePaths: Iterable<string>,
 ) {
   try {
-    const [deleted, swept] = await Promise.all([
-      deleteUnreferencedCatalogImages(candidatePaths),
-      sweepAbandonedCatalogUploads(),
-    ]);
-    if (deleted.length || swept.length) {
+    const deleted = await deleteUnreferencedCatalogImages(candidatePaths);
+    if (deleted.length) {
       req.log.info(
-        { deleted: Array.from(new Set([...deleted, ...swept])) },
+        { deleted },
         "Removed unreferenced catalog images",
       );
     }

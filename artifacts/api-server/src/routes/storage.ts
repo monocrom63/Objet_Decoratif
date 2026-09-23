@@ -12,23 +12,14 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from '../lib/objectStorage';
+import {
+  cleanupAbandonedCatalogUploads,
+  isCatalogImageReferenced,
+} from '../lib/catalogImageCleanup';
 import { currentUser } from './commerce';
-import { db, productsTable, scentsTable } from '@workspace/db';
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
-const ABANDONED_UPLOAD_AGE_MS = 24 * 60 * 60 * 1000;
-
-async function referencedCatalogImages(): Promise<Set<string>> {
-  const [products, scents] = await Promise.all([
-    db.select({ imagePaths: productsTable.imagePaths }).from(productsTable),
-    db.select({ imagePath: scentsTable.imagePath }).from(scentsTable),
-  ]);
-  return new Set([
-    ...products.flatMap((product) => product.imagePaths),
-    ...scents.flatMap((scent) => scent.imagePath ? [scent.imagePath] : []),
-  ]);
-}
 
 function hasAuthenticatedSession(
   req: Request,
@@ -103,13 +94,18 @@ router.post('/storage/uploads/discard', async (req: Request, res: Response): Pro
     res.status(400).json({ error: 'Invalid managed upload path' });
     return;
   }
-  const referenced = await referencedCatalogImages();
-  if (referenced.has(body.data.objectPath)) {
-    res.status(409).json({ error: 'Upload is referenced by the catalog' });
-    return;
+  try {
+    const referenced = await isCatalogImageReferenced(body.data.objectPath);
+    if (referenced) {
+      res.status(409).json({ error: 'Upload is referenced by the catalog' });
+      return;
+    }
+    await objectStorageService.deleteManagedUpload(body.data.objectPath);
+    res.sendStatus(204);
+  } catch (error) {
+    req.log.error({ err: error }, 'Failed to discard upload');
+    res.status(500).json({ error: 'Failed to discard upload' });
   }
-  await objectStorageService.deleteManagedUpload(body.data.objectPath);
-  res.sendStatus(204);
 });
 
 router.post('/admin/storage/cleanup-unused-images', async (req: Request, res: Response): Promise<void> => {
@@ -118,22 +114,13 @@ router.post('/admin/storage/cleanup-unused-images', async (req: Request, res: Re
     res.status(403).json({ error: 'Admin only' });
     return;
   }
-  const [uploads, referenced] = await Promise.all([
-    objectStorageService.listManagedUploads(),
-    referencedCatalogImages(),
-  ]);
-  const cutoff = Date.now() - ABANDONED_UPLOAD_AGE_MS;
-  const candidates = uploads.filter(
-    (upload) => upload.createdAt.getTime() < cutoff && !referenced.has(upload.objectPath),
-  );
-  const deleted = (await Promise.all(
-    candidates.map((upload) => objectStorageService.deleteManagedUpload(upload.objectPath)),
-  )).filter(Boolean).length;
-  res.json(CleanupUnusedImagesResponse.parse({
-    scanned: uploads.length,
-    deleted,
-    retained: uploads.length - deleted,
-  }));
+  try {
+    const result = await cleanupAbandonedCatalogUploads();
+    res.json(CleanupUnusedImagesResponse.parse(result));
+  } catch (error) {
+    req.log.error({ err: error }, 'Catalog upload cleanup failed');
+    res.status(500).json({ error: 'Catalog upload cleanup failed' });
+  }
 });
 
 /**

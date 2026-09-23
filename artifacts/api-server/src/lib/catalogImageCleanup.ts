@@ -1,11 +1,20 @@
 import { db, productsTable, scentsTable } from "@workspace/db";
 
+import { logger } from "./logger";
 import { ObjectStorageService } from "./objectStorage";
 
 const storage = new ObjectStorageService();
 const ABANDONED_UPLOAD_AGE_MS = 24 * 60 * 60 * 1000;
-const SWEEP_INTERVAL_MS = 60 * 60 * 1000;
-let lastSweepAt = 0;
+const DEFAULT_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const MINIMUM_CLEANUP_INTERVAL_MS = 60 * 1000;
+
+export interface CatalogUploadCleanupResult {
+  scanned: number;
+  retained: number;
+  deleted: number;
+}
+
+let cleanupInFlight: Promise<CatalogUploadCleanupResult> | null = null;
 
 async function referencedCatalogImagePaths(): Promise<Set<string>> {
   const [products, scents] = await Promise.all([
@@ -19,6 +28,12 @@ async function referencedCatalogImagePaths(): Promise<Set<string>> {
       ...scents.map((scent) => scent.imagePath),
     ].filter((path): path is string => Boolean(path)),
   );
+}
+
+export async function isCatalogImageReferenced(
+  objectPath: string,
+): Promise<boolean> {
+  return (await referencedCatalogImagePaths()).has(objectPath);
 }
 
 function managedUploadPaths(paths: Iterable<string>): string[] {
@@ -42,23 +57,66 @@ export async function deleteUnreferencedCatalogImages(
   return deleted;
 }
 
-export async function sweepAbandonedCatalogUploads(): Promise<string[]> {
+async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadCleanupResult> {
   const now = Date.now();
-  if (now - lastSweepAt < SWEEP_INTERVAL_MS) return [];
-  lastSweepAt = now;
-
   const [uploads, referenced] = await Promise.all([
-    storage.listUploadedObjectEntities(),
+    storage.listManagedUploads(),
     referencedCatalogImagePaths(),
   ]);
-  const staleUnreferenced = uploads
+  const candidates = uploads
     .filter(
-      ({ objectPath, updatedAt }) =>
+      ({ objectPath, createdAt }) =>
         !referenced.has(objectPath) &&
-        updatedAt !== null &&
-        now - updatedAt.getTime() >= ABANDONED_UPLOAD_AGE_MS,
+        now - createdAt.getTime() >= ABANDONED_UPLOAD_AGE_MS,
+    );
+  const deleted = (
+    await Promise.all(
+      candidates.map(({ objectPath }) => storage.deleteManagedUpload(objectPath)),
     )
-    .map(({ objectPath }) => objectPath);
+  ).filter(Boolean).length;
+  const result = {
+    scanned: uploads.length,
+    retained: uploads.length - deleted,
+    deleted,
+  };
 
-  return deleteUnreferencedCatalogImages(staleUnreferenced);
+  logger.info(result, "Catalog upload cleanup completed");
+  return result;
+}
+
+export function cleanupAbandonedCatalogUploads(): Promise<CatalogUploadCleanupResult> {
+  if (cleanupInFlight) {
+    return cleanupInFlight;
+  }
+
+  cleanupInFlight = performAbandonedCatalogUploadCleanup().finally(() => {
+    cleanupInFlight = null;
+  });
+  return cleanupInFlight;
+}
+
+function cleanupIntervalMs(): number {
+  const configured = Number(process.env.CATALOG_UPLOAD_CLEANUP_INTERVAL_MS);
+  if (
+    Number.isFinite(configured) &&
+    configured >= MINIMUM_CLEANUP_INTERVAL_MS
+  ) {
+    return configured;
+  }
+  return DEFAULT_CLEANUP_INTERVAL_MS;
+}
+
+export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout {
+  const intervalMs = cleanupIntervalMs();
+  const runCleanup = () => {
+    void cleanupAbandonedCatalogUploads().catch((error: unknown) => {
+      logger.error({ err: error }, "Catalog upload cleanup failed");
+    });
+  };
+
+  runCleanup();
+  const timer = setInterval(runCleanup, intervalMs);
+  timer.unref();
+  logger.info({ intervalMs }, "Catalog upload cleanup scheduled");
+  return timer;
 }
