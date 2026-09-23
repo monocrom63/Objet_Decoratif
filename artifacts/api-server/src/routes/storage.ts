@@ -2,7 +2,6 @@ import { Readable } from 'stream';
 import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
-  DiscardUploadBody,
   CleanupUnusedImagesResponse,
 } from '@workspace/api-zod';
 import { Router, type IRouter, type Request, type Response } from 'express';
@@ -17,9 +16,27 @@ import {
   isCatalogImageReferenced,
 } from '../lib/catalogImageCleanup';
 import { currentUser } from './commerce';
+import { createDiscardUploadRouter } from './storageDiscard';
 
-const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
+
+type StorageService = Pick<
+  ObjectStorageService,
+  | 'deleteManagedUpload'
+  | 'downloadObject'
+  | 'getObjectEntityFile'
+  | 'getObjectEntityUploadURL'
+  | 'isManagedUploadPath'
+  | 'normalizeObjectEntityPath'
+  | 'searchPublicObject'
+>;
+
+export interface StorageRouterDependencies {
+  currentUser: typeof currentUser;
+  objectStorageService: StorageService;
+  isCatalogImageReferenced: typeof isCatalogImageReferenced;
+  cleanupAbandonedCatalogUploads: typeof cleanupAbandonedCatalogUploads;
+}
 
 function hasAuthenticatedSession(
   req: Request,
@@ -42,10 +59,20 @@ function hasAuthenticatedSession(
  * Then uploads the file directly to the returned presigned URL.
  * Requires auth middleware so public callers cannot mint write-capable URLs.
  */
+export function createStorageRouter(
+  dependencies: StorageRouterDependencies = {
+    currentUser,
+    objectStorageService,
+    isCatalogImageReferenced,
+    cleanupAbandonedCatalogUploads,
+  },
+): IRouter {
+const router: IRouter = Router();
+
 router.post(
   '/storage/uploads/request-url',
   async (req: Request, res: Response) => {
-    const user = await currentUser(req);
+    const user = await dependencies.currentUser(req);
     if (!user || user.role !== "admin") {
       res.status(403).json({ error: 'Admin only' });
 
@@ -65,9 +92,10 @@ router.post(
         return;
       }
 
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const uploadURL =
+        await dependencies.objectStorageService.getObjectEntityUploadURL();
       const objectPath =
-        objectStorageService.normalizeObjectEntityPath(uploadURL);
+        dependencies.objectStorageService.normalizeObjectEntityPath(uploadURL);
 
       res.json(
         RequestUploadUrlResponse.parse({
@@ -83,39 +111,23 @@ router.post(
   },
 );
 
-router.post('/storage/uploads/discard', async (req: Request, res: Response): Promise<void> => {
-  const user = await currentUser(req);
-  if (!user || user.role !== 'admin') {
-    res.status(403).json({ error: 'Admin only' });
-    return;
-  }
-  const body = DiscardUploadBody.safeParse(req.body);
-  if (!body.success || !objectStorageService.isManagedUploadPath(body.data.objectPath)) {
-    res.status(400).json({ error: 'Invalid managed upload path' });
-    return;
-  }
-  try {
-    const referenced = await isCatalogImageReferenced(body.data.objectPath);
-    if (referenced) {
-      res.status(409).json({ error: 'Upload is referenced by the catalog' });
-      return;
-    }
-    await objectStorageService.deleteManagedUpload(body.data.objectPath);
-    res.sendStatus(204);
-  } catch (error) {
-    req.log.error({ err: error }, 'Failed to discard upload');
-    res.status(500).json({ error: 'Failed to discard upload' });
-  }
-});
+router.use(createDiscardUploadRouter({
+  currentUser: dependencies.currentUser,
+  isManagedUploadPath: (path) =>
+    dependencies.objectStorageService.isManagedUploadPath(path),
+  isCatalogImageReferenced: dependencies.isCatalogImageReferenced,
+  deleteManagedUpload: (path) =>
+    dependencies.objectStorageService.deleteManagedUpload(path),
+}));
 
 router.post('/admin/storage/cleanup-unused-images', async (req: Request, res: Response): Promise<void> => {
-  const user = await currentUser(req);
+  const user = await dependencies.currentUser(req);
   if (!user || user.role !== 'admin') {
     res.status(403).json({ error: 'Admin only' });
     return;
   }
   try {
-    const result = await cleanupAbandonedCatalogUploads();
+    const result = await dependencies.cleanupAbandonedCatalogUploads();
     res.json(CleanupUnusedImagesResponse.parse(result));
   } catch (error) {
     req.log.error({ err: error }, 'Catalog upload cleanup failed');
@@ -136,13 +148,15 @@ router.get(
     try {
       const raw = req.params.filePath;
       const filePath = Array.isArray(raw) ? raw.join('/') : raw;
-      const file = await objectStorageService.searchPublicObject(filePath);
+      const file =
+        await dependencies.objectStorageService.searchPublicObject(filePath);
       if (!file) {
         res.status(404).json({ error: 'File not found' });
         return;
       }
 
-      const response = await objectStorageService.downloadObject(file);
+      const response =
+        await dependencies.objectStorageService.downloadObject(file);
 
       res.status(response.status);
       response.headers.forEach((value, key) => res.setHeader(key, value));
@@ -175,7 +189,7 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
     const wildcardPath = Array.isArray(raw) ? raw.join('/') : raw;
     const objectPath = `/objects/${wildcardPath}`;
     const objectFile =
-      await objectStorageService.getObjectEntityFile(objectPath);
+      await dependencies.objectStorageService.getObjectEntityFile(objectPath);
 
     // --- Protected route example (uncomment when using replit-auth) ---
     // if (!req.isAuthenticated()) {
@@ -192,7 +206,8 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
     //   return;
     // }
 
-    const response = await objectStorageService.downloadObject(objectFile);
+    const response =
+      await dependencies.objectStorageService.downloadObject(objectFile);
 
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
@@ -216,4 +231,7 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
   }
 });
 
-export default router;
+return router;
+}
+
+export default createStorageRouter();
