@@ -1,1 +1,2 @@
 - [Store account roles](store-account-roles.md) — The first authenticated store account becomes admin; later accounts default to customer.
+- [Node source-test imports](node-source-test-imports.md) — Source tests use Node type stripping, so runtime TypeScript imports need explicit extensions and type-only barrels.

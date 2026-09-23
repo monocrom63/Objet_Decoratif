@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { HealthCheckResponse } from "@workspace/api-zod";
-import { getCatalogUploadCleanupHealth } from "../lib/catalogImageCleanupHealth";
+import { getCatalogUploadCleanupHealth } from "../lib/catalogImageCleanupHealth.ts";
 
 const router: IRouter = Router();
 
