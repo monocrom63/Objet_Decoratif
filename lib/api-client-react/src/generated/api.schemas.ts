@@ -5,18 +5,48 @@
  * Objet Décoratif orders and account API
  * OpenAPI spec version: 0.2.0
  */
-export interface HealthStatus {
-  status: string;
-}
+export type HealthStatusStatus = typeof HealthStatusStatus[keyof typeof HealthStatusStatus];
 
-export interface StoredObjectPath {
-  objectPath: string;
-}
+
+export const HealthStatusStatus = {
+  ok: 'ok',
+  degraded: 'degraded',
+} as const;
+
+export type HealthStatusCatalogUploadCleanupStatus = typeof HealthStatusCatalogUploadCleanupStatus[keyof typeof HealthStatusCatalogUploadCleanupStatus];
+
+
+export const HealthStatusCatalogUploadCleanupStatus = {
+  ok: 'ok',
+  degraded: 'degraded',
+} as const;
 
 export interface StorageCleanupResult {
   scanned: number;
   deleted: number;
   retained: number;
+}
+
+export type HealthStatusCatalogUploadCleanup = {
+  status: HealthStatusCatalogUploadCleanupStatus;
+  /** @minimum 0 */
+  consecutiveFailures: number;
+  latestCounts: StorageCleanupResult;
+  /** @nullable */
+  lastSuccessAt: string | null;
+  /** @nullable */
+  lastFailureAt: string | null;
+  /** @nullable */
+  lastFailureMessage: string | null;
+};
+
+export interface HealthStatus {
+  status: HealthStatusStatus;
+  catalogUploadCleanup: HealthStatusCatalogUploadCleanup;
+}
+
+export interface StoredObjectPath {
+  objectPath: string;
 }
 
 export type AccountRole = typeof AccountRole[keyof typeof AccountRole];

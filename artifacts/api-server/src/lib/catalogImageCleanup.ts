@@ -3,6 +3,11 @@ import { db, productsTable, scentsTable } from "@workspace/db";
 import { logger } from "./logger";
 import { ObjectStorageService } from "./objectStorage";
 import {
+  CLEANUP_FAILURE_ALERT_THRESHOLD,
+  recordCatalogUploadCleanupFailure,
+  recordCatalogUploadCleanupSuccess,
+} from "./catalogImageCleanupHealth";
+import {
   abandonedCatalogUploads,
   referencedCatalogImagePaths as collectReferencedCatalogImagePaths,
   unreferencedManagedImagePaths,
@@ -68,6 +73,7 @@ async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadClea
     deleted,
   };
 
+  recordCatalogUploadCleanupSuccess(result);
   logger.info(result, "Catalog upload cleanup completed");
   return result;
 }
@@ -98,7 +104,20 @@ export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout {
   const intervalMs = cleanupIntervalMs();
   const runCleanup = () => {
     void cleanupAbandonedCatalogUploads().catch((error: unknown) => {
-      logger.error({ err: error }, "Catalog upload cleanup failed");
+      const health = recordCatalogUploadCleanupFailure(error);
+      logger.error(
+        {
+          err: error,
+          alert: health.status === "degraded",
+          cleanupHealth: health,
+          failureThreshold: CLEANUP_FAILURE_ALERT_THRESHOLD,
+          action:
+            "Check object storage access and database connectivity; run the admin cleanup endpoint after recovery.",
+        },
+        health.status === "degraded"
+          ? "ALERT: Catalog upload cleanup repeatedly failing"
+          : "Catalog upload cleanup failed",
+      );
     });
   };
 

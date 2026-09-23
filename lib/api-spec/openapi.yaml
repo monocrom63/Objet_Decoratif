@@ -232,9 +232,19 @@ components:
   schemas:
     HealthStatus:
       type: object
-      required: [status]
+      required: [status, catalogUploadCleanup]
       properties:
-        status: { type: string }
+        status: { type: string, enum: [ok, degraded] }
+        catalogUploadCleanup:
+          type: object
+          required: [status, consecutiveFailures, latestCounts, lastSuccessAt, lastFailureAt, lastFailureMessage]
+          properties:
+            status: { type: string, enum: [ok, degraded] }
+            consecutiveFailures: { type: integer, minimum: 0 }
+            latestCounts: { $ref: "#/components/schemas/StorageCleanupResult" }
+            lastSuccessAt: { type: ["string", "null"], format: date-time }
+            lastFailureAt: { type: ["string", "null"], format: date-time }
+            lastFailureMessage: { type: ["string", "null"] }
     StoredObjectPath:
       type: object
       required: [objectPath]

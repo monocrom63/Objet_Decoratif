@@ -5,7 +5,10 @@
  * Objet Décoratif orders and account API
  * OpenAPI spec version: 0.2.0
  */
+import type { HealthStatusCatalogUploadCleanup } from './healthStatusCatalogUploadCleanup';
+import type { HealthStatusStatus } from './healthStatusStatus';
 
 export interface HealthStatus {
-  status: string;
+  status: HealthStatusStatus;
+  catalogUploadCleanup: HealthStatusCatalogUploadCleanup;
 }

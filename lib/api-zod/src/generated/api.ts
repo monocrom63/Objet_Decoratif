@@ -8,8 +8,24 @@
 import * as zod from 'zod';
 
 
+export const healthCheckResponseCatalogUploadCleanupConsecutiveFailuresMin = 0;
+
+
+
 export const HealthCheckResponse = zod.object({
-  "status": zod.string()
+  "status": zod.enum(['ok', 'degraded']),
+  "catalogUploadCleanup": zod.object({
+  "status": zod.enum(['ok', 'degraded']),
+  "consecutiveFailures": zod.number().int().min(healthCheckResponseCatalogUploadCleanupConsecutiveFailuresMin),
+  "latestCounts": zod.object({
+  "scanned": zod.number().int(),
+  "deleted": zod.number().int(),
+  "retained": zod.number().int()
+}),
+  "lastSuccessAt": zod.coerce.date().nullable(),
+  "lastFailureAt": zod.coerce.date().nullable(),
+  "lastFailureMessage": zod.string().nullable()
+})
 })
 
 

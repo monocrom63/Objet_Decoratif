@@ -130,13 +130,6 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-
 export const getGetMeUrl = () => {
 
 
@@ -201,13 +194,6 @@ export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = Err
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-
 export const getListMyOrdersUrl = () => {
 
 
