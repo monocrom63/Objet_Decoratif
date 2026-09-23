@@ -1,36 +1,196 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 0.2.0
+  description: Objet Décoratif orders and account API
 servers:
   - url: /api
-    description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: account
+  - name: orders
+  - name: admin
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
-      summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /me:
+    get:
+      operationId: getMe
+      tags: [account]
+      responses:
+        "200":
+          description: Current account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Account" }
+        "401": { description: Not authenticated }
+  /orders:
+    get:
+      operationId: listMyOrders
+      tags: [orders]
+      responses:
+        "200":
+          description: Customer orders
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+        "401": { description: Not authenticated }
+    post:
+      operationId: createOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderInput" }
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400": { description: Invalid order }
+        "401": { description: Not authenticated }
+  /admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      responses:
+        "200":
+          description: All orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+        "403": { description: Admin only }
+  /admin/orders/{id}:
+    patch:
+      operationId: updateOrderStatus
+      tags: [admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderStatusUpdate" }
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "403": { description: Admin only }
+        "404": { description: Order not found }
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      responses:
+        "200":
+          description: All customer and admin accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminUser" }
+        "403": { description: Admin only }
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+    Account:
+      type: object
+      required: [id, email, role]
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        name: { type: ["string", "null"] }
+        role: { type: string, enum: [admin, customer] }
+    AdminUser:
+      allOf:
+        - { $ref: "#/components/schemas/Account" }
+        - type: object
+          required: [orderCount, totalSpent, createdAt]
+          properties:
+            orderCount: { type: integer }
+            totalSpent: { type: number }
+            createdAt: { type: string, format: date-time }
+    OrderItemInput:
+      type: object
+      required: [productId, name, scent, quantity, unitPrice]
+      properties:
+        productId: { type: string }
+        name: { type: string }
+        scent: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        unitPrice: { type: number, minimum: 0 }
+    OrderInput:
+      type: object
+      required: [email, phone, firstName, lastName, address, postalCode, city, country, paymentMethod, items]
+      properties:
+        email: { type: string, format: email }
+        phone: { type: string, minLength: 6 }
+        firstName: { type: string }
+        lastName: { type: string }
+        company: { type: string }
+        address: { type: string }
+        apartment: { type: string }
+        postalCode: { type: string }
+        city: { type: string }
+        country: { type: string }
+        paymentMethod: { type: string, enum: [card, paypal, klarna] }
+        cardLastFour: { type: ["string", "null"], pattern: "^[0-9]{4}$" }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/OrderItemInput" }
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [new, processing, shipped, completed, cancelled] }
+    OrderItem:
+      allOf:
+        - { $ref: "#/components/schemas/OrderItemInput" }
+        - type: object
+          required: [id, lineTotal]
+          properties:
+            id: { type: integer }
+            lineTotal: { type: number }
+    Order:
+      type: object
+      required: [id, orderNumber, customerEmail, customerName, phone, address, paymentMethod, status, subtotal, shipping, total, createdAt, items]
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        customerEmail: { type: string, format: email }
+        customerName: { type: string }
+        phone: { type: string }
+        address: { type: string }
+        paymentMethod: { type: string }
+        status: { type: string, enum: [new, processing, shipped, completed, cancelled] }
+        subtotal: { type: number }
+        shipping: { type: number }
+        total: { type: number }
+        createdAt: { type: string, format: date-time }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }

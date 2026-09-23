@@ -1,0 +1,156 @@
+import { Router, type IRouter, type Request } from "express";
+import { clerkClient, getAuth } from "@clerk/express";
+import { db, ordersTable, usersTable, type StoreOrder } from "@workspace/db";
+import { desc, eq } from "drizzle-orm";
+import {
+  CreateOrderBody,
+  CreateOrderResponse,
+  GetMeResponse,
+  ListAdminOrdersResponse,
+  ListAdminUsersResponse,
+  ListMyOrdersResponse,
+  UpdateOrderStatusBody,
+  UpdateOrderStatusParams,
+  UpdateOrderStatusResponse,
+} from "@workspace/api-zod";
+
+const router: IRouter = Router();
+const productPrices: Record<string, { name: string; cents: number }> = {
+  barrique: { name: "Barrique", cents: 6800 },
+  milano: { name: "Milano", cents: 8200 },
+  boite: { name: "Boite", cents: 8600 },
+  chateu: { name: "Chateu", cents: 8800 },
+  elephant: { name: "Elephant", cents: 9400 },
+  sakura: { name: "Sakura", cents: 8200 },
+  refill: { name: "Refill", cents: 3800 },
+};
+
+async function currentUser(req: Request) {
+  const auth = getAuth(req);
+  if (!auth.userId) return null;
+  const existing = await db.select().from(usersTable).where(eq(usersTable.clerkUserId, auth.userId)).limit(1);
+  if (existing[0]) return existing[0];
+
+  const clerkUser = await clerkClient.users.getUser(auth.userId);
+  const email = clerkUser.primaryEmailAddress?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress;
+  if (!email) throw new Error("Authenticated user has no email address");
+  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
+  const admins = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin")).limit(1);
+  const [created] = await db.insert(usersTable).values({
+    clerkUserId: auth.userId,
+    email,
+    name,
+    role: admins.length === 0 ? "admin" : "customer",
+  }).onConflictDoNothing({ target: usersTable.clerkUserId }).returning();
+  if (created) return created;
+
+  const [concurrentlyCreated] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.clerkUserId, auth.userId))
+    .limit(1);
+  if (!concurrentlyCreated) throw new Error("Could not initialize authenticated user");
+  return concurrentlyCreated;
+}
+
+function orderResponse(order: StoreOrder) {
+  return {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    customerEmail: order.customerEmail,
+    customerName: order.customerName,
+    phone: order.phone,
+    address: order.address,
+    paymentMethod: order.cardLastFour ? `${order.paymentMethod} •••• ${order.cardLastFour}` : order.paymentMethod,
+    status: order.status as "new" | "processing" | "shipped" | "completed" | "cancelled",
+    subtotal: order.subtotalCents / 100,
+    shipping: order.shippingCents / 100,
+    total: order.totalCents / 100,
+    createdAt: order.createdAt.toISOString(),
+    items: order.items.map((item, index) => ({ ...item, id: index + 1 })),
+  };
+}
+
+router.get("/me", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
+  res.json(GetMeResponse.parse({ id: user.id, email: user.email, name: user.name, role: user.role }));
+});
+
+router.get("/orders", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
+  const orders = await db.select().from(ordersTable).where(eq(ordersTable.userId, user.id)).orderBy(desc(ordersTable.createdAt));
+  res.json(ListMyOrdersResponse.parse(orders.map(orderResponse)));
+});
+
+router.post("/orders", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user) { res.status(401).json({ error: "Sign in before placing an order" }); return; }
+  const parsed = CreateOrderBody.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+  const items = parsed.data.items.map((item) => {
+    const product = productPrices[item.productId];
+    if (!product) throw new Error(`Unknown product: ${item.productId}`);
+    return { productId: item.productId, name: product.name, scent: item.scent, quantity: item.quantity, unitPrice: product.cents / 100, lineTotal: product.cents * item.quantity / 100 };
+  });
+  const subtotalCents = Math.round(items.reduce((sum, item) => sum + item.lineTotal, 0) * 100);
+  const shippingCents = 800;
+  const [order] = await db.insert(ordersTable).values({
+    orderNumber: `OD-${Date.now().toString(36).toUpperCase()}`,
+    userId: user.id,
+    customerEmail: parsed.data.email,
+    customerName: `${parsed.data.firstName} ${parsed.data.lastName}`,
+    phone: parsed.data.phone,
+    address: [parsed.data.address, parsed.data.apartment, `${parsed.data.postalCode} ${parsed.data.city}`, parsed.data.country].filter(Boolean).join(", "),
+    paymentMethod: parsed.data.paymentMethod,
+    cardLastFour: parsed.data.cardLastFour,
+    status: "new",
+    subtotalCents,
+    shippingCents,
+    totalCents: subtotalCents + shippingCents,
+    items,
+  }).returning();
+  res.status(201).json(CreateOrderResponse.parse(orderResponse(order)));
+});
+
+router.get("/admin/orders", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user || user.role !== "admin") { res.status(403).json({ error: "Admin only" }); return; }
+  const orders = await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+  res.json(ListAdminOrdersResponse.parse(orders.map(orderResponse)));
+});
+
+router.patch("/admin/orders/:id", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user || user.role !== "admin") { res.status(403).json({ error: "Admin only" }); return; }
+  const params = UpdateOrderStatusParams.safeParse(req.params);
+  const body = UpdateOrderStatusBody.safeParse(req.body);
+  if (!params.success || !body.success) { res.status(400).json({ error: "Invalid status update" }); return; }
+  const [order] = await db.update(ordersTable).set({ status: body.data.status }).where(eq(ordersTable.id, params.data.id)).returning();
+  if (!order) { res.status(404).json({ error: "Order not found" }); return; }
+  res.json(UpdateOrderStatusResponse.parse(orderResponse(order)));
+});
+
+router.get("/admin/users", async (req, res): Promise<void> => {
+  const user = await currentUser(req);
+  if (!user || user.role !== "admin") { res.status(403).json({ error: "Admin only" }); return; }
+  const [users, orders] = await Promise.all([
+    db.select().from(usersTable).orderBy(desc(usersTable.createdAt)),
+    db.select().from(ordersTable),
+  ]);
+  res.json(ListAdminUsersResponse.parse(users.map((entry) => {
+    const ownOrders = orders.filter((order) => order.userId === entry.id);
+    return {
+      id: entry.id,
+      email: entry.email,
+      name: entry.name,
+      role: entry.role,
+      orderCount: ownOrders.length,
+      totalSpent: ownOrders.reduce((sum, order) => sum + order.totalCents, 0) / 100,
+      createdAt: entry.createdAt.toISOString(),
+    };
+  })));
+});
+
+export default router;

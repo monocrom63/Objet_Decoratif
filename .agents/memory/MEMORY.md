@@ -1,0 +1,1 @@
+- [Store account roles](store-account-roles.md) — The first authenticated store account becomes admin; later accounts default to customer.

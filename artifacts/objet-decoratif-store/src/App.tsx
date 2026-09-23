@@ -1,6 +1,16 @@
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Show, SignIn, SignUp, UserButton, useUser } from '@clerk/react';
+import {
+  useCreateOrder,
+  useGetMe,
+  useListAdminOrders,
+  useListAdminUsers,
+  useListMyOrders,
+  useUpdateOrderStatus,
+  type OrderStatus,
+} from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -235,6 +245,7 @@ const products: Product[] = [
 ];
 
 const queryClient = new QueryClient();
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 const CART_STORAGE_KEY = 'objet-decoratif-cart';
 
 function readStoredCart(): CartLine[] {
@@ -652,6 +663,8 @@ function Header({ cartCount, onCart, onSearch }: { cartCount: number; onCart: ()
           ))}
         </div>
         <button className="header-action search-only" onClick={onSearch} data-testid="button-search"><Search size={14} strokeWidth={1.5} /> <span>Search</span></button>
+        <Show when="signed-in"><Link href="/account" className="header-action account-link">Account</Link></Show>
+        <Show when="signed-out"><Link href="/sign-in" className="header-action account-link">Sign in</Link></Show>
         <button className="cart-button" onClick={onCart} data-testid="button-cart"><ShoppingBag size={14} strokeWidth={1.5} /><span>Cart</span><span className="cart-count" data-testid="text-cart-count">{cartCount}</span></button>
       </div>
     </div>
@@ -1081,10 +1094,13 @@ const emptyCheckoutForm: CheckoutForm = {
 };
 
 function CheckoutPage() {
+  const { isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>(readStoredCart);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'klarna'>('card');
   const [form, setForm] = useState<CheckoutForm>(emptyCheckoutForm);
   const [submitted, setSubmitted] = useState(false);
+  const [placedOrderNumber, setPlacedOrderNumber] = useState('');
+  const createOrder = useCreateOrder();
   const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
   const hasAddress = Boolean(form.address.trim() && form.postalCode.trim() && form.city.trim());
   const shipping = hasAddress ? 8 : 0;
@@ -1110,10 +1126,50 @@ function CheckoutPage() {
   const removeCheckoutLine = (id: string, scent: string) => {
     setLines((current) => current.filter((line) => line.product.id !== id || line.scent !== scent));
   };
+  const placeOrder = async () => {
+    const order = await createOrder.mutateAsync({
+      data: {
+        email: form.email,
+        phone: form.phone,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        company: form.company,
+        address: form.address,
+        apartment: form.apartment,
+        postalCode: form.postalCode,
+        city: form.city,
+        country: form.country,
+        paymentMethod,
+        cardLastFour: paymentMethod === 'card' ? form.cardNumber.replace(/\s/g, '').slice(-4) : null,
+        items: lines.map((line) => ({
+          productId: line.product.id,
+          name: line.product.name,
+          scent: line.scent,
+          quantity: line.quantity,
+          unitPrice: line.product.price,
+        })),
+      },
+    });
+    setPlacedOrderNumber(order.orderNumber);
+    setLines([]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
   }, [lines]);
+
+  if (placedOrderNumber) {
+    return <div className="checkout-page checkout-empty-page">
+      <header className="checkout-header"><Link href="/" className="checkout-logo">Objet Décoratif</Link></header>
+      <main className="checkout-empty-state">
+        <span className="section-kicker">Order received</span>
+        <h1>Thank you.</h1>
+        <p>Your order <strong>{placedOrderNumber}</strong> is saved. No payment has been charged yet.</p>
+        <Link href="/account" className="solid-button">View my orders <ArrowRight size={14} /></Link>
+      </main>
+    </div>;
+  }
 
   if (lines.length === 0) {
     return <div className="checkout-page checkout-empty-page">
@@ -1268,10 +1324,17 @@ function CheckoutPage() {
           </div>
 
           <div className="checkout-review-notice" role="status">
-            <strong>No order has been placed yet.</strong>
-            <span>This page is for reviewing your details only. SMS verification and payment are not connected.</span>
+            <strong>No payment will be charged.</strong>
+            <span>Submitting saves the order for the customer and admin accounts. Payment and SMS are not connected.</span>
           </div>
-          <button className="checkout-review-button" type="button" onClick={editDetails}>Return to checkout details</button>
+          <Show when="signed-in">
+            <button className="checkout-review-button" type="button" disabled={createOrder.isPending} onClick={placeOrder}>{createOrder.isPending ? 'Saving order…' : 'Place order'}</button>
+          </Show>
+          <Show when="signed-out">
+            <Link href="/sign-in" className="checkout-review-button checkout-sign-in-button">Sign in to place order</Link>
+          </Show>
+          {createOrder.isError && <p className="checkout-order-error">The order could not be saved. Please try again.</p>}
+          <button className="checkout-edit-secondary" type="button" onClick={editDetails}>Return to checkout details</button>
         </section>}
 
         <nav className="checkout-footer-links" aria-label="Checkout information">
@@ -1348,8 +1411,89 @@ function Store() {
   </div>;
 }
 
+function AuthPage({ mode }: { mode: 'sign-in' | 'sign-up' }) {
+  return <div className="account-shell auth-shell">
+    <Link href="/" className="checkout-logo">Objet Décoratif</Link>
+    {mode === 'sign-in'
+      ? <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+      : <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />}
+  </div>;
+}
+
+function AccountContent() {
+  const me = useGetMe();
+  const orders = useListMyOrders();
+  return <>
+    <header className="account-header"><Link href="/" className="checkout-logo">Objet Décoratif</Link><div className="account-header-actions">{me.data?.role === 'admin' && <Link href="/admin">Admin dashboard</Link>}<UserButton /></div></header>
+    <main className="account-main">
+        <span className="section-kicker">Customer account</span>
+        <h1>My orders</h1>
+        <p className="account-intro">{me.data?.name || me.data?.email}</p>
+        {orders.isLoading && <p>Loading orders…</p>}
+        {orders.data?.length === 0 && <div className="account-empty">No orders have been saved yet.</div>}
+        <div className="account-orders">
+          {orders.data?.map((order) => <article key={order.id} className="account-order">
+            <div><strong>{order.orderNumber}</strong><span>{new Date(order.createdAt).toLocaleDateString('de-DE')} · {order.status}</span></div>
+            <div>{order.items.map((item) => <span key={item.id}>{item.quantity} × {item.name} · {item.scent}</span>)}</div>
+            <b>€{order.total.toFixed(2)}</b>
+          </article>)}
+        </div>
+    </main>
+  </>;
+}
+
+function AccountPage() {
+  const { isLoaded, isSignedIn } = useUser();
+  if (!isLoaded) return <div className="account-shell"><main className="account-main">Loading account…</main></div>;
+  return <div className="account-shell">
+    {isSignedIn
+      ? <AccountContent />
+      : <><header className="account-header"><Link href="/" className="checkout-logo">Objet Décoratif</Link></header><main className="account-main"><h1>Please sign in.</h1><Link href="/sign-in" className="solid-button">Sign in</Link></main></>}
+  </div>;
+}
+
+function AdminContent() {
+  const me = useGetMe();
+  const orders = useListAdminOrders();
+  const users = useListAdminUsers();
+  const updateStatus = useUpdateOrderStatus();
+  const changeStatus = async (id: number, status: OrderStatus) => {
+    await updateStatus.mutateAsync({ id, data: { status } });
+    await orders.refetch();
+  };
+  if (me.isLoading) return <div className="account-shell"><main className="account-main">Loading…</main></div>;
+  if (me.data?.role !== 'admin') return <div className="account-shell"><main className="account-main"><h1>Admin access required.</h1><Link href="/account">Return to account</Link></main></div>;
+  const revenue = orders.data?.filter((order) => order.status !== 'cancelled').reduce((sum, order) => sum + order.total, 0) ?? 0;
+  return <div className="account-shell admin-shell">
+    <header className="account-header"><Link href="/" className="checkout-logo">Objet Décoratif</Link><div className="account-header-actions"><Link href="/account">Customer view</Link><UserButton /></div></header>
+    <main className="admin-main">
+      <div className="admin-heading"><div><span className="section-kicker">Administration</span><h1>Orders</h1></div><p>Manage customers and fulfilment.</p></div>
+      <div className="admin-stats">
+        <div><span>Orders</span><strong>{orders.data?.length ?? 0}</strong></div>
+        <div><span>Customers</span><strong>{users.data?.filter((user) => user.role === 'customer').length ?? 0}</strong></div>
+        <div><span>Order value</span><strong>€{revenue.toFixed(2)}</strong></div>
+      </div>
+      <section className="admin-panel"><h2>All orders</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>{orders.data?.map((order) => <tr key={order.id}><td><strong>{order.orderNumber}</strong><small>{new Date(order.createdAt).toLocaleDateString('de-DE')}</small></td><td>{order.customerName}<small>{order.customerEmail}</small></td><td>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td><td>€{order.total.toFixed(2)}</td><td><select value={order.status} onChange={(event) => changeStatus(order.id, event.target.value as OrderStatus)}><option value="new">New</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></td></tr>)}</tbody>
+        </table></div>
+      </section>
+      <section className="admin-panel"><h2>Users</h2>
+        <div className="admin-users">{users.data?.map((user) => <div key={user.id}><span><strong>{user.name || 'Unnamed customer'}</strong><small>{user.email} · {user.role}</small></span><span>{user.orderCount} orders</span><b>€{user.totalSpent.toFixed(2)}</b></div>)}</div>
+      </section>
+    </main>
+  </div>;
+}
+
+function AdminPage() {
+  const { isLoaded, isSignedIn } = useUser();
+  if (!isLoaded) return <div className="account-shell"><main className="account-main">Loading administration…</main></div>;
+  if (!isSignedIn) return <div className="account-shell"><main className="account-main"><h1>Please sign in.</h1><Link href="/sign-in" className="solid-button">Sign in</Link></main></div>;
+  return <AdminContent />;
+}
+
 function Router() {
-  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route path="/terms" component={TermsPage} /><Route path="/privacy-policy" component={PrivacyPolicyPage} /><Route path="/shipping-policy" component={ShippingPolicyPage} /><Route path="/returns" component={ReturnsPolicyPage} /><Route path="/legal-notice" component={LegalNoticePage} /><Route path="/contact" component={ContactPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
+  return <ErrorBoundary><Switch><Route path="/" component={Store} /><Route path="/checkout" component={CheckoutPage} /><Route path="/sign-in/*?">{() => <AuthPage mode="sign-in" />}</Route><Route path="/sign-up/*?">{() => <AuthPage mode="sign-up" />}</Route><Route path="/account" component={AccountPage} /><Route path="/admin" component={AdminPage} /><Route path="/care" component={CarePage} /><Route path="/about" component={AboutPage} /><Route path="/terms" component={TermsPage} /><Route path="/privacy-policy" component={PrivacyPolicyPage} /><Route path="/shipping-policy" component={ShippingPolicyPage} /><Route path="/returns" component={ReturnsPolicyPage} /><Route path="/legal-notice" component={LegalNoticePage} /><Route path="/contact" component={ContactPage} /><Route component={NotFound} /></Switch></ErrorBoundary>;
 }
 
 function ScrollToTop() {
@@ -1377,7 +1521,7 @@ function ScrollToTop() {
 }
 
 function App() {
-  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><ScrollToTop /><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={basePath}><ScrollToTop /><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
 }
 
 export default App;
