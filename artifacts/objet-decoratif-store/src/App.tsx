@@ -39,13 +39,7 @@ import {
   shippingPolicyData,
   termsPolicyData,
 } from "@/policy-content";
-import {
-  Link,
-  Route,
-  Switch,
-  Router as WouterRouter,
-  useLocation,
-} from "wouter";
+import { Link, Route, Switch, useLocation } from "wouter";
 
 type ProductCollection =
   "Barrique" | "Milano" | "Boite" | "Chateu" | "Elephant" | "Sakura" | "Refill";
@@ -3216,10 +3210,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={basePath}>
-          <ScrollToTop />
-          <Router />
-        </WouterRouter>
+        <ScrollToTop />
+        <Router />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
