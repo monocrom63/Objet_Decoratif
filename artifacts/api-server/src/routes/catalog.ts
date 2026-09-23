@@ -20,7 +20,7 @@ import {
 } from "@workspace/api-zod";
 import { currentUser } from "./commerce";
 import {
-  deleteUnreferencedCatalogImages,
+  enqueueCatalogImageCleanup,
 } from "../lib/catalogImageCleanup";
 import {
   removedProductImagePaths,
@@ -36,23 +36,6 @@ async function validScentIds(ids: string[]) {
   const scents = await db.select({ id: scentsTable.id }).from(scentsTable);
   const valid = new Set(scents.map((s) => s.id));
   return ids.every((id) => valid.has(id));
-}
-
-async function cleanupCatalogImages(
-  req: Parameters<typeof currentUser>[0],
-  candidatePaths: Iterable<string>,
-) {
-  try {
-    const deleted = await deleteUnreferencedCatalogImages(candidatePaths);
-    if (deleted.length) {
-      req.log.info(
-        { deleted },
-        "Removed unreferenced catalog images",
-      );
-    }
-  } catch (error) {
-    req.log.warn({ err: error }, "Catalog image cleanup failed");
-  }
 }
 
 router.get("/catalog", async (_req, res): Promise<void> => {
@@ -131,8 +114,7 @@ router.patch("/admin/catalog/products/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Product not found" });
     return;
   }
-  await cleanupCatalogImages(
-    req,
+  enqueueCatalogImageCleanup(
     removedProductImagePaths(existing?.imagePaths ?? [], product.imagePaths),
   );
   res.json(UpdateProductResponse.parse(product));
@@ -157,7 +139,7 @@ router.delete(
       res.status(404).json({ error: "Product not found" });
       return;
     }
-    await cleanupCatalogImages(req, product.imagePaths);
+    enqueueCatalogImageCleanup(product.imagePaths);
     res.sendStatus(204);
   },
 );
@@ -210,8 +192,7 @@ router.patch("/admin/catalog/scents/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Scent not found" });
     return;
   }
-  await cleanupCatalogImages(
-    req,
+  enqueueCatalogImageCleanup(
     replacedScentImagePaths(existing?.imagePath, scent.imagePath),
   );
   res.json(UpdateScentResponse.parse(scent));
@@ -234,7 +215,7 @@ router.delete("/admin/catalog/scents/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Scent not found" });
     return;
   }
-  await cleanupCatalogImages(req, scent.imagePath ? [scent.imagePath] : []);
+  enqueueCatalogImageCleanup(scent.imagePath ? [scent.imagePath] : []);
   res.sendStatus(204);
 });
 export default router;

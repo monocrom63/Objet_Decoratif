@@ -16,6 +16,8 @@ import {
 const storage = new ObjectStorageService();
 const DEFAULT_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const MINIMUM_CLEANUP_INTERVAL_MS = 60 * 1000;
+const CATALOG_IMAGE_CLEANUP_INITIAL_RETRY_MS = 1_000;
+const CATALOG_IMAGE_CLEANUP_MAX_RETRY_MS = 5 * 60 * 1000;
 
 export interface CatalogUploadCleanupResult {
   scanned: number;
@@ -24,6 +26,10 @@ export interface CatalogUploadCleanupResult {
 }
 
 let cleanupInFlight: Promise<CatalogUploadCleanupResult> | null = null;
+const pendingCatalogImageCleanupPaths = new Set<string>();
+let catalogImageCleanupTimer: NodeJS.Timeout | null = null;
+let catalogImageCleanupInFlight = false;
+let catalogImageCleanupAttempt = 0;
 
 async function referencedCatalogImagePaths(): Promise<Set<string>> {
   const [products, scents] = await Promise.all([
@@ -53,6 +59,71 @@ export async function deleteUnreferencedCatalogImages(
     if (await storage.deleteObjectEntity(path)) deleted.push(path);
   }
   return deleted;
+}
+
+function scheduleCatalogImageCleanup(delayMs: number): void {
+  if (catalogImageCleanupTimer || catalogImageCleanupInFlight) return;
+
+  catalogImageCleanupTimer = setTimeout(() => {
+    catalogImageCleanupTimer = null;
+    void runQueuedCatalogImageCleanup();
+  }, delayMs);
+  catalogImageCleanupTimer.unref();
+}
+
+async function runQueuedCatalogImageCleanup(): Promise<void> {
+  if (pendingCatalogImageCleanupPaths.size === 0) {
+    catalogImageCleanupAttempt = 0;
+    return;
+  }
+
+  catalogImageCleanupInFlight = true;
+  const candidates = Array.from(pendingCatalogImageCleanupPaths);
+  candidates.forEach((path) => pendingCatalogImageCleanupPaths.delete(path));
+
+  try {
+    const deleted = await deleteUnreferencedCatalogImages(candidates);
+    catalogImageCleanupAttempt = 0;
+    if (deleted.length) {
+      logger.info({ deleted }, "Removed unreferenced catalog images");
+    }
+  } catch (error) {
+    candidates.forEach((path) => pendingCatalogImageCleanupPaths.add(path));
+    catalogImageCleanupAttempt += 1;
+    const retryDelayMs = Math.min(
+      CATALOG_IMAGE_CLEANUP_INITIAL_RETRY_MS *
+        2 ** Math.min(catalogImageCleanupAttempt - 1, 18),
+      CATALOG_IMAGE_CLEANUP_MAX_RETRY_MS,
+    );
+    logger.warn(
+      {
+        err: error,
+        candidateCount: candidates.length,
+        attempt: catalogImageCleanupAttempt,
+        retryDelayMs,
+      },
+      "Catalog image cleanup failed; retry scheduled",
+    );
+    catalogImageCleanupInFlight = false;
+    scheduleCatalogImageCleanup(retryDelayMs);
+    return;
+  }
+
+  catalogImageCleanupInFlight = false;
+  if (pendingCatalogImageCleanupPaths.size > 0) {
+    scheduleCatalogImageCleanup(0);
+  }
+}
+
+export function enqueueCatalogImageCleanup(
+  candidatePaths: Iterable<string>,
+): void {
+  for (const path of candidatePaths) {
+    pendingCatalogImageCleanupPaths.add(path);
+  }
+  if (pendingCatalogImageCleanupPaths.size > 0) {
+    scheduleCatalogImageCleanup(0);
+  }
 }
 
 async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadCleanupResult> {
