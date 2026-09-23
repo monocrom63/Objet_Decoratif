@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request } from "express";
 import { clerkClient, getAuth } from "@clerk/express";
-import { db, ordersTable, usersTable, type StoreOrder } from "@workspace/db";
+import { db, ordersTable, usersTable, productsTable, type StoreOrder } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
 import {
   CreateOrderBody,
@@ -15,17 +15,7 @@ import {
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
-const productPrices: Record<string, { name: string; cents: number }> = {
-  barrique: { name: "Barrique", cents: 6800 },
-  milano: { name: "Milano", cents: 8200 },
-  boite: { name: "Boite", cents: 8600 },
-  chateu: { name: "Chateu", cents: 8800 },
-  elephant: { name: "Elephant", cents: 9400 },
-  sakura: { name: "Sakura", cents: 8200 },
-  refill: { name: "Refill", cents: 3800 },
-};
-
-async function currentUser(req: Request) {
+export async function currentUser(req: Request) {
   const auth = getAuth(req);
   if (!auth.userId) return null;
   const existing = await db.select().from(usersTable).where(eq(usersTable.clerkUserId, auth.userId)).limit(1);
@@ -89,10 +79,11 @@ router.post("/orders", async (req, res): Promise<void> => {
   if (!user) { res.status(401).json({ error: "Sign in before placing an order" }); return; }
   const parsed = CreateOrderBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+  const catalogProducts = await db.select().from(productsTable);
   const items = parsed.data.items.map((item) => {
-    const product = productPrices[item.productId];
-    if (!product) throw new Error(`Unknown product: ${item.productId}`);
-    return { productId: item.productId, name: product.name, scent: item.scent, quantity: item.quantity, unitPrice: product.cents / 100, lineTotal: product.cents * item.quantity / 100 };
+    const product = catalogProducts.find((entry) => entry.id === item.productId && entry.active && entry.published);
+    if (!product) throw new Error(`Unknown or unavailable product: ${item.productId}`);
+    return { productId: item.productId, name: product.name, scent: item.scent, quantity: item.quantity, unitPrice: product.priceCents / 100, lineTotal: product.priceCents * item.quantity / 100 };
   });
   const subtotalCents = Math.round(items.reduce((sum, item) => sum + item.lineTotal, 0) * 100);
   const shippingCents = 800;

@@ -10,6 +10,8 @@ tags:
   - name: account
   - name: orders
   - name: admin
+  - name: catalog
+  - name: Storage
 paths:
   /healthz:
     get:
@@ -109,6 +111,105 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/AdminUser" }
         "403": { description: Admin only }
+  /catalog:
+    get:
+      operationId: getCatalog
+      tags: [catalog]
+      responses:
+        "200":
+          description: Published storefront catalog
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Catalog" }
+  /admin/catalog/products:
+    get:
+      operationId: listAdminProducts
+      tags: [admin]
+      responses:
+        "200": { description: Products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Product" } } } } }
+    post:
+      operationId: createProduct
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }
+  /admin/catalog/products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [admin]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }
+    delete:
+      operationId: deleteProduct
+      tags: [admin]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "204": { description: Deleted } }
+  /admin/catalog/scents:
+    get:
+      operationId: listAdminScents
+      tags: [admin]
+      responses:
+        "200": { description: Scents, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Scent" } } } } }
+    post:
+      operationId: createScent
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScentInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Scent" } } } }
+  /admin/catalog/scents/{id}:
+    patch:
+      operationId: updateScent
+      tags: [admin]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScentUpdate" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Scent" } } } }
+    delete:
+      operationId: deleteScent
+      tags: [admin]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "204": { description: Deleted } }
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UploadUrlRequest" }
+      responses:
+        "200": { description: Upload URL, content: { application/json: { schema: { $ref: "#/components/schemas/UploadUrlResponse" } } } }
+  /storage/public-objects/{filePath}:
+    get:
+      operationId: getPublicObject
+      tags: [Storage]
+      parameters: [{ in: path, name: filePath, required: true, schema: { type: string } }]
+      responses: { "200": { description: Public object } }
+  /storage/objects/{objectPath}:
+    get:
+      operationId: getStorageObject
+      tags: [Storage]
+      parameters: [{ in: path, name: objectPath, required: true, schema: { type: string } }]
+      responses: { "200": { description: Object } }
 components:
   schemas:
     HealthStatus:
@@ -194,3 +295,106 @@ components:
         items:
           type: array
           items: { $ref: "#/components/schemas/OrderItem" }
+    Scent:
+      type: object
+      required: [id, name, notes, description, imagePath, active, published, sortOrder]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        notes: { type: string }
+        description: { type: string }
+        imagePath: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+    ScentInput:
+      type: object
+      required: [id, name, notes, description]
+      properties:
+        id: { type: string, minLength: 1 }
+        name: { type: string }
+        notes: { type: string }
+        description: { type: string }
+        imagePath: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+    ScentUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        notes: { type: string }
+        description: { type: string }
+        imagePath: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+    Product:
+      type: object
+      required: [id, name, collection, category, description, explanation, priceCents, tag, active, published, sortOrder, imagePaths, scentIds]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        collection: { type: string }
+        category: { type: string }
+        description: { type: string }
+        explanation: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        tag: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+        imagePaths: { type: array, items: { type: string } }
+        scentIds: { type: array, items: { type: string } }
+    ProductInput:
+      type: object
+      required: [id, name, collection, category, description, explanation, priceCents, imagePaths, scentIds]
+      properties:
+        id: { type: string, minLength: 1 }
+        name: { type: string }
+        collection: { type: string }
+        category: { type: string }
+        description: { type: string }
+        explanation: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        tag: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+        imagePaths: { type: array, items: { type: string } }
+        scentIds: { type: array, items: { type: string } }
+    ProductUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        collection: { type: string }
+        category: { type: string }
+        description: { type: string }
+        explanation: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        tag: { type: ["string", "null"] }
+        active: { type: boolean }
+        published: { type: boolean }
+        sortOrder: { type: integer }
+        imagePaths: { type: array, items: { type: string } }
+        scentIds: { type: array, items: { type: string } }
+    Catalog:
+      type: object
+      required: [products, scents]
+      properties:
+        products: { type: array, items: { $ref: "#/components/schemas/Product" } }
+        scents: { type: array, items: { $ref: "#/components/schemas/Scent" } }
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string, minLength: 1 }
+        size: { type: integer, minimum: 1 }
+        contentType: { type: string, minLength: 1 }
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath, metadata]
+      properties:
+        uploadURL: { type: string, format: uri }
+        objectPath: { type: string }
+        metadata: { $ref: "#/components/schemas/UploadUrlRequest" }

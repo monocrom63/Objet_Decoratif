@@ -41,29 +41,16 @@ import {
   termsPolicyData,
 } from "@/policy-content";
 import { Link, Route, Switch, useLocation } from "wouter";
+import {
+  useCatalogFrontend,
+  type FrontendProduct as Product,
+  type ScentOption,
+  type ProductCollection,
+} from "@/lib/catalog";
+import { CatalogCms } from "@/components/admin/catalog-cms";
+import { useGetCatalog } from "@workspace/api-client-react";
 
-type ProductCollection =
-  "Barrique" | "Milano" | "Boite" | "Chateu" | "Elephant" | "Sakura" | "Refill";
-type Product = {
-  id: string;
-  name: string;
-  collection: ProductCollection;
-  description: string;
-  explanation: string;
-  price: number;
-  art: string;
-  tag?: string;
-  scents: string[];
-  images?: string[];
-  scentOptions?: ScentOption[];
-};
 type CartLine = { product: Product; scent: string; quantity: number };
-type ScentOption = {
-  name: string;
-  notes: string;
-  description: string;
-  image?: string;
-};
 
 const imagePath = (fileName: string) =>
   `${import.meta.env.BASE_URL}images/products/${fileName}`;
@@ -79,192 +66,6 @@ const careImages = [
   {
     src: careImagePath("care-02.webp"),
     alt: "Candle vessel viewed from above with a wooden wick",
-  },
-];
-
-const milanoScents: ScentOption[] = [
-  {
-    name: "Thé",
-    notes: "Bergamot / Mate tea / Green tea / Clove",
-    description:
-      "Rose, lavandin and tea leaves open into patchouli, cedarwood and woody amber.",
-    image: imagePath("the-scent.webp"),
-  },
-  {
-    name: "Santal Cruz",
-    notes: "Cardamom / Frankincense / Sandalwood",
-    description:
-      "Myrtle, jasmine and white florals rest on sandalwood, amber and vanilla.",
-    image: imagePath("santal-cruz-scent.webp"),
-  },
-  {
-    name: "Tropicale",
-    notes: "Passion fruit / Citrus / Pepper / Clove",
-    description:
-      "Passion fruit and citrus brighten a heart of pepper and clove, grounded by guaiac wood and cedar.",
-    image: imagePath("tropicale-scent.webp"),
-  },
-  {
-    name: "Cedar Salad",
-    notes: "Ginger / Gurjum / Alaskan cedar",
-    description:
-      "Iris root, violet blossom and vanilla lead into Atlas cedar and Virginia cedar.",
-    image: imagePath("cedar-salad-scent.webp"),
-  },
-];
-
-const products: Product[] = [
-  {
-    id: "barrique",
-    name: "Barrique",
-    collection: "Barrique",
-    description: "Compact, soft and perfectly balanced",
-    explanation:
-      "A compact concrete form with a soft silhouette. Barrique is made to stay on the shelf between burns and return to the ritual whenever you need it.",
-    price: 68,
-    art: "art-barrique",
-    tag: "The original",
-    images: [
-      imagePath("barrique-01.webp"),
-      imagePath("barrique-02.webp"),
-      imagePath("barrique-03.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "milano",
-    name: "Milano",
-    collection: "Milano",
-    description: "A taller study in quiet proportion",
-    explanation:
-      "Milano is a taller, architectural vessel with a hand-finished grid texture. Choose the atmosphere, light the form, and refill it when the wax is gone.",
-    price: 82,
-    art: "art-milano",
-    tag: "New form",
-    images: [
-      imagePath("milano-01.webp"),
-      imagePath("milano-02.webp"),
-      imagePath("milano-03.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "boite",
-    name: "Boite",
-    collection: "Boite",
-    description: "A dark, tactile form with a softened grid",
-    explanation:
-      "Boite turns a compact silhouette into a study of shadow and texture. Its rounded grid catches the light differently from every angle, making the vessel feel quietly alive between burns.",
-    price: 86,
-    art: "art-boite",
-    tag: "New form",
-    images: [
-      imagePath("boite-01.webp"),
-      imagePath("boite-02.webp"),
-      imagePath("boite-03.webp"),
-      imagePath("boite-04.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "chateu",
-    name: "Chateu",
-    collection: "Chateu",
-    description: "A pale vessel drawn in fine vertical lines",
-    explanation:
-      "Chateu is shaped around rhythm: a fluted body, a quiet lid, and a soft architectural profile. A light, composed form for shelves, tables and slow evenings.",
-    price: 88,
-    art: "art-chateu",
-    tag: "New form",
-    images: [
-      imagePath("chateu-01.webp"),
-      imagePath("chateu-02.webp"),
-      imagePath("chateu-03.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "elephant",
-    name: "Elephant",
-    collection: "Elephant",
-    description: "A grounded sculptural form with a strong presence",
-    explanation:
-      "Elephant is an object with weight and character. Its generous silhouette is made to hold attention even when the flame is out, then return to the ritual whenever the room needs warmth.",
-    price: 94,
-    art: "art-elephant",
-    tag: "New form",
-    images: [
-      imagePath("elephant-01.webp"),
-      imagePath("elephant-02.webp"),
-      imagePath("elephant-03.webp"),
-      imagePath("elephant-04.webp"),
-      imagePath("elephant-05.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "sakura",
-    name: "Sakura",
-    collection: "Sakura",
-    description: "A gentle form with a calm, rounded silhouette",
-    explanation:
-      "Sakura brings a softer line to the collection. Its balanced shape and quiet surface are designed to sit lightly in a room while carrying the atmosphere of the flame.",
-    price: 82,
-    art: "art-sakura",
-    tag: "New form",
-    images: [
-      imagePath("sakura-01.webp"),
-      imagePath("sakura-02.webp"),
-      imagePath("sakura-03.webp"),
-      imagePath("sakura-04.webp"),
-    ],
-    scents: milanoScents.map((scent) => scent.name),
-    scentOptions: milanoScents,
-  },
-  {
-    id: "refill",
-    name: "Refill",
-    collection: "Refill",
-    description: "A new atmosphere for the form you already love",
-    explanation:
-      "Our sculptural candles are designed to last. With a refill, you extend the life of the form quietly and sustainably, without ever replacing the object itself.",
-    price: 38,
-    art: "art-refill",
-    tag: "Refill",
-    images: [
-      imagePath("refill-01.webp"),
-      imagePath("refill-02.webp"),
-      imagePath("refill-03.webp"),
-    ],
-    scents: [
-      "Small / Thé",
-      "Small / Bois Santal",
-      "Small / Tropicale",
-      "Small / Cedar Salad",
-      "Big / Thé",
-      "Big / Bois Santal",
-      "Big / Tropicale",
-      "Big / Cedar Salad",
-    ],
-    scentOptions: [
-      "Small / Thé",
-      "Small / Bois Santal",
-      "Small / Tropicale",
-      "Small / Cedar Salad",
-      "Big / Thé",
-      "Big / Bois Santal",
-      "Big / Tropicale",
-      "Big / Cedar Salad",
-    ].map((name) => ({
-      name,
-      notes: name.startsWith("Small") ? "190g refill" : "245g refill",
-      description: "Hand-poured to renew your sculptural vessel.",
-    })),
   },
 ];
 
@@ -360,6 +161,7 @@ function ScentSelector({
   const options: ScentOption[] =
     product.scentOptions ??
     product.scents.map((name) => ({
+      id: name,
       name,
       notes: "Signature fragrance",
       description: "A considered fragrance for the everyday ritual.",
@@ -470,7 +272,7 @@ function ObjectShowcase({
             <h3>{product.name}</h3>
             <p>{product.description}</p>
           </div>
-          <span className="object-price">${product.price}</span>
+          <span className="object-price">€{product.price}</span>
         </div>
         <div className="object-actions">
           <ScentSelector
@@ -526,7 +328,7 @@ function RefillShowcase({
             <h3>Refill</h3>
             <p>A new atmosphere for the form you already love.</p>
           </div>
-          <span className="object-price">${product.price}</span>
+          <span className="object-price">€{product.price}</span>
         </div>
         <div className="refill-options">
           <span className="option-label">Choose your refill</span>
@@ -592,18 +394,19 @@ function RefillShowcase({
 
 function ScentShowcase({
   product,
+  scents,
   onOpen,
 }: {
   product: Product;
+  scents: ScentOption[];
   onOpen: (p: Product, scent: string) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const selected = milanoScents[activeIndex];
+  const selected = scents[activeIndex];
 
   const changeScent = (direction: number) => {
     setActiveIndex(
-      (current) =>
-        (current + direction + milanoScents.length) % milanoScents.length,
+      (current) => (current + direction + scents.length) % scents.length,
     );
   };
 
@@ -636,7 +439,7 @@ function ScentShowcase({
             role="group"
             aria-label="Signature scent images"
           >
-            {milanoScents.map((option, index) => (
+            {scents.map((option, index) => (
               <img
                 key={option.name}
                 className={`object-photo ${index === activeIndex ? "active" : ""}`}
@@ -646,7 +449,7 @@ function ScentShowcase({
               />
             ))}
             <div className="slide-controls" aria-label="Choose a scent">
-              {milanoScents.map((option, index) => (
+              {scents.map((option, index) => (
                 <button
                   key={option.name}
                   className={`slide-dot ${index === activeIndex ? "active" : ""}`}
@@ -686,7 +489,7 @@ function ScentShowcase({
               </h3>
               <p>245 gram refill · Up to 65H</p>
             </div>
-            <span className="object-price">$38</span>
+            <span className="object-price">€{product.price}</span>
           </div>
           <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
             <span className="scent-showcase-label">The atmosphere</span>
@@ -828,7 +631,7 @@ function Header({
   return (
     <header>
       <div className="announcement">
-        Free shipping on forms & refills over $100
+        Free shipping on forms & refills over €100
       </div>
       <div className="site-header">
         <nav
@@ -972,8 +775,12 @@ function Hero({ onExplore }: { onExplore: () => void }) {
 }
 
 function Collection({
+  products,
+  scents,
   onOpen,
 }: {
+  products: Product[];
+  scents: ScentOption[];
   onOpen: (p: Product, scent: string) => void;
 }) {
   const [filter, setFilter] = useState<"All" | ProductCollection>("All");
@@ -1042,7 +849,11 @@ function Collection({
           )}
         </div>
         {(filter === "All" || filter === "Refill") && refillProduct && (
-          <ScentShowcase product={refillProduct} onOpen={onOpen} />
+          <ScentShowcase
+            product={refillProduct}
+            scents={scents}
+            onOpen={onOpen}
+          />
         )}
       </div>
     </section>
@@ -1106,6 +917,7 @@ function Footer() {
 
 function EditorialPageFrame({ children }: { children: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { products } = useCatalogFrontend();
   return (
     <div className="store-shell editorial-shell">
       <Header
@@ -1115,7 +927,11 @@ function EditorialPageFrame({ children }: { children: ReactNode }) {
         }}
         onSearch={() => setSearchOpen((open) => !open)}
       />
-      <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchPanel
+        products={products}
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
       <main>{children}</main>
       <Footer />
     </div>
@@ -1665,9 +1481,11 @@ function AboutPage() {
 }
 
 function SearchPanel({
+  products,
   open,
   onClose,
 }: {
+  products: Product[];
   open: boolean;
   onClose: () => void;
 }) {
@@ -1778,7 +1596,7 @@ function ProductModal({
           <div className="section-kicker">{product.collection} collection</div>
           <h2>{product.name}</h2>
           <p className="modal-subtitle">{product.description}</p>
-          <div className="modal-price">${product.price} USD</div>
+          <div className="modal-price">€{product.price} EUR</div>
           <span className="option-label">
             {product.id === "refill"
               ? "Choose size & scent"
@@ -1917,7 +1735,7 @@ function CartDrawer({
                   </div>
                 </div>
                 <span className="cart-item-price">
-                  ${line.product.price * line.quantity}
+                  €{line.product.price * line.quantity}
                 </span>
               </div>
             ))
@@ -1927,7 +1745,7 @@ function CartDrawer({
           <div className="drawer-foot">
             <div className="total-line">
               <span>Subtotal</span>
-              <strong data-testid="text-cart-total">${total}</strong>
+              <strong data-testid="text-cart-total">€{total}</strong>
             </div>
             <button
               className="solid-button full-button"
@@ -2671,6 +2489,7 @@ function CheckoutPage() {
 }
 
 function Store() {
+  const { products, scents, isLoading } = useCatalogFrontend();
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [selected, setSelected] = useState<{
@@ -2682,6 +2501,14 @@ function Store() {
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
+  if (isLoading)
+    return (
+      <div className="store-shell">
+        <div className="flex h-screen items-center justify-center">
+          Loading...
+        </div>
+      </div>
+    );
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
   const addToCart = (product: Product, scent: string, quantity: number) => {
     setCart((current) => {
@@ -2717,7 +2544,11 @@ function Store() {
         onCart={() => setCartOpen(true)}
         onSearch={() => setSearchOpen((open) => !open)}
       />
-      <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchPanel
+        products={products}
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
       <main>
         <Hero
           onExplore={() =>
@@ -2751,7 +2582,7 @@ function Store() {
             <p>One beautiful object, many lives.</p>
           </div>
         </section>
-        <Collection onOpen={openProduct} />
+        <Collection products={products} scents={scents} onOpen={openProduct} />
         <section className="newsletter" id="newsletter">
           <h2>Notes from the studio.</h2>
           {subscribed ? (
@@ -3145,6 +2976,9 @@ function AdminContent() {
             </h1>
             <p>Manage customers and fulfillment across the store.</p>
             <div className="account-hero-actions">
+              <Link href="/admin/catalog" className="solid-button">
+                Catalog CMS <ArrowRight size={13} />
+              </Link>
               <Link href="/account" className="outline-button">
                 Customer view <ArrowRight size={13} />
               </Link>
@@ -3324,6 +3158,54 @@ function AdminPage() {
   return <AdminContent />;
 }
 
+function AdminCatalogPage() {
+  const { isLoaded, isSignedIn } = useUser();
+  const me = useGetMe();
+
+  if (!isLoaded || me.isLoading) {
+    return (
+      <EditorialPageFrame>
+        <main className="section">
+          <p>Loading administration…</p>
+        </main>
+      </EditorialPageFrame>
+    );
+  }
+
+  if (!isSignedIn || me.data?.role !== "admin") {
+    return (
+      <EditorialPageFrame>
+        <section className="editorial-hero">
+          <div className="editorial-hero-copy">
+            <div className="section-kicker">
+              Administration / Objet Décoratif
+            </div>
+            <h1>
+              Admin access
+              <br />
+              <em>required.</em>
+            </h1>
+            <div className="account-hero-actions">
+              <Link
+                href={!isSignedIn ? "/sign-in" : "/account"}
+                className="outline-button"
+              >
+                Return <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </EditorialPageFrame>
+    );
+  }
+
+  return (
+    <EditorialPageFrame>
+      <CatalogCms />
+    </EditorialPageFrame>
+  );
+}
+
 function Router() {
   return (
     <ErrorBoundary>
@@ -3334,6 +3216,7 @@ function Router() {
         <Route path="/sign-up/*?">{() => <AuthPage mode="sign-up" />}</Route>
         <Route path="/account" component={AccountPage} />
         <Route path="/admin" component={AdminPage} />
+        <Route path="/admin/catalog" component={AdminCatalogPage} />
         <Route path="/care" component={CarePage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/terms" component={TermsPage} />

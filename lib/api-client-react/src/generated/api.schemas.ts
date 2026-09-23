@@ -116,3 +116,113 @@ export interface Order {
   createdAt: string;
   items: OrderItem[];
 }
+
+export interface Scent {
+  id: string;
+  name: string;
+  notes: string;
+  description: string;
+  /** @nullable */
+  imagePath: string | null;
+  active: boolean;
+  published: boolean;
+  sortOrder: number;
+}
+
+export interface ScentInput {
+  /** @minLength 1 */
+  id: string;
+  name: string;
+  notes: string;
+  description: string;
+  /** @nullable */
+  imagePath?: string | null;
+  active?: boolean;
+  published?: boolean;
+  sortOrder?: number;
+}
+
+export interface ScentUpdate {
+  name?: string;
+  notes?: string;
+  description?: string;
+  /** @nullable */
+  imagePath?: string | null;
+  active?: boolean;
+  published?: boolean;
+  sortOrder?: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  collection: string;
+  category: string;
+  description: string;
+  explanation: string;
+  /** @minimum 0 */
+  priceCents: number;
+  /** @nullable */
+  tag: string | null;
+  active: boolean;
+  published: boolean;
+  sortOrder: number;
+  imagePaths: string[];
+  scentIds: string[];
+}
+
+export interface ProductInput {
+  /** @minLength 1 */
+  id: string;
+  name: string;
+  collection: string;
+  category: string;
+  description: string;
+  explanation: string;
+  /** @minimum 0 */
+  priceCents: number;
+  /** @nullable */
+  tag?: string | null;
+  active?: boolean;
+  published?: boolean;
+  sortOrder?: number;
+  imagePaths: string[];
+  scentIds: string[];
+}
+
+export interface ProductUpdate {
+  name?: string;
+  collection?: string;
+  category?: string;
+  description?: string;
+  explanation?: string;
+  /** @minimum 0 */
+  priceCents?: number;
+  /** @nullable */
+  tag?: string | null;
+  active?: boolean;
+  published?: boolean;
+  sortOrder?: number;
+  imagePaths?: string[];
+  scentIds?: string[];
+}
+
+export interface Catalog {
+  products: Product[];
+  scents: Scent[];
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata: UploadUrlRequest;
+}
