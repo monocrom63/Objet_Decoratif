@@ -248,6 +248,49 @@ export class ObjectStorageService {
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });
   }
+
+  isManagedUploadPath(objectPath: string): boolean {
+    return /^\/objects\/uploads\/[0-9a-f-]+$/i.test(objectPath);
+  }
+
+  async deleteManagedUpload(objectPath: string): Promise<boolean> {
+    if (!this.isManagedUploadPath(objectPath)) {
+      return false;
+    }
+
+    try {
+      const file = await this.getObjectEntityFile(objectPath);
+      await file.delete();
+      return true;
+    } catch (error) {
+      if (error instanceof ObjectNotFoundError) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async listManagedUploads(): Promise<Array<{ objectPath: string; createdAt: Date }>> {
+    let privateObjectDir = this.getPrivateObjectDir();
+    if (!privateObjectDir.endsWith('/')) {
+      privateObjectDir = `${privateObjectDir}/`;
+    }
+    const { bucketName, objectName } = parseObjectPath(`${privateObjectDir}uploads`);
+    const [files] = await objectStorageClient.bucket(bucketName).getFiles({
+      prefix: `${objectName}/`,
+    });
+
+    return files.flatMap((file) => {
+      const id = file.name.slice(`${objectName}/`.length);
+      const objectPath = `/objects/uploads/${id}`;
+      const createdAt = file.metadata.timeCreated
+        ? new Date(file.metadata.timeCreated)
+        : null;
+      return this.isManagedUploadPath(objectPath) && createdAt
+        ? [{ objectPath, createdAt }]
+        : [];
+    });
+  }
 }
 
 function parseObjectPath(path: string): {

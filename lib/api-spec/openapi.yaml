@@ -198,6 +198,24 @@ paths:
             schema: { $ref: "#/components/schemas/UploadUrlRequest" }
       responses:
         "200": { description: Upload URL, content: { application/json: { schema: { $ref: "#/components/schemas/UploadUrlResponse" } } } }
+  /storage/uploads/discard:
+    post:
+      operationId: discardUpload
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StoredObjectPath" }
+      responses:
+        "204": { description: Upload discarded or already absent }
+        "409": { description: Upload is referenced by the catalog }
+  /admin/storage/cleanup-unused-images:
+    post:
+      operationId: cleanupUnusedImages
+      tags: [admin, Storage]
+      responses:
+        "200": { description: Cleanup result, content: { application/json: { schema: { $ref: "#/components/schemas/StorageCleanupResult" } } } }
   /storage/public-objects/{filePath}:
     get:
       operationId: getPublicObject
@@ -217,6 +235,18 @@ components:
       required: [status]
       properties:
         status: { type: string }
+    StoredObjectPath:
+      type: object
+      required: [objectPath]
+      properties:
+        objectPath: { type: string }
+    StorageCleanupResult:
+      type: object
+      required: [scanned, deleted, retained]
+      properties:
+        scanned: { type: integer }
+        deleted: { type: integer }
+        retained: { type: integer }
     Account:
       type: object
       required: [id, email, role]

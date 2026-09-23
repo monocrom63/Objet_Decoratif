@@ -5,445 +5,470 @@
  * Objet Décoratif orders and account API
  * OpenAPI spec version: 0.2.0
  */
-import * as zod from "zod";
+import * as zod from 'zod';
+
 
 export const HealthCheckResponse = zod.object({
-  status: zod.string(),
-});
+  "status": zod.string()
+})
+
 
 export const GetMeResponse = zod.object({
-  id: zod.number().int(),
-  email: zod.string().email(),
-  name: zod.string().nullish(),
-  role: zod.enum(["admin", "customer"]),
-});
+  "id": zod.number().int(),
+  "email": zod.string().email(),
+  "name": zod.string().nullish(),
+  "role": zod.enum(['admin', 'customer'])
+})
+
+
 
 export const listMyOrdersResponseItemsItemOneUnitPriceMin = 0;
 
+
+
 export const ListMyOrdersResponseItem = zod.object({
-  id: zod.number().int(),
-  orderNumber: zod.string(),
-  customerEmail: zod.string().email(),
-  customerName: zod.string(),
-  phone: zod.string(),
-  address: zod.string(),
-  paymentMethod: zod.string(),
-  status: zod.enum(["new", "processing", "shipped", "completed", "cancelled"]),
-  subtotal: zod.number(),
-  shipping: zod.number(),
-  total: zod.number(),
-  createdAt: zod.coerce.date(),
-  items: zod.array(
-    zod
-      .object({
-        productId: zod.string(),
-        name: zod.string(),
-        scent: zod.string(),
-        quantity: zod.number().int().min(1),
-        unitPrice: zod
-          .number()
-          .min(listMyOrdersResponseItemsItemOneUnitPriceMin),
-      })
-      .and(
-        zod.object({
-          id: zod.number().int(),
-          lineTotal: zod.number(),
-        }),
-      ),
-  ),
-});
-export const ListMyOrdersResponse = zod.array(ListMyOrdersResponseItem);
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "customerEmail": zod.string().email(),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "paymentMethod": zod.string(),
+  "status": zod.enum(['new', 'processing', 'shipped', 'completed', 'cancelled']),
+  "subtotal": zod.number(),
+  "shipping": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "name": zod.string(),
+  "scent": zod.string(),
+  "quantity": zod.number().int().min(1),
+  "unitPrice": zod.number().min(listMyOrdersResponseItemsItemOneUnitPriceMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "lineTotal": zod.number()
+})))
+})
+export const ListMyOrdersResponse = zod.array(ListMyOrdersResponseItem)
+
 
 export const createOrderBodyPhoneMin = 6;
 
-export const createOrderBodyCardLastFourRegExp = new RegExp("^[0-9]{4}$");
+export const createOrderBodyCardLastFourRegExp = new RegExp('^[0-9]{4}$');
 
 export const createOrderBodyItemsItemUnitPriceMin = 0;
 
+
+
+
 export const CreateOrderBody = zod.object({
-  email: zod.string().email(),
-  phone: zod.string().min(createOrderBodyPhoneMin),
-  firstName: zod.string(),
-  lastName: zod.string(),
-  company: zod.string().optional(),
-  address: zod.string(),
-  apartment: zod.string().optional(),
-  postalCode: zod.string(),
-  city: zod.string(),
-  country: zod.string(),
-  paymentMethod: zod.enum(["card", "paypal", "klarna"]),
-  cardLastFour: zod.string().regex(createOrderBodyCardLastFourRegExp).nullish(),
-  items: zod
-    .array(
-      zod.object({
-        productId: zod.string(),
-        name: zod.string(),
-        scent: zod.string(),
-        quantity: zod.number().int().min(1),
-        unitPrice: zod.number().min(createOrderBodyItemsItemUnitPriceMin),
-      }),
-    )
-    .min(1),
-});
+  "email": zod.string().email(),
+  "phone": zod.string().min(createOrderBodyPhoneMin),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "company": zod.string().optional(),
+  "address": zod.string(),
+  "apartment": zod.string().optional(),
+  "postalCode": zod.string(),
+  "city": zod.string(),
+  "country": zod.string(),
+  "paymentMethod": zod.enum(['card', 'paypal', 'klarna']),
+  "cardLastFour": zod.string().regex(createOrderBodyCardLastFourRegExp).nullish(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "name": zod.string(),
+  "scent": zod.string(),
+  "quantity": zod.number().int().min(1),
+  "unitPrice": zod.number().min(createOrderBodyItemsItemUnitPriceMin)
+})).min(1)
+})
+
 
 export const createOrderResponseItemsItemOneUnitPriceMin = 0;
 
+
+
 export const CreateOrderResponse = zod.object({
-  id: zod.number().int(),
-  orderNumber: zod.string(),
-  customerEmail: zod.string().email(),
-  customerName: zod.string(),
-  phone: zod.string(),
-  address: zod.string(),
-  paymentMethod: zod.string(),
-  status: zod.enum(["new", "processing", "shipped", "completed", "cancelled"]),
-  subtotal: zod.number(),
-  shipping: zod.number(),
-  total: zod.number(),
-  createdAt: zod.coerce.date(),
-  items: zod.array(
-    zod
-      .object({
-        productId: zod.string(),
-        name: zod.string(),
-        scent: zod.string(),
-        quantity: zod.number().int().min(1),
-        unitPrice: zod
-          .number()
-          .min(createOrderResponseItemsItemOneUnitPriceMin),
-      })
-      .and(
-        zod.object({
-          id: zod.number().int(),
-          lineTotal: zod.number(),
-        }),
-      ),
-  ),
-});
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "customerEmail": zod.string().email(),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "paymentMethod": zod.string(),
+  "status": zod.enum(['new', 'processing', 'shipped', 'completed', 'cancelled']),
+  "subtotal": zod.number(),
+  "shipping": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "name": zod.string(),
+  "scent": zod.string(),
+  "quantity": zod.number().int().min(1),
+  "unitPrice": zod.number().min(createOrderResponseItemsItemOneUnitPriceMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "lineTotal": zod.number()
+})))
+})
+
+
 
 export const listAdminOrdersResponseItemsItemOneUnitPriceMin = 0;
 
+
+
 export const ListAdminOrdersResponseItem = zod.object({
-  id: zod.number().int(),
-  orderNumber: zod.string(),
-  customerEmail: zod.string().email(),
-  customerName: zod.string(),
-  phone: zod.string(),
-  address: zod.string(),
-  paymentMethod: zod.string(),
-  status: zod.enum(["new", "processing", "shipped", "completed", "cancelled"]),
-  subtotal: zod.number(),
-  shipping: zod.number(),
-  total: zod.number(),
-  createdAt: zod.coerce.date(),
-  items: zod.array(
-    zod
-      .object({
-        productId: zod.string(),
-        name: zod.string(),
-        scent: zod.string(),
-        quantity: zod.number().int().min(1),
-        unitPrice: zod
-          .number()
-          .min(listAdminOrdersResponseItemsItemOneUnitPriceMin),
-      })
-      .and(
-        zod.object({
-          id: zod.number().int(),
-          lineTotal: zod.number(),
-        }),
-      ),
-  ),
-});
-export const ListAdminOrdersResponse = zod.array(ListAdminOrdersResponseItem);
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "customerEmail": zod.string().email(),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "paymentMethod": zod.string(),
+  "status": zod.enum(['new', 'processing', 'shipped', 'completed', 'cancelled']),
+  "subtotal": zod.number(),
+  "shipping": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "name": zod.string(),
+  "scent": zod.string(),
+  "quantity": zod.number().int().min(1),
+  "unitPrice": zod.number().min(listAdminOrdersResponseItemsItemOneUnitPriceMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "lineTotal": zod.number()
+})))
+})
+export const ListAdminOrdersResponse = zod.array(ListAdminOrdersResponseItem)
+
 
 export const UpdateOrderStatusParams = zod.object({
-  id: zod.coerce.number().int(),
-});
+  "id": zod.coerce.number().int()
+})
 
 export const UpdateOrderStatusBody = zod.object({
-  status: zod.enum(["new", "processing", "shipped", "completed", "cancelled"]),
-});
+  "status": zod.enum(['new', 'processing', 'shipped', 'completed', 'cancelled'])
+})
+
 
 export const updateOrderStatusResponseItemsItemOneUnitPriceMin = 0;
 
-export const UpdateOrderStatusResponse = zod.object({
-  id: zod.number().int(),
-  orderNumber: zod.string(),
-  customerEmail: zod.string().email(),
-  customerName: zod.string(),
-  phone: zod.string(),
-  address: zod.string(),
-  paymentMethod: zod.string(),
-  status: zod.enum(["new", "processing", "shipped", "completed", "cancelled"]),
-  subtotal: zod.number(),
-  shipping: zod.number(),
-  total: zod.number(),
-  createdAt: zod.coerce.date(),
-  items: zod.array(
-    zod
-      .object({
-        productId: zod.string(),
-        name: zod.string(),
-        scent: zod.string(),
-        quantity: zod.number().int().min(1),
-        unitPrice: zod
-          .number()
-          .min(updateOrderStatusResponseItemsItemOneUnitPriceMin),
-      })
-      .and(
-        zod.object({
-          id: zod.number().int(),
-          lineTotal: zod.number(),
-        }),
-      ),
-  ),
-});
 
-export const ListAdminUsersResponseItem = zod
-  .object({
-    id: zod.number().int(),
-    email: zod.string().email(),
-    name: zod.string().nullish(),
-    role: zod.enum(["admin", "customer"]),
-  })
-  .and(
-    zod.object({
-      orderCount: zod.number().int(),
-      totalSpent: zod.number(),
-      createdAt: zod.coerce.date(),
-    }),
-  );
-export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem);
+
+export const UpdateOrderStatusResponse = zod.object({
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "customerEmail": zod.string().email(),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "paymentMethod": zod.string(),
+  "status": zod.enum(['new', 'processing', 'shipped', 'completed', 'cancelled']),
+  "subtotal": zod.number(),
+  "shipping": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "name": zod.string(),
+  "scent": zod.string(),
+  "quantity": zod.number().int().min(1),
+  "unitPrice": zod.number().min(updateOrderStatusResponseItemsItemOneUnitPriceMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "lineTotal": zod.number()
+})))
+})
+
+
+export const ListAdminUsersResponseItem = zod.object({
+  "id": zod.number().int(),
+  "email": zod.string().email(),
+  "name": zod.string().nullish(),
+  "role": zod.enum(['admin', 'customer'])
+}).and(zod.object({
+  "orderCount": zod.number().int(),
+  "totalSpent": zod.number(),
+  "createdAt": zod.coerce.date()
+}))
+export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
+
 
 export const getCatalogResponseProductsItemPriceCentsMin = 0;
 
+
+
 export const GetCatalogResponse = zod.object({
-  products: zod.array(
-    zod.object({
-      id: zod.string(),
-      name: zod.string(),
-      collection: zod.string(),
-      category: zod.string(),
-      description: zod.string(),
-      explanation: zod.string(),
-      priceCents: zod
-        .number()
-        .int()
-        .min(getCatalogResponseProductsItemPriceCentsMin),
-      tag: zod.string().nullable(),
-      active: zod.boolean(),
-      published: zod.boolean(),
-      sortOrder: zod.number().int(),
-      imagePaths: zod.array(zod.string()),
-      scentIds: zod.array(zod.string()),
-    }),
-  ),
-  scents: zod.array(
-    zod.object({
-      id: zod.string(),
-      name: zod.string(),
-      notes: zod.string(),
-      description: zod.string(),
-      imagePath: zod.string().nullable(),
-      active: zod.boolean(),
-      published: zod.boolean(),
-      sortOrder: zod.number().int(),
-    }),
-  ),
-});
+  "products": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(getCatalogResponseProductsItemPriceCentsMin),
+  "tag": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})),
+  "scents": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int()
+}))
+})
+
 
 export const listAdminProductsResponsePriceCentsMin = 0;
 
+
+
 export const ListAdminProductsResponseItem = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  collection: zod.string(),
-  category: zod.string(),
-  description: zod.string(),
-  explanation: zod.string(),
-  priceCents: zod.number().int().min(listAdminProductsResponsePriceCentsMin),
-  tag: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-  imagePaths: zod.array(zod.string()),
-  scentIds: zod.array(zod.string()),
-});
-export const ListAdminProductsResponse = zod.array(
-  ListAdminProductsResponseItem,
-);
+  "id": zod.string(),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(listAdminProductsResponsePriceCentsMin),
+  "tag": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})
+export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)
+
+
 
 export const createProductBodyPriceCentsMin = 0;
 
+
+
 export const CreateProductBody = zod.object({
-  id: zod.string().min(1),
-  name: zod.string(),
-  collection: zod.string(),
-  category: zod.string(),
-  description: zod.string(),
-  explanation: zod.string(),
-  priceCents: zod.number().int().min(createProductBodyPriceCentsMin),
-  tag: zod.string().nullish(),
-  active: zod.boolean().optional(),
-  published: zod.boolean().optional(),
-  sortOrder: zod.number().int().optional(),
-  imagePaths: zod.array(zod.string()),
-  scentIds: zod.array(zod.string()),
-});
+  "id": zod.string().min(1),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(createProductBodyPriceCentsMin),
+  "tag": zod.string().nullish(),
+  "active": zod.boolean().optional(),
+  "published": zod.boolean().optional(),
+  "sortOrder": zod.number().int().optional(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})
 
 export const createProductResponsePriceCentsMin = 0;
 
+
+
 export const CreateProductResponse = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  collection: zod.string(),
-  category: zod.string(),
-  description: zod.string(),
-  explanation: zod.string(),
-  priceCents: zod.number().int().min(createProductResponsePriceCentsMin),
-  tag: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-  imagePaths: zod.array(zod.string()),
-  scentIds: zod.array(zod.string()),
-});
+  "id": zod.string(),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(createProductResponsePriceCentsMin),
+  "tag": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})
+
 
 export const UpdateProductParams = zod.object({
-  id: zod.coerce.string(),
-});
+  "id": zod.coerce.string()
+})
 
 export const updateProductBodyPriceCentsMin = 0;
 
+
+
 export const UpdateProductBody = zod.object({
-  name: zod.string().optional(),
-  collection: zod.string().optional(),
-  category: zod.string().optional(),
-  description: zod.string().optional(),
-  explanation: zod.string().optional(),
-  priceCents: zod.number().int().min(updateProductBodyPriceCentsMin).optional(),
-  tag: zod.string().nullish(),
-  active: zod.boolean().optional(),
-  published: zod.boolean().optional(),
-  sortOrder: zod.number().int().optional(),
-  imagePaths: zod.array(zod.string()).optional(),
-  scentIds: zod.array(zod.string()).optional(),
-});
+  "name": zod.string().optional(),
+  "collection": zod.string().optional(),
+  "category": zod.string().optional(),
+  "description": zod.string().optional(),
+  "explanation": zod.string().optional(),
+  "priceCents": zod.number().int().min(updateProductBodyPriceCentsMin).optional(),
+  "tag": zod.string().nullish(),
+  "active": zod.boolean().optional(),
+  "published": zod.boolean().optional(),
+  "sortOrder": zod.number().int().optional(),
+  "imagePaths": zod.array(zod.string()).optional(),
+  "scentIds": zod.array(zod.string()).optional()
+})
 
 export const updateProductResponsePriceCentsMin = 0;
 
+
+
 export const UpdateProductResponse = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  collection: zod.string(),
-  category: zod.string(),
-  description: zod.string(),
-  explanation: zod.string(),
-  priceCents: zod.number().int().min(updateProductResponsePriceCentsMin),
-  tag: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-  imagePaths: zod.array(zod.string()),
-  scentIds: zod.array(zod.string()),
-});
+  "id": zod.string(),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(updateProductResponsePriceCentsMin),
+  "tag": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})
+
 
 export const DeleteProductParams = zod.object({
-  id: zod.coerce.string(),
-});
+  "id": zod.coerce.string()
+})
 
-export const DeleteProductResponse = zod.void();
+export const DeleteProductResponse = zod.void()
+
 
 export const ListAdminScentsResponseItem = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  notes: zod.string(),
-  description: zod.string(),
-  imagePath: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-});
-export const ListAdminScentsResponse = zod.array(ListAdminScentsResponseItem);
+  "id": zod.string(),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int()
+})
+export const ListAdminScentsResponse = zod.array(ListAdminScentsResponseItem)
+
+
+
+
 
 export const CreateScentBody = zod.object({
-  id: zod.string().min(1),
-  name: zod.string(),
-  notes: zod.string(),
-  description: zod.string(),
-  imagePath: zod.string().nullish(),
-  active: zod.boolean().optional(),
-  published: zod.boolean().optional(),
-  sortOrder: zod.number().int().optional(),
-});
+  "id": zod.string().min(1),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullish(),
+  "active": zod.boolean().optional(),
+  "published": zod.boolean().optional(),
+  "sortOrder": zod.number().int().optional()
+})
 
 export const CreateScentResponse = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  notes: zod.string(),
-  description: zod.string(),
-  imagePath: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-});
+  "id": zod.string(),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int()
+})
+
 
 export const UpdateScentParams = zod.object({
-  id: zod.coerce.string(),
-});
+  "id": zod.coerce.string()
+})
 
 export const UpdateScentBody = zod.object({
-  name: zod.string().optional(),
-  notes: zod.string().optional(),
-  description: zod.string().optional(),
-  imagePath: zod.string().nullish(),
-  active: zod.boolean().optional(),
-  published: zod.boolean().optional(),
-  sortOrder: zod.number().int().optional(),
-});
+  "name": zod.string().optional(),
+  "notes": zod.string().optional(),
+  "description": zod.string().optional(),
+  "imagePath": zod.string().nullish(),
+  "active": zod.boolean().optional(),
+  "published": zod.boolean().optional(),
+  "sortOrder": zod.number().int().optional()
+})
 
 export const UpdateScentResponse = zod.object({
-  id: zod.string(),
-  name: zod.string(),
-  notes: zod.string(),
-  description: zod.string(),
-  imagePath: zod.string().nullable(),
-  active: zod.boolean(),
-  published: zod.boolean(),
-  sortOrder: zod.number().int(),
-});
+  "id": zod.string(),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int()
+})
+
 
 export const DeleteScentParams = zod.object({
-  id: zod.coerce.string(),
-});
+  "id": zod.coerce.string()
+})
 
-export const DeleteScentResponse = zod.void();
+export const DeleteScentResponse = zod.void()
+
+
+
+
+
+
 
 export const RequestUploadUrlBody = zod.object({
-  name: zod.string().min(1),
-  size: zod.number().int().min(1),
-  contentType: zod.string().min(1),
-});
+  "name": zod.string().min(1),
+  "size": zod.number().int().min(1),
+  "contentType": zod.string().min(1)
+})
+
+
+
+
+
 
 export const RequestUploadUrlResponse = zod.object({
-  uploadURL: zod.string().url(),
-  objectPath: zod.string(),
-  metadata: zod.object({
-    name: zod.string().min(1),
-    size: zod.number().int().min(1),
-    contentType: zod.string().min(1),
-  }),
-});
+  "uploadURL": zod.string().url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1),
+  "size": zod.number().int().min(1),
+  "contentType": zod.string().min(1)
+})
+})
+
+
+export const DiscardUploadBody = zod.object({
+  "objectPath": zod.string()
+})
+
+export const DiscardUploadResponse = zod.void()
+
+
+export const CleanupUnusedImagesResponse = zod.object({
+  "scanned": zod.number().int(),
+  "deleted": zod.number().int(),
+  "retained": zod.number().int()
+})
+
 
 export const GetPublicObjectParams = zod.object({
-  filePath: zod.coerce.string(),
-});
+  "filePath": zod.coerce.string()
+})
 
-export const GetPublicObjectResponse = zod.unknown();
+export const GetPublicObjectResponse = zod.unknown()
+
 
 export const GetStorageObjectParams = zod.object({
-  objectPath: zod.coerce.string(),
-});
+  "objectPath": zod.coerce.string()
+})
 
-export const GetStorageObjectResponse = zod.unknown();
+export const GetStorageObjectResponse = zod.unknown()

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useRequestUploadUrl } from "@workspace/api-client-react";
+import { useDiscardUpload, useRequestUploadUrl } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, ArrowUp, ArrowDown } from "lucide-react";
 import { resolveImagePath } from "@/lib/catalog";
@@ -18,6 +18,7 @@ export function MultiImageUploader({
   onChange: (paths: string[]) => void;
 }) {
   const requestUrl = useRequestUploadUrl();
+  const discardUpload = useDiscardUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<UploadState | null>(null);
 
@@ -27,18 +28,20 @@ export function MultiImageUploader({
 
     setUploading({ file, progress: 0 });
 
+    let objectPath: string | undefined;
     try {
-      const { uploadURL, objectPath } = await requestUrl.mutateAsync({
+      const upload = await requestUrl.mutateAsync({
         data: {
           name: file.name,
           size: file.size,
           contentType: file.type,
         },
       });
+      objectPath = upload.objectPath;
 
       setUploading({ file, progress: 50 });
 
-      const res = await fetch(uploadURL, {
+      const res = await fetch(upload.uploadURL, {
         method: "PUT",
         body: file,
         headers: {
@@ -50,6 +53,9 @@ export function MultiImageUploader({
 
       onChange([...value, objectPath]);
     } catch (err) {
+      if (objectPath) {
+        await discardUpload.mutateAsync({ data: { objectPath } }).catch(() => undefined);
+      }
       setUploading({ file, progress: 0, error: String(err) });
       return; // leave error state visible
     }
@@ -182,6 +188,7 @@ export function SingleImageUploader({
   onChange: (path: string | null) => void;
 }) {
   const requestUrl = useRequestUploadUrl();
+  const discardUpload = useDiscardUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<UploadState | null>(null);
 
@@ -191,16 +198,18 @@ export function SingleImageUploader({
 
     setUploading({ file, progress: 0 });
 
+    let objectPath: string | undefined;
     try {
-      const { uploadURL, objectPath } = await requestUrl.mutateAsync({
+      const upload = await requestUrl.mutateAsync({
         data: {
           name: file.name,
           size: file.size,
           contentType: file.type,
         },
       });
+      objectPath = upload.objectPath;
 
-      const res = await fetch(uploadURL, {
+      const res = await fetch(upload.uploadURL, {
         method: "PUT",
         body: file,
         headers: {
@@ -212,6 +221,9 @@ export function SingleImageUploader({
 
       onChange(objectPath);
     } catch (err) {
+      if (objectPath) {
+        await discardUpload.mutateAsync({ data: { objectPath } }).catch(() => undefined);
+      }
       setUploading({ file, progress: 0, error: String(err) });
       return;
     }

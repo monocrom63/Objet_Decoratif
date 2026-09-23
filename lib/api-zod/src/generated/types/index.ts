@@ -25,5 +25,7 @@ export * from './productUpdate';
 export * from './scent';
 export * from './scentInput';
 export * from './scentUpdate';
+export * from './storageCleanupResult';
+export * from './storedObjectPath';
 export * from './uploadUrlRequest';
 export * from './uploadUrlResponse';

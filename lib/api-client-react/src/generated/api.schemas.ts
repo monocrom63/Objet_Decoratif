@@ -9,11 +9,22 @@ export interface HealthStatus {
   status: string;
 }
 
-export type AccountRole = (typeof AccountRole)[keyof typeof AccountRole];
+export interface StoredObjectPath {
+  objectPath: string;
+}
+
+export interface StorageCleanupResult {
+  scanned: number;
+  deleted: number;
+  retained: number;
+}
+
+export type AccountRole = typeof AccountRole[keyof typeof AccountRole];
+
 
 export const AccountRole = {
-  admin: "admin",
-  customer: "customer",
+  admin: 'admin',
+  customer: 'customer',
 } as const;
 
 export interface Account {
@@ -40,13 +51,13 @@ export interface OrderItemInput {
   unitPrice: number;
 }
 
-export type OrderInputPaymentMethod =
-  (typeof OrderInputPaymentMethod)[keyof typeof OrderInputPaymentMethod];
+export type OrderInputPaymentMethod = typeof OrderInputPaymentMethod[keyof typeof OrderInputPaymentMethod];
+
 
 export const OrderInputPaymentMethod = {
-  card: "card",
-  paypal: "paypal",
-  klarna: "klarna",
+  card: 'card',
+  paypal: 'paypal',
+  klarna: 'klarna',
 } as const;
 
 export interface OrderInput {
@@ -63,23 +74,23 @@ export interface OrderInput {
   country: string;
   paymentMethod: OrderInputPaymentMethod;
   /**
-   * @nullable
-   * @pattern ^[0-9]{4}$
-   */
+     * @nullable
+     * @pattern ^[0-9]{4}$
+     */
   cardLastFour?: string | null;
   /** @minItems 1 */
   items: OrderItemInput[];
 }
 
-export type OrderStatusUpdateStatus =
-  (typeof OrderStatusUpdateStatus)[keyof typeof OrderStatusUpdateStatus];
+export type OrderStatusUpdateStatus = typeof OrderStatusUpdateStatus[keyof typeof OrderStatusUpdateStatus];
+
 
 export const OrderStatusUpdateStatus = {
-  new: "new",
-  processing: "processing",
-  shipped: "shipped",
-  completed: "completed",
-  cancelled: "cancelled",
+  new: 'new',
+  processing: 'processing',
+  shipped: 'shipped',
+  completed: 'completed',
+  cancelled: 'cancelled',
 } as const;
 
 export interface OrderStatusUpdate {
@@ -91,14 +102,15 @@ export type OrderItem = OrderItemInput & {
   lineTotal: number;
 };
 
-export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
 
 export const OrderStatus = {
-  new: "new",
-  processing: "processing",
-  shipped: "shipped",
-  completed: "completed",
-  cancelled: "cancelled",
+  new: 'new',
+  processing: 'processing',
+  shipped: 'shipped',
+  completed: 'completed',
+  cancelled: 'cancelled',
 } as const;
 
 export interface Order {
