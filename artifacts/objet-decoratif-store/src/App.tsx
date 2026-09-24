@@ -48,6 +48,7 @@ import {
   type ProductCollection,
 } from "@/lib/catalog";
 import { CatalogCms } from "@/components/admin/catalog-cms";
+import { demoOrders, demoUsers } from "@/components/admin/demo-data";
 import { useGetCatalog } from "@workspace/api-client-react";
 
 type CartLine = { product: Product; scent: string; quantity: number };
@@ -2764,9 +2765,11 @@ function AccountPage() {
 function OrderDetailDrawer({
   order,
   onClose,
+  isDemo = false,
 }: {
   order: Order | null;
   onClose: () => void;
+  isDemo?: boolean;
 }) {
   if (!order) return null;
 
@@ -2811,6 +2814,12 @@ function OrderDetailDrawer({
           </button>
         </div>
         <div className="order-detail-content">
+          {isDemo && (
+            <p className="admin-demo-notice">
+              Demo-Bestellung · Nur Vorschau. Keine echte Bestellung oder
+              Zahlung.
+            </p>
+          )}
           <div className="order-detail-grid">
             <div className="order-detail-section">
               <span className="order-detail-section-title">Order Info</span>
@@ -2899,7 +2908,10 @@ function AdminContent() {
   const orders = useListAdminOrders();
   const users = useListAdminUsers();
   const updateStatus = useUpdateOrderStatus();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<{
+    order: Order;
+    isDemo: boolean;
+  } | null>(null);
 
   const changeStatus = async (id: number, status: OrderStatus) => {
     await updateStatus.mutateAsync({ id, data: { status } });
@@ -3040,7 +3052,7 @@ function AdminContent() {
                 <div
                   key={order.id}
                   className="admin-order-row"
-                  onClick={() => setSelectedOrder(order)}
+                  onClick={() => setSelectedOrder({ order, isDemo: false })}
                   data-testid={`row-order-${order.id}`}
                 >
                   <div>
@@ -3081,6 +3093,43 @@ function AdminContent() {
                   </div>
                 </div>
               ))}
+              <div className="admin-demo-heading">
+                <span className="admin-demo-label">Demo · Nur Vorschau</span>
+                <p>
+                  Beispielbestellungen – nicht in Umsatz und Kennzahlen
+                  enthalten.
+                </p>
+              </div>
+              {demoOrders.map((order) => (
+                <div
+                  key={order.orderNumber}
+                  className="admin-order-row admin-demo-row"
+                  onClick={() => setSelectedOrder({ order, isDemo: true })}
+                  data-testid={`row-demo-order-${order.orderNumber}`}
+                >
+                  <div>
+                    <strong>{order.orderNumber}</strong>
+                    <small>
+                      {new Date(order.createdAt).toLocaleDateString("de-DE")}
+                    </small>
+                  </div>
+                  <div>
+                    <span className="admin-customer-name">
+                      {order.customerName}
+                    </span>
+                    <small>{order.customerEmail}</small>
+                  </div>
+                  <div>
+                    {order.items.reduce((sum, item) => sum + item.quantity, 0)}
+                  </div>
+                  <div>€{order.total.toFixed(2)}</div>
+                  <div>
+                    <span className="admin-demo-status">
+                      {getGermanStatusLabel(order.status)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -3109,12 +3158,29 @@ function AdminContent() {
                   </div>
                 </div>
               ))}
+              <div className="admin-demo-heading">
+                <span className="admin-demo-label">Demo · Nur Vorschau</span>
+                <p>Beispielkunden – keine echten Nutzerkonten.</p>
+              </div>
+              {demoUsers.map((user) => (
+                <div key={user.id} className="admin-user-row admin-demo-row">
+                  <div className="admin-user-info">
+                    <strong>{user.name}</strong>
+                    <small>{user.email} · Demo-Kunde</small>
+                  </div>
+                  <div className="admin-user-stats">
+                    <span>{user.orderCount} Demo-Bestellungen</span>
+                    <b>€{user.totalSpent.toFixed(2)} Demo</b>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </EditorialPageFrame>
       <OrderDetailDrawer
-        order={selectedOrder}
+        order={selectedOrder?.order ?? null}
+        isDemo={selectedOrder?.isDemo}
         onClose={() => setSelectedOrder(null)}
       />
     </>
