@@ -1,8 +1,9 @@
 import { Router, type IRouter } from "express";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { db, productsTable, scentsTable } from "@workspace/db";
 import {
   GetCatalogResponse,
+  InitializeCatalogResponse,
   ListAdminProductsResponse,
   CreateProductBody,
   CreateProductResponse,
@@ -19,13 +20,12 @@ import {
   DeleteScentParams,
 } from "@workspace/api-zod";
 import { currentUser } from "./commerce";
-import {
-  enqueueCatalogImageCleanup,
-} from "../lib/catalogImageCleanup";
+import { enqueueCatalogImageCleanup } from "../lib/catalogImageCleanup";
 import {
   removedProductImagePaths,
   replacedScentImagePaths,
 } from "../lib/catalogImageCleanupPolicy";
+import { initialProducts, initialScents } from "../lib/catalogDefaults";
 
 const router: IRouter = Router();
 async function admin(req: Parameters<typeof currentUser>[0]) {
@@ -54,6 +54,50 @@ router.get("/catalog", async (_req, res): Promise<void> => {
       .orderBy(asc(scentsTable.sortOrder)),
   ]);
   res.json(GetCatalogResponse.parse({ products, scents }));
+});
+router.post("/admin/catalog/initialize", async (req, res): Promise<void> => {
+  if (!(await admin(req))) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const catalog = await db.transaction(async (tx) => {
+    // Serializes initializers and catalog writes; the check and inserts are atomic.
+    await tx.execute(
+      sql`LOCK TABLE catalog_products, catalog_scents IN SHARE ROW EXCLUSIVE MODE`,
+    );
+    const products = await tx
+      .select({ id: productsTable.id })
+      .from(productsTable)
+      .limit(1);
+    const scents = await tx
+      .select({ id: scentsTable.id })
+      .from(scentsTable)
+      .limit(1);
+    if (products.length || scents.length) return null;
+    const createdScents = await tx
+      .insert(scentsTable)
+      .values(initialScents)
+      .returning();
+    const createdProducts = await tx
+      .insert(productsTable)
+      .values(initialProducts)
+      .returning();
+    return InitializeCatalogResponse.parse({
+      products: createdProducts,
+      scents: createdScents,
+    });
+  });
+  if (!catalog) {
+    res
+      .status(409)
+      .json({ error: "Catalog is not empty; no records were changed." });
+    return;
+  }
+  req.log.info(
+    { products: catalog.products.length, scents: catalog.scents.length },
+    "Initialized empty store catalog",
+  );
+  res.status(201).json(catalog);
 });
 router.get("/admin/catalog/products", async (req, res): Promise<void> => {
   if (!(await admin(req))) {

@@ -130,6 +130,12 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
 export const getGetMeUrl = () => {
 
 
@@ -194,6 +200,13 @@ export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = Err
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
+
 export const getListMyOrdersUrl = () => {
 
 
@@ -642,6 +655,77 @@ export function useGetCatalog<TData = Awaited<ReturnType<typeof getCatalog>>, TE
 
 
 
+
+export const getInitializeCatalogUrl = () => {
+
+
+
+
+  return `/api/admin/catalog/initialize`
+}
+
+/**
+ * Import the original store catalog only when both catalog tables are empty. Existing records are never replaced.
+ */
+export const initializeCatalog = async ( options?: Parameters<typeof customFetch>[1]): Promise<Catalog> => {
+
+  return customFetch<Catalog>(getInitializeCatalogUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getInitializeCatalogMutationKey = () => ['initializeCatalog'] as const;
+
+export const getInitializeCatalogMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initializeCatalog>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof initializeCatalog>>, TError,void, TContext> => {
+
+const mutationKey = getInitializeCatalogMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof initializeCatalog>>, void> = () => {
+
+
+          return  initializeCatalog(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InitializeCatalogMutationResult = NonNullable<Awaited<ReturnType<typeof initializeCatalog>>>
+
+    export type InitializeCatalogMutationError = ErrorType<void>
+
+
+    export const useInitializeCatalog = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initializeCatalog>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof initializeCatalog>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getInitializeCatalogMutationOptions(options));
+    }
 
 export const getListAdminProductsUrl = () => {
 

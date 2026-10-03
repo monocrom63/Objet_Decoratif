@@ -121,6 +121,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Catalog" }
+  /admin/catalog/initialize:
+    post:
+      operationId: initializeCatalog
+      tags: [admin]
+      description: Import the original store catalog only when both catalog tables are empty. Existing records are never replaced.
+      responses:
+        "201": { description: Catalog initialized, content: { application/json: { schema: { $ref: "#/components/schemas/Catalog" } } } }
+        "403": { description: Admin access required }
+        "409": { description: Catalog is not empty }
   /admin/catalog/products:
     get:
       operationId: listAdminProducts

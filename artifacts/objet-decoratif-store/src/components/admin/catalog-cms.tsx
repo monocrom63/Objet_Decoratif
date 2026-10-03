@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   useListAdminProducts,
+  useInitializeCatalog,
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
@@ -397,6 +398,7 @@ function ScentForm({ scent, onClose }: { scent?: Scent; onClose: () => void }) {
 export function CatalogCms() {
   const products = useListAdminProducts();
   const scents = useListAdminScents();
+  const initializeCatalog = useInitializeCatalog();
   const deleteProduct = useDeleteProduct();
   const deleteScent = useDeleteScent();
   const queryClient = useQueryClient();
@@ -410,6 +412,37 @@ export function CatalogCms() {
     open: boolean;
     scent?: Scent;
   }>({ open: false });
+
+  const handleInitializeCatalog = async () => {
+    if (
+      !window.confirm(
+        "Den Standardkatalog mit 7 Produkten und 4 Düften laden? Dies ist nur bei einem vollständig leeren Katalog möglich.",
+      )
+    )
+      return;
+    try {
+      await initializeCatalog.mutateAsync();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["/api/admin/catalog/products"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["/api/admin/catalog/scents"],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["/api/catalog"] }),
+      ]);
+      toast({
+        title: "Standardkatalog geladen",
+        description: "7 Produkte und 4 Düfte sind jetzt veröffentlicht.",
+      });
+    } catch (error) {
+      toast({
+        title: "Katalog konnte nicht geladen werden",
+        description: String(error),
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDeleteProduct = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this product?"))
@@ -459,6 +492,36 @@ export function CatalogCms() {
         </h1>
         <p>Curate products and signature scent profiles.</p>
       </div>
+
+      {products.isSuccess &&
+        scents.isSuccess &&
+        products.data?.length === 0 &&
+        scents.data?.length === 0 && (
+          <section className="editorial-section mt-12">
+            <div className="editorial-section-label">Setup / Catalog</div>
+            <div className="editorial-section-content">
+              <div className="section-kicker">Katalog ist leer</div>
+              <h2>Standardkatalog laden</h2>
+              <p>
+                Hier fehlen noch die Produktdaten. Lade die sieben
+                ursprünglichen Produkte und vier Düfte mit ihren Bildern und
+                Preisen. Kunden und Bestellungen bleiben unverändert.
+              </p>
+              <button
+                type="button"
+                className="solid-button"
+                onClick={handleInitializeCatalog}
+                disabled={initializeCatalog.isPending}
+                data-testid="button-initialize-catalog"
+              >
+                {initializeCatalog.isPending
+                  ? "Katalog wird geladen…"
+                  : "Standardkatalog laden"}{" "}
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          </section>
+        )}
 
       <section className="editorial-section mt-12">
         <div className="editorial-section-label">

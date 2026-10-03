@@ -248,6 +248,42 @@ export const GetCatalogResponse = zod.object({
 })
 
 
+/**
+ * Import the original store catalog only when both catalog tables are empty. Existing records are never replaced.
+ */
+export const initializeCatalogResponseProductsItemPriceCentsMin = 0;
+
+
+
+export const InitializeCatalogResponse = zod.object({
+  "products": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "collection": zod.string(),
+  "category": zod.string(),
+  "description": zod.string(),
+  "explanation": zod.string(),
+  "priceCents": zod.number().int().min(initializeCatalogResponseProductsItemPriceCentsMin),
+  "tag": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int(),
+  "imagePaths": zod.array(zod.string()),
+  "scentIds": zod.array(zod.string())
+})),
+  "scents": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "notes": zod.string(),
+  "description": zod.string(),
+  "imagePath": zod.string().nullable(),
+  "active": zod.boolean(),
+  "published": zod.boolean(),
+  "sortOrder": zod.number().int()
+}))
+})
+
+
 export const listAdminProductsResponsePriceCentsMin = 0;
 
 
