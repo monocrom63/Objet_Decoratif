@@ -21,6 +21,7 @@ import { Show, SignIn, SignUp, UserButton, useUser } from "@clerk/react";
 import {
   useCreateOrder,
   useGetMe,
+  getGetMeQueryKey,
   useListAdminOrders,
   useListAdminUsers,
   useListMyOrders,
@@ -29,6 +30,7 @@ import {
   type Order,
 } from "@workspace/api-client-react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { LogoutButton } from "@/components/logout-button";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -669,6 +671,14 @@ function Header({
           >
             About
           </Link>
+          <Show when="signed-in">
+            <LogoutButton
+              className="nav-link mobile-logout-button"
+              label={language === "DE" ? "Abmelden" : "Log out"}
+              pendingLabel={language === "DE" ? "Wird abgemeldet…" : "Logging out…"}
+              testId="button-logout-mobile"
+            />
+          </Show>
         </nav>
         <button
           className="menu-button"
@@ -711,6 +721,11 @@ function Header({
             <Link href="/account" className="header-action account-link">
               Account
             </Link>
+            <LogoutButton
+              className="header-action header-logout-button"
+              label={language === "DE" ? "Abmelden" : "Log out"}
+              pendingLabel={language === "DE" ? "Wird abgemeldet…" : "Logging out…"}
+            />
           </Show>
           <Show when="signed-out">
             <Link href="/sign-in" className="header-action account-link">
@@ -2673,6 +2688,7 @@ function AccountContent() {
               </Link>
             )}
             <UserButton />
+            <LogoutButton className="outline-button" testId="button-logout-account" />
           </div>
         </div>
         <div className="editorial-hero-note">Customer Account / History</div>
@@ -3226,9 +3242,11 @@ function AdminPage() {
 
 function AdminCatalogPage() {
   const { isLoaded, isSignedIn } = useUser();
-  const me = useGetMe();
+  const me = useGetMe({
+    query: { queryKey: getGetMeQueryKey(), enabled: isLoaded && !!isSignedIn, retry: false },
+  });
 
-  if (!isLoaded || me.isLoading) {
+  if (!isLoaded || (isSignedIn && me.isLoading)) {
     return (
       <EditorialPageFrame>
         <main className="section">
@@ -3256,7 +3274,7 @@ function AdminCatalogPage() {
                 href={!isSignedIn ? "/sign-in" : "/account"}
                 className="outline-button"
               >
-                Return <ArrowRight size={13} />
+                {!isSignedIn ? "Sign in" : "Return"} <ArrowRight size={13} />
               </Link>
             </div>
           </div>

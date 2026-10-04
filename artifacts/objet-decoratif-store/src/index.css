@@ -132,6 +132,14 @@ a {
   gap: 6px;
   white-space: nowrap;
 }
+.mobile-logout-button {
+  display: none;
+}
+.header-logout-button:disabled,
+.mobile-logout-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 .nav-link::after {
   content: "";
   position: absolute;
@@ -3265,6 +3273,14 @@ a {
   }
   .header-action.search-only {
     display: none;
+  }
+  .header-logout-button {
+    display: none;
+  }
+  .mobile-logout-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
   .menu-button {
     display: block;
