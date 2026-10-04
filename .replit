@@ -21,3 +21,8 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+SHOP_ADMIN_EMAILS = "thorsten.magers@macabe.de"

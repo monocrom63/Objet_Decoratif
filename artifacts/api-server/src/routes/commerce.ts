@@ -13,15 +13,25 @@ import {
   UpdateOrderStatusParams,
   UpdateOrderStatusResponse,
 } from "@workspace/api-zod";
+import { configuredAdminEmails, isVerifiedConfiguredAdmin, initialStoreRole } from "../lib/storeAdminAccess.ts";
 
 const router: IRouter = Router();
 export async function currentUser(req: Request) {
   const auth = getAuth(req);
   if (!auth.userId) return null;
   const existing = await db.select().from(usersTable).where(eq(usersTable.clerkUserId, auth.userId)).limit(1);
-  if (existing[0]) return existing[0];
+  const allowedEmails = configuredAdminEmails(process.env.SHOP_ADMIN_EMAILS);
+  if (existing[0] && (existing[0].role === "admin" || allowedEmails.size === 0)) return existing[0];
 
   const clerkUser = await clerkClient.users.getUser(auth.userId);
+  const configuredAdmin = isVerifiedConfiguredAdmin(clerkUser.primaryEmailAddress, allowedEmails);
+  if (existing[0]) {
+    if (!configuredAdmin) return existing[0];
+    const [promoted] = await db.update(usersTable).set({ role: "admin" })
+      .where(eq(usersTable.clerkUserId, auth.userId)).returning();
+    if (!promoted) throw new Error("Could not grant configured administrator access");
+    return promoted;
+  }
   const email = clerkUser.primaryEmailAddress?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress;
   if (!email) throw new Error("Authenticated user has no email address");
   const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
@@ -30,7 +40,7 @@ export async function currentUser(req: Request) {
     clerkUserId: auth.userId,
     email,
     name,
-    role: admins.length === 0 ? "admin" : "customer",
+    role: initialStoreRole(admins.length > 0, configuredAdmin),
   }).onConflictDoNothing({ target: usersTable.clerkUserId }).returning();
   if (created) return created;
 
@@ -40,6 +50,12 @@ export async function currentUser(req: Request) {
     .where(eq(usersTable.clerkUserId, auth.userId))
     .limit(1);
   if (!concurrentlyCreated) throw new Error("Could not initialize authenticated user");
+  if (configuredAdmin && concurrentlyCreated.role !== "admin") {
+    const [promoted] = await db.update(usersTable).set({ role: "admin" })
+      .where(eq(usersTable.clerkUserId, auth.userId)).returning();
+    if (!promoted) throw new Error("Could not grant configured administrator access");
+    return promoted;
+  }
   return concurrentlyCreated;
 }
 
