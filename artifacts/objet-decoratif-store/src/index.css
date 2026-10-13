@@ -156,6 +156,39 @@ a {
   transform: scaleX(1);
   transform-origin: left;
 }
+.header-nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.header-nav-trigger svg {
+  transition: transform 0.2s ease;
+}
+.header-nav-trigger[data-state="open"] svg {
+  transform: rotate(180deg);
+}
+.header-nav-menu {
+  z-index: 110;
+  min-width: 170px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--bone);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(32, 32, 28, 0.08);
+}
+.header-nav-item {
+  padding: 12px;
+  border-radius: 0;
+  font: 10px var(--mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.header-nav-item[data-highlighted] {
+  background: var(--paper);
+  color: var(--ink);
+}
 .cart-button {
   display: flex;
   align-items: center;

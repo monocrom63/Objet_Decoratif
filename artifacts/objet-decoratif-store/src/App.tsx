@@ -32,6 +32,8 @@ import {
 import { ErrorBoundary } from "@/components/error-boundary";
 import { LogoutButton } from "@/components/logout-button";
 import { CatalogMedia } from "@/components/catalog-media";
+import { HeaderNavMenu } from "@/components/header-nav-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -612,7 +614,12 @@ function Header({
   onSearch: () => void;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<"products" | "od" | null>(null);
   const [language, setLanguage] = useState<"DE" | "EN">("EN");
+
+  const changeMenu = (menu: "products" | "od", open: boolean) => {
+    setOpenMenu((current) => (open ? menu : current === menu ? null : current));
+  };
 
   useEffect(() => {
     const savedLanguage = window.localStorage.getItem(
@@ -644,6 +651,7 @@ function Header({
       window.location.href = `${import.meta.env.BASE_URL}#${id}`;
     }
     setMobileOpen(false);
+    setOpenMenu(null);
   };
 
   return (
@@ -656,36 +664,58 @@ function Header({
           className={`main-nav ${mobileOpen ? "open" : ""}`}
           data-testid="nav-main"
         >
-          <button
-            className="nav-link"
-            onClick={() => navTo("collection")}
-            data-testid="link-shop-collection"
+          <HeaderNavMenu
+            label="Products"
+            testId="button-products-menu"
+            open={openMenu === "products"}
+            onOpenChange={(open) => changeMenu("products", open)}
           >
-            Shop Collection
-          </button>
-          <button
-            className="nav-link"
-            onClick={() => navTo("scents")}
-            data-testid="link-signature-scents"
+            <DropdownMenuItem
+              className="header-nav-item"
+              onSelect={() => navTo("collection")}
+              data-testid="link-shop-collection"
+            >
+              Candels
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="header-nav-item"
+              onSelect={() => navTo("scents")}
+              data-testid="link-signature-scents"
+            >
+              Scents
+            </DropdownMenuItem>
+          </HeaderNavMenu>
+          <HeaderNavMenu
+            label="OD"
+            testId="button-od-menu"
+            open={openMenu === "od"}
+            onOpenChange={(open) => changeMenu("od", open)}
           >
-            Signature Scents
-          </button>
-          <Link
-            href="/care"
-            className="nav-link"
-            onClick={() => setMobileOpen(false)}
-            data-testid="link-care"
-          >
-            Care
-          </Link>
-          <Link
-            href="/about"
-            className="nav-link"
-            onClick={() => setMobileOpen(false)}
-            data-testid="link-about"
-          >
-            About
-          </Link>
+            <DropdownMenuItem className="header-nav-item" asChild>
+              <Link
+                href="/about"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setOpenMenu(null);
+                }}
+                data-testid="link-about"
+              >
+                About
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="header-nav-item" asChild>
+              <Link
+                href="/care"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setOpenMenu(null);
+                }}
+                data-testid="link-care"
+              >
+                Care
+              </Link>
+            </DropdownMenuItem>
+          </HeaderNavMenu>
           <Show when="signed-in">
             <LogoutButton
               className="nav-link mobile-logout-button"
@@ -697,7 +727,10 @@ function Header({
         </nav>
         <button
           className="menu-button"
-          onClick={() => setMobileOpen((open) => !open)}
+          onClick={() => {
+            setOpenMenu(null);
+            setMobileOpen((open) => !open);
+          }}
           aria-label="Open menu"
           data-testid="button-menu"
         >
