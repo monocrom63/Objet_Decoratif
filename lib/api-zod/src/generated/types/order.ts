@@ -9,6 +9,7 @@ import type { OrderItem } from './orderItem';
 import type { OrderStatus } from './orderStatus';
 
 export interface Order {
+  isGuest: boolean;
   id: number;
   orderNumber: string;
   customerEmail: string;

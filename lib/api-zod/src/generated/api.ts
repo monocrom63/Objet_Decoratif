@@ -43,6 +43,7 @@ export const listMyOrdersResponseItemsItemOneUnitPriceMin = 0;
 
 
 export const ListMyOrdersResponseItem = zod.object({
+  "isGuest": zod.boolean(),
   "id": zod.number().int(),
   "orderNumber": zod.string(),
   "customerEmail": zod.string().email(),
@@ -69,18 +70,24 @@ export const ListMyOrdersResponseItem = zod.object({
 export const ListMyOrdersResponse = zod.array(ListMyOrdersResponseItem)
 
 
+export const createOrderBodyGuestDefault = false;
+export const createOrderBodyEmailMax = 254;
+
 export const createOrderBodyPhoneMin = 6;
+export const createOrderBodyPhoneMax = 40;
 
 export const createOrderBodyCardLastFourRegExp = new RegExp('^[0-9]{4}$');
 
 export const createOrderBodyItemsItemUnitPriceMin = 0;
 
+export const createOrderBodyItemsMax = 100;
 
 
 
 export const CreateOrderBody = zod.object({
-  "email": zod.string().email(),
-  "phone": zod.string().min(createOrderBodyPhoneMin),
+  "guest": zod.boolean().default(createOrderBodyGuestDefault).describe('Place an order without creating or linking a user account.'),
+  "email": zod.string().email().max(createOrderBodyEmailMax),
+  "phone": zod.string().min(createOrderBodyPhoneMin).max(createOrderBodyPhoneMax),
   "firstName": zod.string(),
   "lastName": zod.string(),
   "company": zod.string().optional(),
@@ -97,7 +104,7 @@ export const CreateOrderBody = zod.object({
   "scent": zod.string(),
   "quantity": zod.number().int().min(1),
   "unitPrice": zod.number().min(createOrderBodyItemsItemUnitPriceMin)
-})).min(1)
+})).min(1).max(createOrderBodyItemsMax)
 })
 
 
@@ -106,6 +113,7 @@ export const createOrderResponseItemsItemOneUnitPriceMin = 0;
 
 
 export const CreateOrderResponse = zod.object({
+  "isGuest": zod.boolean(),
   "id": zod.number().int(),
   "orderNumber": zod.string(),
   "customerEmail": zod.string().email(),
@@ -137,6 +145,7 @@ export const listAdminOrdersResponseItemsItemOneUnitPriceMin = 0;
 
 
 export const ListAdminOrdersResponseItem = zod.object({
+  "isGuest": zod.boolean(),
   "id": zod.number().int(),
   "orderNumber": zod.string(),
   "customerEmail": zod.string().email(),
@@ -177,6 +186,7 @@ export const updateOrderStatusResponseItemsItemOneUnitPriceMin = 0;
 
 
 export const UpdateOrderStatusResponse = zod.object({
+  "isGuest": zod.boolean(),
   "id": zod.number().int(),
   "orderNumber": zod.string(),
   "customerEmail": zod.string().email(),
@@ -524,3 +534,5 @@ export const GetStorageObjectParams = zod.object({
 })
 
 export const GetStorageObjectResponse = zod.unknown()
+
+

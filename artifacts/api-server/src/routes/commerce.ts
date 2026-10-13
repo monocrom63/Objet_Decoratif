@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request } from "express";
 import { clerkClient, getAuth } from "@clerk/express";
+import { randomUUID } from "node:crypto";
 import { db, ordersTable, usersTable, productsTable, type StoreOrder } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
 import {
@@ -14,8 +15,10 @@ import {
   UpdateOrderStatusResponse,
 } from "@workspace/api-zod";
 import { configuredAdminEmails, isVerifiedConfiguredAdmin, initialStoreRole } from "../lib/storeAdminAccess.ts";
+import { createGuestOrderLimiter } from "../lib/guestOrderLimit.ts";
 
 const router: IRouter = Router();
+const allowGuestOrder = createGuestOrderLimiter();
 export async function currentUser(req: Request) {
   const auth = getAuth(req);
   if (!auth.userId) return null;
@@ -63,6 +66,7 @@ function orderResponse(order: StoreOrder) {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
+    isGuest: order.userId === null,
     customerEmail: order.customerEmail,
     customerName: order.customerName,
     phone: order.phone,
@@ -91,25 +95,41 @@ router.get("/orders", async (req, res): Promise<void> => {
 });
 
 router.post("/orders", async (req, res): Promise<void> => {
-  const user = await currentUser(req);
-  if (!user) { res.status(401).json({ error: "Sign in before placing an order" }); return; }
   const parsed = CreateOrderBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+  const user = parsed.data.guest ? null : await currentUser(req);
+  if (!parsed.data.guest && !user) {
+    res.status(401).json({ error: "Sign in or choose guest checkout" }); return;
+  }
+  if ([parsed.data.firstName, parsed.data.lastName, parsed.data.address, parsed.data.postalCode, parsed.data.city, parsed.data.country].some((field) => !field.trim())) {
+    res.status(400).json({ error: "Complete the customer and delivery details" }); return;
+  }
+  if (parsed.data.items.some((item) => item.quantity > 100)) {
+    res.status(400).json({ error: "A maximum of 100 units per item can be ordered online" }); return;
+  }
   const catalogProducts = await db.select().from(productsTable);
+  if (parsed.data.items.some((item) => !catalogProducts.some((product) => product.id === item.productId && product.active && product.published))) {
+    res.status(400).json({ error: "One or more products are no longer available" }); return;
+  }
   const items = parsed.data.items.map((item) => {
     const product = catalogProducts.find((entry) => entry.id === item.productId && entry.active && entry.published);
     if (!product) throw new Error(`Unknown or unavailable product: ${item.productId}`);
     return { productId: item.productId, name: product.name, scent: item.scent, quantity: item.quantity, unitPrice: product.priceCents / 100, lineTotal: product.priceCents * item.quantity / 100 };
   });
+  if (parsed.data.guest && !allowGuestOrder(req.ip ?? "unknown", parsed.data.email)) {
+    res.setHeader("Retry-After", "900");
+    res.status(429).json({ error: "Too many guest orders. Please try again later." });
+    return;
+  }
   const subtotalCents = Math.round(items.reduce((sum, item) => sum + item.lineTotal, 0) * 100);
   const shippingCents = 800;
   const [order] = await db.insert(ordersTable).values({
-    orderNumber: `OD-${Date.now().toString(36).toUpperCase()}`,
-    userId: user.id,
+    orderNumber: `OD-${Date.now().toString(36).toUpperCase()}-${randomUUID().slice(0, 8).toUpperCase()}`,
+    userId: user?.id ?? null,
     customerEmail: parsed.data.email,
     customerName: `${parsed.data.firstName} ${parsed.data.lastName}`,
     phone: parsed.data.phone,
-    address: [parsed.data.address, parsed.data.apartment, `${parsed.data.postalCode} ${parsed.data.city}`, parsed.data.country].filter(Boolean).join(", "),
+    address: [parsed.data.company, parsed.data.address, parsed.data.apartment, `${parsed.data.postalCode} ${parsed.data.city}`, parsed.data.country].filter(Boolean).join(", "),
     paymentMethod: parsed.data.paymentMethod,
     cardLastFour: parsed.data.cardLastFour,
     status: "new",

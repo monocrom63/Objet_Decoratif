@@ -9,8 +9,14 @@ import type { OrderInputPaymentMethod } from './orderInputPaymentMethod';
 import type { OrderItemInput } from './orderItemInput';
 
 export interface OrderInput {
+  /** Place an order without creating or linking a user account. */
+  guest?: boolean;
+  /** @maxLength 254 */
   email: string;
-  /** @minLength 6 */
+  /**
+     * @minLength 6
+     * @maxLength 40
+     */
   phone: string;
   firstName: string;
   lastName: string;
@@ -26,6 +32,9 @@ export interface OrderInput {
      * @pattern ^[0-9]{4}$
      */
   cardLastFour?: string | null;
-  /** @minItems 1 */
+  /**
+     * @minItems 1
+     * @maxItems 100
+     */
   items: OrderItemInput[];
 }

@@ -92,6 +92,7 @@ const examples: Array<{
 export const demoOrders: Order[] = examples.map((example, index) => ({
   id: -(index + 1),
   orderNumber: example.number,
+  isGuest: false,
   customerEmail: example.customer.email,
   customerName: example.customer.name ?? "",
   phone: "Keine echte Telefonnummer",

@@ -1864,7 +1864,7 @@ const emptyCheckoutForm: CheckoutForm = {
 };
 
 function CheckoutPage() {
-  const { isSignedIn } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>(readStoredCart);
   const [paymentMethod, setPaymentMethod] = useState<
     "card" | "paypal" | "klarna"
@@ -1872,6 +1872,7 @@ function CheckoutPage() {
   const [form, setForm] = useState<CheckoutForm>(emptyCheckoutForm);
   const [submitted, setSubmitted] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState("");
+  const [placedAsGuest, setPlacedAsGuest] = useState(false);
   const createOrder = useCreateOrder();
   const subtotal = lines.reduce(
     (sum, line) => sum + line.product.price * line.quantity,
@@ -1910,35 +1911,42 @@ function CheckoutPage() {
     );
   };
   const placeOrder = async () => {
-    const order = await createOrder.mutateAsync({
-      data: {
-        email: form.email,
-        phone: form.phone,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        company: form.company,
-        address: form.address,
-        apartment: form.apartment,
-        postalCode: form.postalCode,
-        city: form.city,
-        country: form.country,
-        paymentMethod,
-        cardLastFour:
-          paymentMethod === "card"
-            ? form.cardNumber.replace(/\s/g, "").slice(-4)
-            : null,
-        items: lines.map((line) => ({
-          productId: line.product.id,
-          name: line.product.name,
-          scent: line.scent,
-          quantity: line.quantity,
-          unitPrice: line.product.price,
-        })),
-      },
-    });
-    setPlacedOrderNumber(order.orderNumber);
-    setLines([]);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!isLoaded || createOrder.isPending || lines.length === 0) return;
+    try {
+      const order = await createOrder.mutateAsync({
+        data: {
+          guest: !isSignedIn,
+          email: form.email,
+          phone: form.phone,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          company: form.company,
+          address: form.address,
+          apartment: form.apartment,
+          postalCode: form.postalCode,
+          city: form.city,
+          country: form.country,
+          paymentMethod,
+          cardLastFour:
+            paymentMethod === "card"
+              ? form.cardNumber.replace(/\s/g, "").slice(-4)
+              : null,
+          items: lines.map((line) => ({
+            productId: line.product.id,
+            name: line.product.name,
+            scent: line.scent,
+            quantity: line.quantity,
+            unitPrice: line.product.price,
+          })),
+        },
+      });
+      setPlacedOrderNumber(order.orderNumber);
+      setPlacedAsGuest(order.isGuest);
+      setLines([]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      // React Query displays the error below; keep the cart and form for retry.
+    }
   };
 
   useEffect(() => {
@@ -1960,9 +1968,21 @@ function CheckoutPage() {
             Your order <strong>{placedOrderNumber}</strong> is saved. No payment
             has been charged yet.
           </p>
-          <Link href="/account" className="solid-button">
-            View my orders <ArrowRight size={14} />
-          </Link>
+          {placedAsGuest ? (
+            <>
+              <p>
+                Your guest order was received without creating an account.
+                Please keep your order number for any questions.
+              </p>
+              <Link href="/" className="solid-button">
+                Return to store <ArrowRight size={14} />
+              </Link>
+            </>
+          ) : (
+            <Link href="/account" className="solid-button">
+              View my orders <ArrowRight size={14} />
+            </Link>
+          )}
         </main>
       </div>
     );
@@ -2028,6 +2048,15 @@ function CheckoutPage() {
 
               <section className="checkout-section">
                 <h2>Contact</h2>
+                <Show when="signed-out">
+                  <div className="checkout-review-notice" data-testid="guest-checkout-notice">
+                    <strong>Guest checkout — no registration required.</strong>
+                    <span>
+                      Enter your contact and delivery details to order as a guest.
+                      Already have an account? <Link href="/sign-in">Sign in</Link>.
+                    </span>
+                  </div>
+                </Show>
                 <label className="checkout-field">
                   <span className="sr-only">Email</span>
                   <input
@@ -2383,28 +2412,26 @@ function CheckoutPage() {
               <div className="checkout-review-notice" role="status">
                 <strong>No payment will be charged.</strong>
                 <span>
-                  Submitting saves the order for the customer and admin
-                  accounts. Payment and SMS are not connected.
+                  Your order will be saved for the shop team
+                  {isSignedIn ? " and your account" : ""}. Payment and SMS are
+                  not connected.
                 </span>
               </div>
-              <Show when="signed-in">
                 <button
                   className="checkout-review-button"
                   type="button"
-                  disabled={createOrder.isPending}
+                  disabled={!isLoaded || createOrder.isPending}
                   onClick={placeOrder}
+                  data-testid="button-place-order"
                 >
-                  {createOrder.isPending ? "Saving order…" : "Place order"}
+                  {!isLoaded
+                    ? "Loading checkout…"
+                    : createOrder.isPending
+                      ? "Saving order…"
+                      : isSignedIn
+                        ? "Place order"
+                        : "Place order as guest"}
                 </button>
-              </Show>
-              <Show when="signed-out">
-                <Link
-                  href="/sign-in"
-                  className="checkout-review-button checkout-sign-in-button"
-                >
-                  Sign in to place order
-                </Link>
-              </Show>
               {createOrder.isError && (
                 <p className="checkout-order-error">
                   The order could not be saved. Please try again.
@@ -3132,6 +3159,7 @@ function AdminContent() {
                       {order.customerName}
                     </span>
                     <small>{order.customerEmail}</small>
+                    {order.isGuest && <small>Guest order</small>}
                   </div>
                   <div>
                     {order.items.reduce((sum, item) => sum + item.quantity, 0)}

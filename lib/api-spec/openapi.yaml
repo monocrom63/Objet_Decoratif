@@ -296,8 +296,9 @@ components:
       type: object
       required: [email, phone, firstName, lastName, address, postalCode, city, country, paymentMethod, items]
       properties:
-        email: { type: string, format: email }
-        phone: { type: string, minLength: 6 }
+        guest: { type: boolean, default: false, description: "Place an order without creating or linking a user account." }
+        email: { type: string, format: email, maxLength: 254 }
+        phone: { type: string, minLength: 6, maxLength: 40 }
         firstName: { type: string }
         lastName: { type: string }
         company: { type: string }
@@ -311,6 +312,7 @@ components:
         items:
           type: array
           minItems: 1
+          maxItems: 100
           items: { $ref: "#/components/schemas/OrderItemInput" }
     OrderStatusUpdate:
       type: object
@@ -327,8 +329,9 @@ components:
             lineTotal: { type: number }
     Order:
       type: object
-      required: [id, orderNumber, customerEmail, customerName, phone, address, paymentMethod, status, subtotal, shipping, total, createdAt, items]
+      required: [id, orderNumber, customerEmail, customerName, phone, address, paymentMethod, status, subtotal, shipping, total, createdAt, items, isGuest]
       properties:
+        isGuest: { type: boolean }
         id: { type: integer }
         orderNumber: { type: string }
         customerEmail: { type: string, format: email }
