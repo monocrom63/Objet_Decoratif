@@ -20,3 +20,9 @@ Public scent videos should autoplay muted in a continuous loop without player co
 **Why:** The shop owner explicitly requested scent videos as automatic looping media rather than visible players.
 
 **How to apply:** Start or resume the selected scent video and pause it when switching to another scent. Preserve inline mobile playback and keep CMS playback controls for inspecting uploads.
+
+Media navigation arrows should always sit at the bottom right, for both images and videos on desktop and mobile.
+
+**Why:** The shop owner explicitly requested this consistent position after the scent videos were changed to control-free loops.
+
+**How to apply:** Do not move scent or gallery navigation arrows to the top for video playback. Keep them visible above the media.

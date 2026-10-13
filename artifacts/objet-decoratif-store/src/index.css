@@ -745,8 +745,11 @@ a {
 }
 .scent-slide-arrows {
   position: absolute;
+  top: auto;
   right: 10px;
   bottom: 10px;
+  left: auto;
+  z-index: 2;
   display: flex;
   gap: 5px;
 }
@@ -4074,10 +4077,6 @@ a {
 .object-media:has(video.active) .slide-controls {
   bottom: auto;
   top: 20px;
-}
-.scent-slide-image-wrap:has(video.active) .scent-slide-arrows {
-  bottom: auto;
-  top: 12px;
 }
 .catalog-media-error {
   position: absolute;
