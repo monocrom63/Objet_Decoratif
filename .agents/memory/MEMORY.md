@@ -3,3 +3,4 @@
 - [Catalog initialization](catalog-initialization.md) — Restore an empty catalog through explicit admin action, never by overwriting the live database or reseeding on startup.
 - [Catalog media compatibility](catalog-media-compatibility.md) — Upload validation, rendering, deletion and cleanup must agree on supported video formats while preserving legacy image URLs.
 - [Clerk testing sessions](clerk-testing-session.md) — A programmatic client session may lack a usable API cookie; verify same-origin Bearer auth before changing app authentication.
+- [Store brand typography](store-brand-typography.md) — The menu wordmark must visibly match the hero typography, not just share its font-family declaration.

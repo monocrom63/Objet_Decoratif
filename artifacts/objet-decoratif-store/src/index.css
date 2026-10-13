@@ -79,11 +79,10 @@ a {
   backdrop-filter: blur(14px);
 }
 .logo {
-  font-family: var(--hero);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font: 500 clamp(18px, 1.8vw, 25px)/1 var(--hero);
+  letter-spacing: -0.035em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .main-nav,
 .header-actions {
@@ -3247,6 +3246,7 @@ a {
   }
   .logo {
     justify-self: center;
+    font-size: 16px;
   }
   .main-nav {
     display: none;
