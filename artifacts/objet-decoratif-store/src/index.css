@@ -79,8 +79,9 @@ a {
   backdrop-filter: blur(14px);
 }
 .logo {
+  font-family: var(--hero);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }

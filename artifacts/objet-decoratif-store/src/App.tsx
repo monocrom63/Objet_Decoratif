@@ -780,7 +780,7 @@ function Hero({ onExplore }: { onExplore: () => void }) {
         <h1>
           Objects
           <br />
-          <em>with a glow.</em>
+          <em>With a Glow</em>
         </h1>
         <p className="hero-note">
           Architectural vessels cast in concrete. Fragrances made to stay with
