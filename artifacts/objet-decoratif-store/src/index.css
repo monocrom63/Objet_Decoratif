@@ -3306,6 +3306,9 @@ a {
   .header-actions {
     gap: 14px;
   }
+  .cart-label {
+    display: none;
+  }
   .language-option {
     font-size: 8px;
   }

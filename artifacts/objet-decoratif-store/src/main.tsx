@@ -5,6 +5,8 @@ import { Router as WouterRouter, useLocation } from "wouter";
 
 import App from "./App";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { LanguageProvider, useLanguage } from "@/lib/language";
+import { deDE, enUS } from "@clerk/localizations";
 
 import "./index.css";
 
@@ -23,6 +25,8 @@ function stripBase(path: string): string {
 
 function ClerkProviderWithRoutes() {
   const [, setLocation] = useLocation();
+  const { language } = useLanguage();
+  const localization = language === "DE" ? deDE : enUS;
 
   return (
     <ClerkProvider
@@ -46,16 +50,21 @@ function ClerkProviderWithRoutes() {
         },
       }}
       localization={{
+        ...localization,
         signIn: {
+          ...localization.signIn,
           start: {
-            title: "Welcome back",
-            subtitle: "Sign in to manage your Objet Décoratif account",
+            ...localization.signIn?.start,
+            title: language === "DE" ? "Willkommen zurück" : "Welcome back",
+            subtitle: language === "DE" ? "Melde dich an, um dein Objet Décoratif Konto zu verwalten" : "Sign in to manage your Objet Décoratif account",
           },
         },
         signUp: {
+          ...localization.signUp,
           start: {
-            title: "Create your account",
-            subtitle: "Save and review your Objet Décoratif orders",
+            ...localization.signUp?.start,
+            title: language === "DE" ? "Erstelle dein Konto" : "Create your account",
+            subtitle: language === "DE" ? "Speichere und verwalte deine Objet Décoratif Bestellungen" : "Save and review your Objet Décoratif orders",
           },
         },
       }}
@@ -73,7 +82,9 @@ createRoot(document.getElementById("root")!, {
 }).render(
   <ErrorBoundary>
     <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
+      <LanguageProvider>
+        <ClerkProviderWithRoutes />
+      </LanguageProvider>
     </WouterRouter>
   </ErrorBoundary>,
 );

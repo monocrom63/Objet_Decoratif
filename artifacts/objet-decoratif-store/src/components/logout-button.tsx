@@ -3,6 +3,7 @@ import { useClerk } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/lib/language";
 
 export function LogoutButton({
   className = "header-action",
@@ -16,6 +17,7 @@ export function LogoutButton({
   testId?: string;
 }) {
   const { signOut } = useClerk();
+  const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [pending, setPending] = useState(false);
@@ -32,8 +34,8 @@ export function LogoutButton({
     } catch {
       setPending(false);
       toast({
-        title: "Abmelden fehlgeschlagen",
-        description: "Bitte versuche es erneut. Du bist weiterhin angemeldet.",
+        title: language === "DE" ? "Abmelden fehlgeschlagen" : "Logout failed",
+        description: language === "DE" ? "Bitte versuche es erneut. Du bist weiterhin angemeldet." : "Please try again. You are still signed in.",
         variant: "destructive",
       });
     }
@@ -49,7 +51,7 @@ export function LogoutButton({
       data-testid={testId}
     >
       <LogOut size={14} strokeWidth={1.5} aria-hidden="true" />
-      <span>{pending ? pendingLabel : label}</span>
+      <span>{t(pending ? pendingLabel : label)}</span>
     </button>
   );
 }

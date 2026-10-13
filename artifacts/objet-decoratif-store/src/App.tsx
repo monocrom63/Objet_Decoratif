@@ -35,6 +35,8 @@ import { CatalogMedia } from "@/components/catalog-media";
 import { HeaderNavMenu } from "@/components/header-nav-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
+import { useLanguage } from "@/lib/language";
+import { CONTACT_EMAIL } from "@/lib/store-config";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -99,6 +101,7 @@ function Sculpture({
   product: Product;
   flame?: boolean;
 }) {
+  const { t } = useLanguage();
   return (
     <div
       className={`product-art ${product.art}`}
@@ -109,12 +112,13 @@ function Sculpture({
         <div className="wick" />
         {flame && <div className="flame" />}
       </div>
-      {product.tag && <span className="product-tag">{product.tag}</span>}
+      {product.tag && <span className="product-tag">{t(product.tag)}</span>}
     </div>
   );
 }
 
 function ObjectSlideshow({ product }: { product: Product }) {
+  const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const images = product.images ?? [];
 
@@ -145,7 +149,7 @@ function ObjectSlideshow({ product }: { product: Product }) {
           alt={`${product.name} view ${index + 1}`}
         />
       ))}
-      <div className="slide-controls" aria-label="Choose product media">
+      <div className="slide-controls" aria-label={t("Choose product media")}>
         {images.map((image, index) => (
           <button
             key={image}
@@ -170,6 +174,7 @@ function ScentSelector({
   selectedScent: string;
   onSelect: (scent: string) => void;
 }) {
+  const { t, locale } = useLanguage();
   const options: ScentOption[] =
     product.scentOptions ??
     product.scents.map((name) => ({
@@ -192,9 +197,9 @@ function ScentSelector({
   return (
     <div className="scent-selector">
       <div className="scent-selector-head">
-        <span className="option-label">Choose the atmosphere</span>
+        <span className="option-label">{t("Choose the atmosphere")}</span>
         <span className="selected-scent">
-          {String(selectedIndex + 1).padStart(2, "0")} /{" "}
+          {String(selectedIndex + 1).padStart(2, "0")} /{t(" ")}
           {String(options.length).padStart(2, "0")}
         </span>
       </div>
@@ -227,14 +232,14 @@ function ScentSelector({
                 <button
                   type="button"
                   onClick={() => changeScent(-1)}
-                  aria-label="Previous scent"
+                  aria-label={t("Previous scent")}
                 >
                   <ArrowLeft size={15} />
                 </button>
                 <button
                   type="button"
                   onClick={() => changeScent(1)}
-                  aria-label="Next scent"
+                  aria-label={t("Next scent")}
                 >
                   <ArrowRight size={15} />
                 </button>
@@ -242,12 +247,11 @@ function ScentSelector({
             )}
           </div>
           <div className="scent-slide-copy" key={selected.name}>
-            <span className="scent-slide-number">
-              Scent / {String(selectedIndex + 1).padStart(2, "0")}
+            <span className="scent-slide-number">{t("Scent / ")}{String(selectedIndex + 1).padStart(2, "0")}
             </span>
             <strong>{selected.name}</strong>
-            <small>{selected.notes}</small>
-            <p>{selected.description}</p>
+            <small>{t(selected.notes)}</small>
+            <p>{t(selected.description)}</p>
           </div>
         </div>
       )}
@@ -262,6 +266,7 @@ function ObjectShowcase({
   product: Product;
   onOpen: (p: Product, scent: string) => void;
 }) {
+  const { t, locale } = useLanguage();
   const [selectedScent, setSelectedScent] = useState(
     product.scentOptions?.[0]?.name ?? product.scents[0],
   );
@@ -272,7 +277,7 @@ function ObjectShowcase({
       data-testid={`object-showcase-${product.id}`}
     >
       <div className="object-media-wrap">
-        <div className="object-index">Object / {product.name}</div>
+        <div className="object-index">{t("Object / ")}{product.name}</div>
         {product.images ? (
           <ObjectSlideshow product={product} />
         ) : (
@@ -282,11 +287,11 @@ function ObjectShowcase({
         )}
       </div>
       <div className="object-details">
-        <div className="section-kicker">{product.collection} collection</div>
+        <div className="section-kicker">{product.collection}{t(" collection")}</div>
         <div className="object-title-row">
           <div>
             <h3>{product.name}</h3>
-            <p>{product.description}</p>
+            <p>{t(product.description)}</p>
           </div>
           <span className="object-price">€{product.price}</span>
         </div>
@@ -300,16 +305,15 @@ function ObjectShowcase({
       </div>
       <div className="object-explanation object-explanation-with-action">
         <div className="object-explanation-copy">
-          <span className="object-explanation-label">About the object</span>
-          <p>{product.explanation}</p>
+          <span className="object-explanation-label">{t("About the object")}</span>
+          <p>{t(product.explanation)}</p>
         </div>
         <button
           className="solid-button object-buy-button object-explanation-button"
           type="button"
           onClick={() => onOpen(product, selectedScent)}
           data-testid={`button-open-object-${product.id}`}
-        >
-          Choose {product.name} <ArrowRight size={14} />
+        >{t("Choose ")}{product.name} <ArrowRight size={14} />
         </button>
       </div>
     </article>
@@ -323,6 +327,7 @@ function RefillShowcase({
   product: Product;
   onOpen: (p: Product, scent: string) => void;
 }) {
+  const { t, locale } = useLanguage();
   const [size, setSize] = useState<"Small" | "Big">("Small");
   const [scent, setScent] = useState("Thé");
   const selectedVariant = `${size} / ${scent}`;
@@ -334,75 +339,67 @@ function RefillShowcase({
       data-testid="object-showcase-refill"
     >
       <div className="object-media-wrap">
-        <div className="object-index">Object / Refill</div>
+        <div className="object-index">{t("Object / Refill")}</div>
         <ObjectSlideshow product={product} />
       </div>
       <div className="object-details refill-details">
-        <div className="section-kicker">Refill / for every form</div>
+        <div className="section-kicker">{t("Refill / for every form")}</div>
         <div className="object-title-row">
           <div>
-            <h3>Refill</h3>
-            <p>A new atmosphere for the form you already love.</p>
+            <h3>{t("Refill")}</h3>
+            <p>{t("A new atmosphere for the form you already love.")}</p>
           </div>
           <span className="object-price">€{product.price}</span>
         </div>
         <div className="refill-options">
-          <span className="option-label">Choose your refill</span>
+          <span className="option-label">{t("Choose your refill")}</span>
           <div className="refill-select-row">
             <label>
-              <span className="refill-select-label">Size</span>
+              <span className="refill-select-label">{t("Size")}</span>
               <select
                 className="refill-select"
                 value={size}
                 onChange={(event) =>
                   setSize(event.target.value as "Small" | "Big")
                 }
-                aria-label="Refill size"
+                aria-label={t("Refill size")}
               >
-                <option value="Small">Small (190g)</option>
-                <option value="Big">Big (245g)</option>
+                <option value="Small">{t("Small (190g)")}</option>
+                <option value="Big">{t("Big (245g)")}</option>
               </select>
             </label>
             <label>
-              <span className="refill-select-label">Scent</span>
+              <span className="refill-select-label">{t("Scent")}</span>
               <select
                 className="refill-select"
                 value={scent}
                 onChange={(event) => setScent(event.target.value)}
-                aria-label="Refill scent"
+                aria-label={t("Refill scent")}
               >
-                <option>Thé</option>
-                <option>Bois Santal</option>
-                <option>Tropicale</option>
-                <option>Cedar Salad</option>
+                <option value="Thé">{t("Thé")}</option>
+                <option value="Bois Santal">{t("Bois Santal")}</option>
+                <option value="Tropicale">{t("Tropicale")}</option>
+                <option value="Cedar Salad">{t("Cedar Salad")}</option>
               </select>
             </label>
           </div>
         </div>
         <div className="refill-copy">
-          <p>Our sculptural candles are designed to last.</p>
-          <p>
-            With our refills, you extend their life—quietly, sustainably, and
-            without ever replacing the form itself.
-          </p>
-          <p>
-            Each refill is hand-poured in our Berlin atelier and precisely
-            tailored to our sculptures. The minimalist composition allows the
-            fragrance to unfold evenly without overpowering the room.
-          </p>
+          <p>{t("Our sculptural candles are designed to last.")}</p>
+          <p>{t("With our refills, you extend their life—quietly, sustainably, and without ever replacing the form itself.")}</p>
+          <p>{t("Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures. The minimalist composition allows the fragrance to unfold evenly without overpowering the room.")}</p>
         </div>
         <button
           className="solid-button object-buy-button refill-buy-button"
           type="button"
           onClick={() => onOpen(product, selectedVariant)}
           data-testid="button-open-object-refill"
-        >
-          Choose refill <ArrowRight size={14} />
+        >{t("Choose refill ")}<ArrowRight size={14} />
         </button>
       </div>
       <div className="object-explanation">
-        <span className="object-explanation-label">About the refill</span>
-        <p>{product.explanation}</p>
+        <span className="object-explanation-label">{t("About the refill")}</span>
+        <p>{t(product.explanation)}</p>
       </div>
     </article>
   );
@@ -417,6 +414,7 @@ function ScentShowcase({
   scents: ScentOption[];
   onOpen: (p: Product, scent: string) => void;
 }) {
+  const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const selected = scents[activeIndex];
 
@@ -430,30 +428,24 @@ function ScentShowcase({
     <>
       <div className="scent-showcase-heading" id="scents">
         <div>
-          <div className="section-kicker">The atmosphere / 02</div>
-          <h2 className="section-title">
-            Signature
-            <br />
-            <em>scents.</em>
+          <div className="section-kicker">{t("The atmosphere / 02")}</div>
+          <h2 className="section-title">{t("Signature")}<br />
+            <em>{t("scents.")}</em>
           </h2>
         </div>
-        <p className="section-intro">
-          Four scent compositions, each unfolding slowly through the warmth of
-          the candle.
-        </p>
+        <p className="section-intro">{t("Four scent compositions, each unfolding slowly through the warmth of the candle.")}</p>
       </div>
       <article
         className="object-showcase scent-showcase"
         data-testid="scent-showcase"
       >
         <div className="object-media-wrap">
-          <div className="object-index">
-            Atmosphere / {String(activeIndex + 1).padStart(2, "0")}
+          <div className="object-index">{t("Atmosphere / ")}{String(activeIndex + 1).padStart(2, "0")}
           </div>
           <div
             className="object-media scent-showcase-media"
             role="group"
-            aria-label="Signature scent images and videos"
+            aria-label={t("Signature scent images and videos")}
           >
             {scents.map((option, index) => (
               <CatalogMedia
@@ -468,7 +460,7 @@ function ScentShowcase({
                 aria-hidden={index !== activeIndex}
               />
             ))}
-            <div className="slide-controls" aria-label="Choose a scent">
+            <div className="slide-controls" aria-label={t("Choose a scent")}>
               {scents.map((option, index) => (
                 <button
                   key={option.name}
@@ -484,14 +476,14 @@ function ScentShowcase({
               <button
                 type="button"
                 onClick={() => changeScent(-1)}
-                aria-label="Previous scent"
+                aria-label={t("Previous scent")}
               >
                 <ArrowLeft size={15} />
               </button>
               <button
                 type="button"
                 onClick={() => changeScent(1)}
-                aria-label="Next scent"
+                aria-label={t("Next scent")}
               >
                 <ArrowRight size={15} />
               </button>
@@ -499,41 +491,33 @@ function ScentShowcase({
           </div>
         </div>
         <div className="object-details scent-showcase-details">
-          <div className="section-kicker">
-            Signature scents / composed in Grasse
-          </div>
+          <div className="section-kicker">{t("Signature scents / composed in Grasse")}</div>
           <div className="object-title-row">
             <div>
               <h3 key={selected.name} className="scent-showcase-title">
                 {selected.name}
               </h3>
-              <p>245 gram refill · Up to 65H</p>
+              <p>{t("245 gram refill · Up to 65H")}</p>
             </div>
             <span className="object-price">€{product.price}</span>
           </div>
           <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
-            <span className="scent-showcase-label">The atmosphere</span>
-            <p>{selected.description}</p>
-            <span className="scent-showcase-label">Scent notes</span>
-            <p>{selected.notes}</p>
+            <span className="scent-showcase-label">{t("The atmosphere")}</span>
+            <p>{t(selected.description)}</p>
+            <span className="scent-showcase-label">{t("Scent notes")}</span>
+            <p>{t(selected.notes)}</p>
           </div>
           <button
             className="solid-button object-buy-button scent-buy-button"
             type="button"
             onClick={() => onOpen(product, `Big / ${selected.name}`)}
             data-testid={`button-open-scent-${selected.name.toLowerCase().replace(" ", "-")}`}
-          >
-            Choose {selected.name} <ArrowRight size={14} />
+          >{t("Choose ")}{selected.name} <ArrowRight size={14} />
           </button>
         </div>
         <div className="object-explanation">
-          <span className="object-explanation-label">
-            Keep the form. Change the atmosphere.
-          </span>
-          <p>
-            When the candle is finished, place a new wax refill inside the same
-            vessel. Choose the same scent or change the atmosphere entirely.
-          </p>
+          <span className="object-explanation-label">{t("Keep the form. Change the atmosphere.")}</span>
+          <p>{t("When the candle is finished, place a new wax refill inside the same vessel. Choose the same scent or change the atmosphere entirely.")}</p>
         </div>
       </article>
     </>
@@ -541,6 +525,7 @@ function ScentShowcase({
 }
 
 function CareImageSlideshow() {
+  const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -561,7 +546,7 @@ function CareImageSlideshow() {
     <div
       className="care-image-slideshow"
       role="group"
-      aria-label="Candle care images"
+      aria-label={t("Candle care images")}
     >
       {careImages.map((image, index) => (
         <img
@@ -576,19 +561,19 @@ function CareImageSlideshow() {
         <button
           type="button"
           onClick={() => changeImage(-1)}
-          aria-label="Previous care image"
+          aria-label={t("Previous care image")}
         >
           <ArrowLeft size={15} />
         </button>
         <button
           type="button"
           onClick={() => changeImage(1)}
-          aria-label="Next care image"
+          aria-label={t("Next care image")}
         >
           <ArrowRight size={15} />
         </button>
       </div>
-      <div className="care-image-dots" aria-label="Choose care image">
+      <div className="care-image-dots" aria-label={t("Choose care image")}>
         {careImages.map((image, index) => (
           <button
             key={image.src}
@@ -613,27 +598,14 @@ function Header({
   onCart: () => void;
   onSearch: () => void;
 }) {
+  const { t, locale } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<"products" | "od" | null>(null);
-  const [language, setLanguage] = useState<"DE" | "EN">("EN");
+  const { language, setLanguage } = useLanguage();
 
   const changeMenu = (menu: "products" | "od", open: boolean) => {
     setOpenMenu((current) => (open ? menu : current === menu ? null : current));
   };
-
-  useEffect(() => {
-    const savedLanguage = window.localStorage.getItem(
-      "objet-decoratif-language",
-    );
-    if (savedLanguage === "DE" || savedLanguage === "EN") {
-      setLanguage(savedLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = language.toLowerCase();
-    window.localStorage.setItem("objet-decoratif-language", language);
-  }, [language]);
 
   const navTo = (id: string) => {
     const target = document.getElementById(id);
@@ -656,16 +628,14 @@ function Header({
 
   return (
     <header>
-      <div className="announcement">
-        Free shipping on forms & refills over €100
-      </div>
+      <div className="announcement">{t("Free shipping on forms & refills over €100")}</div>
       <div className="site-header">
         <nav
           className={`main-nav ${mobileOpen ? "open" : ""}`}
           data-testid="nav-main"
         >
           <HeaderNavMenu
-            label="Products"
+            label={t("Products")}
             testId="button-products-menu"
             open={openMenu === "products"}
             onOpenChange={(open) => changeMenu("products", open)}
@@ -674,19 +644,15 @@ function Header({
               className="header-nav-item"
               onSelect={() => navTo("collection")}
               data-testid="link-shop-collection"
-            >
-              Candels
-            </DropdownMenuItem>
+            >{t("Candels")}</DropdownMenuItem>
             <DropdownMenuItem
               className="header-nav-item"
               onSelect={() => navTo("scents")}
               data-testid="link-signature-scents"
-            >
-              Scents
-            </DropdownMenuItem>
+            >{t("Scents")}</DropdownMenuItem>
           </HeaderNavMenu>
           <HeaderNavMenu
-            label="OD"
+            label={t("OD")}
             testId="button-od-menu"
             open={openMenu === "od"}
             onOpenChange={(open) => changeMenu("od", open)}
@@ -699,9 +665,7 @@ function Header({
                   setOpenMenu(null);
                 }}
                 data-testid="link-about"
-              >
-                About
-              </Link>
+              >{t("About")}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem className="header-nav-item" asChild>
               <Link
@@ -711,9 +675,7 @@ function Header({
                   setOpenMenu(null);
                 }}
                 data-testid="link-care"
-              >
-                Care
-              </Link>
+              >{t("Care")}</Link>
             </DropdownMenuItem>
           </HeaderNavMenu>
           <Show when="signed-in">
@@ -731,19 +693,17 @@ function Header({
             setOpenMenu(null);
             setMobileOpen((open) => !open);
           }}
-          aria-label="Open menu"
+          aria-label={t("Open menu")}
           data-testid="button-menu"
         >
           {mobileOpen ? <X size={19} /> : <Menu size={19} />}
         </button>
-        <a href="/" className="logo" data-testid="link-logo">
-          Objet Décoratif
-        </a>
+        <a href="/" className="logo" data-testid="link-logo">{t("Objet Décoratif")}</a>
         <div className="header-actions">
           <div
             className="language-switch"
             role="group"
-            aria-label="Choose language"
+            aria-label={t("Choose language")}
           >
             {(["DE", "EN"] as const).map((option) => (
               <button
@@ -763,12 +723,10 @@ function Header({
             onClick={onSearch}
             data-testid="button-search"
           >
-            <Search size={14} strokeWidth={1.5} /> <span>Search</span>
+            <Search size={14} strokeWidth={1.5} /> <span>{t("Search")}</span>
           </button>
           <Show when="signed-in">
-            <Link href="/account" className="header-action account-link">
-              Account
-            </Link>
+            <Link href="/account" className="header-action account-link">{t("Account")}</Link>
             <LogoutButton
               className="header-action header-logout-button"
               label={language === "DE" ? "Abmelden" : "Log out"}
@@ -776,17 +734,16 @@ function Header({
             />
           </Show>
           <Show when="signed-out">
-            <Link href="/sign-in" className="header-action account-link">
-              Sign in
-            </Link>
+            <Link href="/sign-in" className="header-action account-link">{t("Sign in")}</Link>
           </Show>
           <button
             className="cart-button"
             onClick={onCart}
+            aria-label={`${t("Cart")} (${cartCount})`}
             data-testid="button-cart"
           >
             <ShoppingBag size={14} strokeWidth={1.5} />
-            <span>Cart</span>
+            <span className="cart-label">{t("Cart")}</span>
             <span className="cart-count" data-testid="text-cart-count">
               {cartCount}
             </span>
@@ -798,6 +755,7 @@ function Header({
 }
 
 function Hero({ onExplore }: { onExplore: () => void }) {
+  const { t, locale } = useLanguage();
   const [videoReady, setVideoReady] = useState(false);
 
   return (
@@ -815,25 +773,19 @@ function Hero({ onExplore }: { onExplore: () => void }) {
         <source src="/videos/hero.mp4" type="video/mp4" />
       </video>
       <div className="hero-copy">
-        <span className="eyebrow">Concrete candle collection / 01—25</span>
-        <h1>
-          Objects
-          <br />
-          <em>With a Glow</em>
+        <span className="eyebrow">{t("Concrete candle collection / 01—25")}</span>
+        <h1>{t("Objects")}<br />
+          <em>{t("With a Glow")}</em>
         </h1>
-        <p className="hero-note">
-          Architectural vessels cast in concrete. Fragrances made to stay with
-          you long after the flame goes out.
-        </p>
+        <p className="hero-note">{t("Architectural vessels cast in concrete. Fragrances made to stay with you long after the flame goes out.")}</p>
         <button
           className="outline-button"
           onClick={onExplore}
           data-testid="button-explore-collection"
-        >
-          Explore the collection <ArrowDown size={13} />
+        >{t("Explore the collection ")}<ArrowDown size={13} />
         </button>
       </div>
-      <span className="hero-index">OD / 001</span>
+      <span className="hero-index">{t("OD / 001")}</span>
     </section>
   );
 }
@@ -847,6 +799,7 @@ function Collection({
   scents: ScentOption[];
   onOpen: (p: Product, scent: string) => void;
 }) {
+  const { t, locale } = useLanguage();
   const [filter, setFilter] = useState<"All" | ProductCollection>("All");
   const visible = useMemo(
     () =>
@@ -860,13 +813,10 @@ function Collection({
     <section className="section" id="collection">
       <div className="section-header">
         <div>
-          <div className="section-kicker">The forms / 01</div>
-          <h2 className="section-title">Shop collection</h2>
+          <div className="section-kicker">{t("The forms / 01")}</div>
+          <h2 className="section-title">{t("Shop collection")}</h2>
         </div>
-        <p className="section-intro">
-          A small family of concrete forms. Each one is designed to be lived
-          with, then lit again.
-        </p>
+        <p className="section-intro">{t("A small family of concrete forms. Each one is designed to be lived with, then lit again.")}</p>
       </div>
       <div className="filter-bar">
         {(
@@ -887,7 +837,7 @@ function Collection({
             onClick={() => setFilter(item)}
             data-testid={`button-filter-${item.toLowerCase()}`}
           >
-            {item}
+            {t(item)}
           </button>
         ))}
       </div>
@@ -925,55 +875,54 @@ function Collection({
 }
 
 function Footer() {
+  const { t, locale } = useLanguage();
   return (
     <footer className="footer editorial-footer" id="footer">
       <div className="footer-grid">
         <div className="footer-column">
-          <span className="footer-index">01 / Sitemap</span>
+          <span className="footer-index">{t("01 / Sitemap")}</span>
           <div className="footer-links">
-            <a href="/">Home</a>
-            <a href="/#collection">The Forms</a>
-            <a href="/#scents">Signature Scents</a>
-            <Link href="/about">About</Link>
-            <Link href="/care">Candle Care</Link>
+            <a href="/">{t("Home")}</a>
+            <a href="/#collection">{t("The Forms")}</a>
+            <a href="/#scents">{t("Signature Scents")}</a>
+            <Link href="/about">{t("About")}</Link>
+            <Link href="/care">{t("Candle Care")}</Link>
           </div>
         </div>
         <div className="footer-column">
-          <span className="footer-index">02 / Information</span>
+          <span className="footer-index">{t("02 / Information")}</span>
           <div className="footer-links footer-muted-links">
-            <Link href="/shipping-policy">Shipping Policy</Link>
-            <Link href="/returns">Returns</Link>
-            <Link href="/privacy-policy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/legal-notice">Legal Notice</Link>
+            <Link href="/shipping-policy">{t("Shipping Policy")}</Link>
+            <Link href="/returns">{t("Returns")}</Link>
+            <Link href="/privacy-policy">{t("Privacy")}</Link>
+            <Link href="/terms">{t("Terms")}</Link>
+            <Link href="/legal-notice">{t("Legal Notice")}</Link>
           </div>
         </div>
         <div className="footer-column footer-contact">
-          <span className="footer-index">03 / Contact</span>
+          <span className="footer-index">{t("03 / Contact")}</span>
           <div className="footer-links">
             <a
-              href="mailto:info@objetdecoratif.de"
+              href={`mailto:${CONTACT_EMAIL}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              info@objetdecoratif.de
+              {CONTACT_EMAIL}
             </a>
-            <Link href="/contact">
-              Contact Form <span aria-hidden="true">↗</span>
+            <Link href="/contact">{t("Contact Form ")}<span aria-hidden="true">↗</span>
             </Link>
             <a
               href="https://www.instagram.com/objet_decoratif/"
               target="_blank"
               rel="noreferrer"
-            >
-              Instagram <span aria-hidden="true">↗</span>
+            >{t("Instagram ")}<span aria-hidden="true">↗</span>
             </a>
           </div>
         </div>
       </div>
       <div className="footer-bottom">
-        <span>© Objet Décoratif / Made for slow evenings</span>
-        <span>Concrete candle collection — Berlin / Everywhere</span>
+        <span>{t("© Objet Décoratif / Made for slow evenings")}</span>
+        <span>{t("Concrete candle collection — Berlin / Everywhere")}</span>
       </div>
     </footer>
   );
@@ -1011,6 +960,7 @@ function PolicyPage({
   label: string;
   encodedContent: string;
 }) {
+  const { t, locale } = useLanguage();
   const [content, setContent] = useState("");
   const [loadError, setLoadError] = useState(false);
 
@@ -1036,25 +986,22 @@ function PolicyPage({
   return (
     <EditorialPageFrame>
       <section className="policy-hero">
-        <div className="section-kicker">{label} / Objet Décoratif</div>
+        <div className="section-kicker">{label}{t(" / Objet Décoratif")}</div>
         <h1>{title}</h1>
-        <p>Legal information for the Objet Décoratif store.</p>
+        <p>{t("Legal information for the Objet Décoratif store.")}</p>
+        <small>{t("Legal documents are displayed in their original language.")}</small>
       </section>
       <section className="policy-layout">
         <div className="policy-index">{label}</div>
         {loadError ? (
-          <p className="policy-status" role="alert">
-            The policy could not be displayed.
-          </p>
+          <p className="policy-status" role="alert">{t("The policy could not be displayed.")}</p>
         ) : content ? (
           <article
             className="policy-content"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
-          <p className="policy-status" role="status">
-            Loading policy…
-          </p>
+          <p className="policy-status" role="status">{t("Loading policy…")}</p>
         )}
       </section>
     </EditorialPageFrame>
@@ -1062,65 +1009,71 @@ function PolicyPage({
 }
 
 function TermsPage() {
+  const { t, locale } = useLanguage();
   return (
     <PolicyPage
-      title="Terms of service"
-      label="Terms"
+      title={t("Terms of service")}
+      label={t("Terms")}
       encodedContent={termsPolicyData}
     />
   );
 }
 
 function PrivacyPolicyPage() {
+  const { t, locale } = useLanguage();
   return (
     <PolicyPage
-      title="Privacy policy"
-      label="Privacy"
+      title={t("Privacy policy")}
+      label={t("Privacy")}
       encodedContent={privacyPolicyData}
     />
   );
 }
 
 function ShippingPolicyPage() {
+  const { t, locale } = useLanguage();
   return (
     <PolicyPage
-      title="Shipping policy"
-      label="Shipping"
+      title={t("Shipping policy")}
+      label={t("Shipping")}
       encodedContent={shippingPolicyData}
     />
   );
 }
 
 function ReturnsPolicyPage() {
+  const { t, locale } = useLanguage();
   return (
     <PolicyPage
-      title="Returns"
-      label="Returns"
+      title={t("Returns")}
+      label={t("Returns")}
       encodedContent={returnsPolicyData}
     />
   );
 }
 
 function LegalNoticePage() {
+  const { t, locale } = useLanguage();
   return (
     <PolicyPage
-      title="Legal notice"
-      label="Legal"
+      title={t("Legal notice")}
+      label={t("Legal")}
       encodedContent={legalNoticeData}
     />
   );
 }
 
 function ContactPage() {
+  const { t, locale } = useLanguage();
   const [prepared, setPrepared] = useState(false);
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Contact — Objet Décoratif";
+    document.title = `${t("Contact")} — Objet Décoratif`;
     return () => {
       document.title = previousTitle;
     };
-  }, []);
+  }, [t]);
 
   const prepareEmail = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1145,91 +1098,72 @@ function ContactPage() {
     );
 
     setPrepared(true);
-    window.location.href = `mailto:info@objetdecoratif.de?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
   };
 
   return (
     <EditorialPageFrame>
       <section className="contact-hero">
-        <div className="section-kicker">Contact / Objet Décoratif</div>
-        <h1>
-          Have a question
-          <br />
-          or need support?
-        </h1>
+        <div className="section-kicker">{t("Contact / Objet Décoratif")}</div>
+        <h1>{t("Have a question")}<br />{t("or need support?")}</h1>
         <div className="contact-intro">
-          <p>
-            We’re here to assist you with any inquiries about our candles, our
-            process, or upcoming releases.
-          </p>
-          <p>Feel free to send us a message — we respond as soon as we can.</p>
-          <p>
-            For direct communication, you can always email us at{" "}
-            <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>.
+          <p>{t("We’re here to assist you with any inquiries about our candles, our process, or upcoming releases.")}</p>
+          <p>{t("Feel free to send us a message — we respond as soon as we can.")}</p>
+          <p>{t("For direct communication, you can always email us at")}{t(" ")}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
         </div>
       </section>
       <section className="contact-layout">
         <div className="contact-aside">
-          <span>01 / Message</span>
-          <p>
-            Tell us how we can help. Required fields are marked with an
-            asterisk.
-          </p>
+          <span>{t("01 / Message")}</span>
+          <p>{t("Tell us how we can help. Required fields are marked with an asterisk.")}</p>
         </div>
         <form className="contact-form" onSubmit={prepareEmail}>
           <div className="contact-form-grid">
             <label>
-              <span>Name *</span>
+              <span>{t("Name *")}</span>
               <input name="name" type="text" autoComplete="name" required />
             </label>
             <label>
-              <span>Email *</span>
+              <span>{t("Email *")}</span>
               <input name="email" type="email" autoComplete="email" required />
             </label>
           </div>
           <div className="contact-form-grid">
             <label>
-              <span>Topic *</span>
+              <span>{t("Topic *")}</span>
               <select name="topic" defaultValue="" required>
-                <option value="" disabled>
-                  Select a topic
-                </option>
-                <option>Product question</option>
-                <option>Order support</option>
-                <option>Candle care</option>
-                <option>Press or collaboration</option>
-                <option>Other</option>
+                <option value="" disabled>{t("Select a topic")}</option>
+                <option value="Product question">{t("Product question")}</option>
+                <option value="Order support">{t("Order support")}</option>
+                <option value="Candle care">{t("Candle care")}</option>
+                <option value="Press or collaboration">{t("Press or collaboration")}</option>
+                <option value="Other">{t("Other")}</option>
               </select>
             </label>
             <label>
-              <span>Order number</span>
+              <span>{t("Order number")}</span>
               <input
                 name="orderNumber"
                 type="text"
                 autoComplete="off"
-                placeholder="Optional"
+                placeholder={t("Optional")}
               />
             </label>
           </div>
           <label>
-            <span>Message *</span>
+            <span>{t("Message *")}</span>
             <textarea name="message" rows={8} required />
           </label>
           <div className="contact-form-actions">
-            <button className="solid-button" type="submit">
-              Prepare email <ArrowRight size={13} />
+            <button className="solid-button" type="submit">{t("Prepare email ")}<ArrowRight size={13} />
             </button>
-            <small>
-              Your email application will open with your message addressed to
-              us.
-            </small>
+            <small>{t("Your email application will open with your message addressed to us.")}</small>
           </div>
           {prepared && (
-            <p className="contact-status" role="status">
-              Your email application should now be open. If it did not open,
-              write directly to{" "}
-              <a href="mailto:info@objetdecoratif.de">info@objetdecoratif.de</a>
+            <p className="contact-status" role="status">{t("Your email application should now be open. If it did not open, write directly to")}{t(" ")}
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
               .
             </p>
           )}
@@ -1240,6 +1174,7 @@ function ContactPage() {
 }
 
 function CarePage() {
+  const { t, locale } = useLanguage();
   return (
     <EditorialPageFrame>
       <section className="care-top">
@@ -1252,132 +1187,91 @@ function CarePage() {
             playsInline
             preload="metadata"
             poster="/videos/care-01-poster.jpg"
-            aria-label="Objet Décoratif candle care"
+            aria-label={t("Objet Décoratif candle care")}
           >
             <source src="/videos/care-01.mp4" type="video/mp4" />
           </video>
-          <span className="care-video-label">Care / 01</span>
+          <span className="care-video-label">{t("Care / 01")}</span>
         </div>
         <div className="care-top-copy">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">Candle care / Objet Décoratif</div>
-            <span className="eyebrow">A considered flame / Care guide</span>
-            <h1>
-              Care for
-              <br />
-              <em>the flame.</em>
+            <div className="section-kicker">{t("Candle care / Objet Décoratif")}</div>
+            <span className="eyebrow">{t("A considered flame / Care guide")}</span>
+            <h1>{t("Care for")}<br />
+              <em>{t("the flame.")}</em>
             </h1>
-            <p>
-              A few considered habits help every candle burn evenly, keep the
-              vessel clean and let the perfume unfold as intended.
-            </p>
-            <a className="outline-button" href="#care-essentials">
-              View the essentials <ArrowDown size={13} />
+            <p>{t("A few considered habits help every candle burn evenly, keep the vessel clean and let the perfume unfold as intended.")}</p>
+            <a className="outline-button" href="#care-essentials">{t("View the essentials ")}<ArrowDown size={13} />
             </a>
           </div>
-          <div className="editorial-hero-note">
-            Even burn / Clean vessel / Balanced scent
-          </div>
+          <div className="editorial-hero-note">{t("Even burn / Clean vessel / Balanced scent")}</div>
         </div>
       </section>
       <section
         className="editorial-section care-essentials"
         id="care-essentials"
       >
-        <div className="editorial-section-label">
-          01 / The essentials
-          <br />
-          <span>Wax / Wick / Vessel</span>
+        <div className="editorial-section-label">{t("01 / The essentials")}<br />
+          <span>{t("Wax / Wick / Vessel")}</span>
         </div>
         <div className="editorial-section-content">
-          <div className="section-kicker">Care extends the ritual</div>
-          <h2>A clean, even burn starts with the wick.</h2>
+          <div className="section-kicker">{t("Care extends the ritual")}</div>
+          <h2>{t("A clean, even burn starts with the wick.")}</h2>
           <div className="care-intro-copy">
-            <p>
-              We tested numerous wax and wick combinations. This pairing was
-              selected for a steady burn and balanced scent diffusion. Caring
-              for it well helps the candle perform as intended.
-            </p>
-            <p>
-              Let the wax pool become fully liquid on the first burn, keep the
-              wick centered and remove any debris before lighting. Small
-              adjustments make a noticeable difference.
-            </p>
+            <p>{t("We tested numerous wax and wick combinations. This pairing was selected for a steady burn and balanced scent diffusion. Caring for it well helps the candle perform as intended.")}</p>
+            <p>{t("Let the wax pool become fully liquid on the first burn, keep the wick centered and remove any debris before lighting. Small adjustments make a noticeable difference.")}</p>
           </div>
         </div>
         <div className="care-facts">
           <div>
-            <strong>5 mm</strong>
-            <span>Wick trim only after the wax has fully set.</span>
+            <strong>{t("5 mm")}</strong>
+            <span>{t("Wick trim only after the wax has fully set.")}</span>
           </div>
           <div>
-            <strong>1½–2 h</strong>
-            <span>Recommended burn time for regular-sized candles.</span>
+            <strong>{t("1½–2 h")}</strong>
+            <span>{t("Recommended burn time for regular-sized candles.")}</span>
           </div>
           <div>
-            <strong>4 h</strong>
-            <span>Do not exceed four hours in one burn.</span>
+            <strong>{t("4 h")}</strong>
+            <span>{t("Do not exceed four hours in one burn.")}</span>
           </div>
           <div>
-            <strong>10 mm</strong>
-            <span>Stop burning when this amount of wax remains.</span>
+            <strong>{t("10 mm")}</strong>
+            <span>{t("Stop burning when this amount of wax remains.")}</span>
           </div>
         </div>
       </section>
       <section className="care-split care-steps">
         <div className="care-step-copy">
-          <div className="section-kicker">
-            02 / Step by step / Wax / Wick / Vessel
-          </div>
-          <h2>
-            How to care
-            <br />
-            for your candle.
-          </h2>
+          <div className="section-kicker">{t("02 / Step by step / Wax / Wick / Vessel")}</div>
+          <h2>{t("How to care")}<br />{t("for your candle.")}</h2>
           <div className="care-step-list">
             <div>
               <span>01</span>
               <div>
-                <h3>The first burn</h3>
-                <p>
-                  Allow the melt pool to become fully liquid and reach the edges
-                  of the refill. This establishes an even burn and helps prevent
-                  tunnelling during future use.
-                </p>
+                <h3>{t("The first burn")}</h3>
+                <p>{t("Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.")}</p>
               </div>
             </div>
             <div>
               <span>02</span>
               <div>
-                <h3>Each time you burn</h3>
-                <p>
-                  Place the candle in a well-ventilated room, away from drafts
-                  and fans. Burn regular-sized candles for 1½–2 hours at a time
-                  and never longer than four hours.
-                </p>
+                <h3>{t("Each time you burn")}</h3>
+                <p>{t("Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.")}</p>
               </div>
             </div>
             <div>
               <span>03</span>
               <div>
-                <h3>Care for the wick</h3>
-                <p>
-                  Keep the wax pool free from wick trimmings, matches and
-                  debris. After extinguishing, gently re-center the wick while
-                  the wax is still soft. Once fully set, trim it to
-                  approximately 5 mm.
-                </p>
+                <h3>{t("Care for the wick")}</h3>
+                <p>{t("Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.")}</p>
               </div>
             </div>
             <div>
               <span>04</span>
               <div>
-                <h3>Extinguish and finish</h3>
-                <p>
-                  Use the lid or a candle snuffer to extinguish the flame. Let
-                  the vessel cool before touching or moving it. Discontinue use
-                  when approximately 10 mm of wax remains at the bottom.
-                </p>
+                <h3>{t("Extinguish and finish")}</h3>
+                <p>{t("Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.")}</p>
               </div>
             </div>
           </div>
@@ -1386,41 +1280,36 @@ function CarePage() {
       </section>
       <section className="care-split care-safety">
         <div className="care-safety-copy">
-          <div className="section-kicker">03 / Safety first</div>
-          <h2>Never leave a burning candle unattended.</h2>
+          <div className="section-kicker">{t("03 / Safety first")}</div>
+          <h2>{t("Never leave a burning candle unattended.")}</h2>
         </div>
         <div className="care-safety-list">
           <div>
             <span>01</span>
             <div>
-              <h3>Keep a clear space</h3>
-              <p>Keep away from children, pets and flammable materials.</p>
+              <h3>{t("Keep a clear space")}</h3>
+              <p>{t("Keep away from children, pets and flammable materials.")}</p>
             </div>
           </div>
           <div>
             <span>02</span>
             <div>
-              <h3>Use a stable surface</h3>
-              <p>Place on a stable, heat-resistant surface.</p>
+              <h3>{t("Use a stable surface")}</h3>
+              <p>{t("Place on a stable, heat-resistant surface.")}</p>
             </div>
           </div>
           <div>
             <span>03</span>
             <div>
-              <h3>Watch the flame</h3>
-              <p>
-                Extinguish if the flame becomes unusually high or the wick moves
-                close to the vessel wall.
-              </p>
+              <h3>{t("Watch the flame")}</h3>
+              <p>{t("Extinguish if the flame becomes unusually high or the wick moves close to the vessel wall.")}</p>
             </div>
           </div>
           <div>
             <span>04</span>
             <div>
-              <h3>Let the vessel cool</h3>
-              <p>
-                Allow the vessel and wax to cool completely before handling.
-              </p>
+              <h3>{t("Let the vessel cool")}</h3>
+              <p>{t("Allow the vessel and wax to cool completely before handling.")}</p>
             </div>
           </div>
         </div>
@@ -1428,21 +1317,12 @@ function CarePage() {
       <section className="care-split care-closing">
         <CareImageSlideshow />
         <div className="care-closing-copy">
-          <div className="section-kicker">
-            04 / Continue the ritual / Form / Scent
-          </div>
-          <h2>
-            Keep the vessel.
-            <br />
-            <em>Renew the scent.</em>
+          <div className="section-kicker">{t("04 / Continue the ritual / Form / Scent")}</div>
+          <h2>{t("Keep the vessel.")}<br />
+            <em>{t("Renew the scent.")}</em>
           </h2>
-          <p>
-            Once the candle is finished and the vessel has cooled completely,
-            continue with a new refill. The object remains; only the atmosphere
-            changes.
-          </p>
-          <a className="solid-button" href="/#collection">
-            Shop refills <ArrowRight size={13} />
+          <p>{t("Once the candle is finished and the vessel has cooled completely, continue with a new refill. The object remains; only the atmosphere changes.")}</p>
+          <a className="solid-button" href="/#collection">{t("Shop refills ")}<ArrowRight size={13} />
           </a>
         </div>
       </section>
@@ -1451,92 +1331,60 @@ function CarePage() {
 }
 
 function AboutPage() {
+  const { t, locale } = useLanguage();
   return (
     <EditorialPageFrame>
       <section className="editorial-hero about-hero">
         <div className="editorial-hero-copy">
-          <div className="section-kicker">About / Objet Décoratif</div>
-          <span className="eyebrow">Berlin / Grasse</span>
-          <h1>
-            Objects
-            <br />
-            <em>with meaning.</em>
+          <div className="section-kicker">{t("About / Objet Décoratif")}</div>
+          <span className="eyebrow">{t("Berlin / Grasse")}</span>
+          <h1>{t("Objects")}<br />
+            <em>{t("with meaning.")}</em>
           </h1>
-          <p>
-            A long-standing passion for interiors, transformed into handpicked
-            objects that give a space character, permanence and quiet intention.
-          </p>
-          <a className="outline-button" href="#about-story">
-            Read our approach <ArrowDown size={13} />
+          <p>{t("A long-standing passion for interiors, transformed into handpicked objects that give a space character, permanence and quiet intention.")}</p>
+          <a className="outline-button" href="#about-story">{t("Read our approach ")}<ArrowDown size={13} />
           </a>
         </div>
-        <div className="editorial-hero-note">
-          Sculptural objects / Refillable by design
-        </div>
+        <div className="editorial-hero-note">{t("Sculptural objects / Refillable by design")}</div>
       </section>
       <section className="editorial-section about-story" id="about-story">
-        <div className="editorial-section-label">01 / Our approach</div>
+        <div className="editorial-section-label">{t("01 / Our approach")}</div>
         <div className="editorial-section-content">
-          <div className="section-kicker">Curated with intention</div>
-          <h2>We do not simply inhabit spaces. We fill them with meaning.</h2>
+          <div className="section-kicker">{t("Curated with intention")}</div>
+          <h2>{t("We do not simply inhabit spaces. We fill them with meaning.")}</h2>
           <div className="about-intro-copy">
-            <p>
-              Objet Décoratif transforms a long-standing passion for interior
-              design and decoration into handpicked, extraordinary objects. It
-              is the result of a conscious decision: not just to inhabit spaces,
-              but to fill them with meaning.
-            </p>
-            <p>
-              Our selection follows a simple rule — we curate only what we truly
-              love ourselves. Beautiful things belong together when they share
-              the same care, clarity and intention.
-            </p>
+            <p>{t("Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.")}</p>
+            <p>{t("Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.")}</p>
           </div>
         </div>
         <div className="about-principles">
           <div>
             <span>01</span>
-            <h3>Curated with intention</h3>
-            <p>
-              Only objects we would choose for our own spaces — considered,
-              distinctive and made with care.
-            </p>
+            <h3>{t("Curated with intention")}</h3>
+            <p>{t("Only objects we would choose for our own spaces — considered, distinctive and made with care.")}</p>
           </div>
           <div>
             <span>02</span>
-            <h3>Designed to remain</h3>
-            <p>
-              Sculptural vessels that continue beyond the first flame: objects
-              to keep, refill and return to.
-            </p>
+            <h3>{t("Designed to remain")}</h3>
+            <p>{t("Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.")}</p>
           </div>
           <div>
             <span>03</span>
-            <h3>Scents from Grasse</h3>
-            <p>
-              Our candle perfumes are developed with specialists in Grasse and
-              selected to complement every form.
-            </p>
+            <h3>{t("Scents from Grasse")}</h3>
+            <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
           </div>
         </div>
       </section>
       <section className="editorial-closing about-closing">
         <div className="about-closing-main">
-          <div className="section-kicker">The refill ritual / 02</div>
-          <h2>
-            Keep the object.
-            <br />
-            <em>Change the atmosphere.</em>
+          <div className="section-kicker">{t("The refill ritual / 02")}</div>
+          <h2>{t("Keep the object.")}<br />
+            <em>{t("Change the atmosphere.")}</em>
           </h2>
         </div>
         <div className="about-closing-side">
-          <p>
-            Filling spaces with objects that genuinely make you want to have
-            them — that is what we are all about. Not just for ourselves, but
-            for everyone who knows that beauty and care in the details matter.
-          </p>
-          <a className="solid-button" href="/#collection">
-            Explore the forms <ArrowRight size={13} />
+          <p>{t("Filling spaces with objects that genuinely make you want to have them — that is what we are all about. Not just for ourselves, but for everyone who knows that beauty and care in the details matter.")}</p>
+          <a className="solid-button" href="/#collection">{t("Explore the forms ")}<ArrowRight size={13} />
           </a>
         </div>
       </section>
@@ -1553,6 +1401,7 @@ function SearchPanel({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t, locale } = useLanguage();
   const [query, setQuery] = useState("");
   return (
     <div
@@ -1565,12 +1414,12 @@ function SearchPanel({
           autoFocus={open}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search forms, scents, rituals…"
+          placeholder={t("Search forms, scents, rituals…")}
           data-testid="input-search"
         />
         <button
           onClick={onClose}
-          aria-label="Close search"
+          aria-label={t("Close search")}
           data-testid="button-close-search"
         >
           <X size={17} />
@@ -1581,15 +1430,13 @@ function SearchPanel({
           <span>
             {
               products.filter((p) =>
-                `${p.name} ${p.description}`
+                `${p.name} ${p.description} ${t(p.description)}`
                   .toLowerCase()
                   .includes(query.toLowerCase()),
               ).length
-            }{" "}
-            objects found
-          </span>
+            }{t(" ")}{t("objects found")}</span>
         ) : (
-          <span>Try “Barrique” or “Santal Cruz”</span>
+          <span>{t("Try “Barrique” or “Santal Cruz”")}</span>
         )}
       </div>
     </div>
@@ -1607,6 +1454,7 @@ function ProductModal({
   onClose: () => void;
   onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
+  const { t, locale } = useLanguage();
   const [scent, setScent] = useState(
     initialScent ??
       product?.scentOptions?.[0]?.name ??
@@ -1652,19 +1500,19 @@ function ProductModal({
           <button
             className="close-button modal-close"
             onClick={onClose}
-            aria-label="Close product details"
+            aria-label={t("Close product details")}
             data-testid="button-close-product"
           >
             <X size={16} />
           </button>
-          <div className="section-kicker">{product.collection} collection</div>
+          <div className="section-kicker">{product.collection}{t(" collection")}</div>
           <h2>{product.name}</h2>
-          <p className="modal-subtitle">{product.description}</p>
-          <div className="modal-price">€{product.price} EUR</div>
+          <p className="modal-subtitle">{t(product.description)}</p>
+          <div className="modal-price">€{product.price}{t(" EUR")}</div>
           <span className="option-label">
             {product.id === "refill"
-              ? "Choose size & scent"
-              : "Choose your scent"}
+              ? t("Choose size & scent")
+              : t("Choose your scent")}
           </span>
           <div className="scent-options">
             {scentOptions.map((item) => (
@@ -1678,12 +1526,12 @@ function ProductModal({
               </button>
             ))}
           </div>
-          <span className="option-label">Quantity</span>
+          <span className="option-label">{t("Quantity")}</span>
           <div className="modal-buy">
             <div className="modal-quantity">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                aria-label="Decrease quantity"
+                aria-label={t("Decrease quantity")}
                 data-testid="button-modal-decrease"
               >
                 <Minus size={13} />
@@ -1691,7 +1539,7 @@ function ProductModal({
               <span data-testid="text-modal-quantity">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                aria-label="Increase quantity"
+                aria-label={t("Increase quantity")}
                 data-testid="button-modal-increase"
               >
                 <Plus size={13} />
@@ -1704,8 +1552,7 @@ function ProductModal({
                 onClose();
               }}
               data-testid="button-add-to-cart"
-            >
-              Add to cart <ArrowRight size={14} />
+            >{t("Add to cart ")}<ArrowRight size={14} />
             </button>
           </div>
         </div>
@@ -1725,6 +1572,7 @@ function CartDrawer({
   onClose: () => void;
   onChange: (id: string, scent: string, delta: number) => void;
 }) {
+  const { t, locale } = useLanguage();
   const total = lines.reduce(
     (sum, line) => sum + line.product.price * line.quantity,
     0,
@@ -1734,15 +1582,15 @@ function CartDrawer({
       <div className={`overlay ${open ? "open" : ""}`} onClick={onClose} />
       <aside
         className={`cart-drawer ${open ? "open" : ""}`}
-        aria-label="Shopping cart"
+        aria-label={t("Shopping cart")}
         data-testid="cart-drawer"
       >
         <div className="drawer-head">
-          <h2>Your cart</h2>
+          <h2>{t("Your cart")}</h2>
           <button
             className="close-button"
             onClick={onClose}
-            aria-label="Close cart"
+            aria-label={t("Close cart")}
             data-testid="button-close-cart"
           >
             <X size={16} />
@@ -1751,14 +1599,14 @@ function CartDrawer({
         <div className="cart-items">
           {lines.length === 0 ? (
             <div className="cart-empty">
-              <strong>Your cart is quiet.</strong>
-              <span>Add a form to begin the ritual.</span>
+              <strong>{t("Your cart is quiet.")}</strong>
+              <span>{t("Add a form to begin the ritual.")}</span>
             </div>
           ) : (
             lines.map((line) => (
               <div
                 className="cart-item"
-                key={`${line.product.id}-${line.scent}`}
+                key={`${line.product.id}-${t(line.scent)}`}
                 data-testid={`cart-item-${line.product.id}`}
               >
                 <div className="cart-thumb">
@@ -1778,12 +1626,12 @@ function CartDrawer({
                 </div>
                 <div className="cart-item-info">
                   <strong>{line.product.name}</strong>
-                  <small>{line.scent}</small>
+                  <small>{t(line.scent)}</small>
                   <div className="cart-controls">
                     <button
                       className="qty-button"
                       onClick={() => onChange(line.product.id, line.scent, -1)}
-                      aria-label="Decrease item"
+                      aria-label={t("Decrease item")}
                       data-testid={`button-decrease-${line.product.id}`}
                     >
                       <Minus size={11} />
@@ -1792,7 +1640,7 @@ function CartDrawer({
                     <button
                       className="qty-button"
                       onClick={() => onChange(line.product.id, line.scent, 1)}
-                      aria-label="Increase item"
+                      aria-label={t("Increase item")}
                       data-testid={`button-increase-${line.product.id}`}
                     >
                       <Plus size={11} />
@@ -1809,7 +1657,7 @@ function CartDrawer({
         {lines.length > 0 && (
           <div className="drawer-foot">
             <div className="total-line">
-              <span>Subtotal</span>
+              <span>{t("Subtotal")}</span>
               <strong data-testid="text-cart-total">€{total}</strong>
             </div>
             <button
@@ -1819,8 +1667,7 @@ function CartDrawer({
                 window.location.href = `${import.meta.env.BASE_URL}checkout`;
               }}
               data-testid="button-checkout"
-            >
-              Continue to checkout <ArrowRight size={14} />
+            >{t("Continue to checkout ")}<ArrowRight size={14} />
             </button>
           </div>
         )}
@@ -1864,6 +1711,7 @@ const emptyCheckoutForm: CheckoutForm = {
 };
 
 function CheckoutPage() {
+  const { t, locale } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>(readStoredCart);
   const [paymentMethod, setPaymentMethod] = useState<
@@ -1957,30 +1805,20 @@ function CheckoutPage() {
     return (
       <div className="checkout-page checkout-empty-page">
         <header className="checkout-header">
-          <Link href="/" className="checkout-logo">
-            Objet Décoratif
-          </Link>
+          <Link href="/" className="checkout-logo">{t("Objet Décoratif")}</Link>
         </header>
         <main className="checkout-empty-state">
-          <span className="section-kicker">Order received</span>
-          <h1>Thank you.</h1>
-          <p>
-            Your order <strong>{placedOrderNumber}</strong> is saved. No payment
-            has been charged yet.
-          </p>
+          <span className="section-kicker">{t("Order received")}</span>
+          <h1>{t("Thank you.")}</h1>
+          <p>{t("Your order ")}<strong>{placedOrderNumber}</strong>{t(" is saved. No payment has been charged yet.")}</p>
           {placedAsGuest ? (
             <>
-              <p>
-                Your guest order was received without creating an account.
-                Please keep your order number for any questions.
-              </p>
-              <Link href="/" className="solid-button">
-                Return to store <ArrowRight size={14} />
+              <p>{t("Your guest order was received without creating an account. Please keep your order number for any questions.")}</p>
+              <Link href="/" className="solid-button">{t("Return to store ")}<ArrowRight size={14} />
               </Link>
             </>
           ) : (
-            <Link href="/account" className="solid-button">
-              View my orders <ArrowRight size={14} />
+            <Link href="/account" className="solid-button">{t("View my orders ")}<ArrowRight size={14} />
             </Link>
           )}
         </main>
@@ -1992,16 +1830,13 @@ function CheckoutPage() {
     return (
       <div className="checkout-page checkout-empty-page">
         <header className="checkout-header">
-          <Link href="/" className="checkout-logo">
-            Objet Décoratif
-          </Link>
+          <Link href="/" className="checkout-logo">{t("Objet Décoratif")}</Link>
         </header>
         <main className="checkout-empty-state">
-          <span className="section-kicker">Checkout</span>
-          <h1>Your cart is quiet.</h1>
-          <p>Add a form before continuing to checkout.</p>
-          <Link href="/#collection" className="solid-button">
-            Explore the collection <ArrowRight size={14} />
+          <span className="section-kicker">{t("Checkout")}</span>
+          <h1>{t("Your cart is quiet.")}</h1>
+          <p>{t("Add a form before continuing to checkout.")}</p>
+          <Link href="/#collection" className="solid-button">{t("Explore the collection ")}<ArrowRight size={14} />
           </Link>
         </main>
       </div>
@@ -2011,12 +1846,8 @@ function CheckoutPage() {
   return (
     <div className="checkout-page">
       <header className="checkout-header">
-        <Link href="/" className="checkout-logo">
-          Objet Décoratif
-        </Link>
-        <Link href="/" className="checkout-back">
-          Return to store
-        </Link>
+        <Link href="/" className="checkout-logo">{t("Objet Décoratif")}</Link>
+        <Link href="/" className="checkout-back">{t("Return to store")}</Link>
       </header>
       <main className="checkout-layout">
         <form
@@ -2029,36 +1860,29 @@ function CheckoutPage() {
           {!submitted && (
             <>
               <section className="checkout-section checkout-express">
-                <span className="checkout-overline">Express checkout</span>
+                <span className="checkout-overline">{t("Express checkout")}</span>
                 <div className="express-buttons">
-                  <button type="button" className="express-button shop-pay">
-                    shop
-                  </button>
-                  <button type="button" className="express-button paypal-pay">
-                    PayPal
-                  </button>
+                  <button type="button" className="express-button shop-pay">{t("shop")}</button>
+                  <button type="button" className="express-button paypal-pay">{t("PayPal")}</button>
                   <button type="button" className="express-button gpay">
-                    <span className="gpay-mark">G</span> Pay
-                  </button>
+                    <span className="gpay-mark">{t("G")}</span>{t(" Pay")}</button>
                 </div>
                 <div className="checkout-or">
-                  <span>OR</span>
+                  <span>{t("OR")}</span>
                 </div>
               </section>
 
               <section className="checkout-section">
-                <h2>Contact</h2>
+                <h2>{t("Contact")}</h2>
                 <Show when="signed-out">
                   <div className="checkout-review-notice" data-testid="guest-checkout-notice">
-                    <strong>Guest checkout — no registration required.</strong>
-                    <span>
-                      Enter your contact and delivery details to order as a guest.
-                      Already have an account? <Link href="/sign-in">Sign in</Link>.
+                    <strong>{t("Guest checkout — no registration required.")}</strong>
+                    <span>{t("Enter your contact and delivery details to order as a guest. Already have an account? ")}<Link href="/sign-in">{t("Sign in")}</Link>.
                     </span>
                   </div>
                 </Show>
                 <label className="checkout-field">
-                  <span className="sr-only">Email</span>
+                  <span className="sr-only">{t("Email")}</span>
                   <input
                     required
                     type="email"
@@ -2066,21 +1890,21 @@ function CheckoutPage() {
                     onChange={(event) =>
                       updateField("email", event.target.value)
                     }
-                    placeholder="Email"
+                    placeholder={t("Email")}
                     autoComplete="email"
                   />
                   <span className="field-help">?</span>
                 </label>
                 <label className="checkout-checkbox">
-                  <input type="checkbox" />{" "}
-                  <span>Email me with news and offers</span>
+                  <input type="checkbox" />{t(" ")}
+                  <span>{t("Email me with news and offers")}</span>
                 </label>
               </section>
 
               <section className="checkout-section">
-                <h2>Delivery</h2>
+                <h2>{t("Delivery")}</h2>
                 <label className="checkout-field checkout-select">
-                  <span>Country/Region</span>
+                  <span>{t("Country/Region")}</span>
                   <select
                     value={form.country}
                     onChange={(event) =>
@@ -2088,102 +1912,102 @@ function CheckoutPage() {
                     }
                     autoComplete="country"
                   >
-                    <option>Germany</option>
-                    <option>Austria</option>
-                    <option>Switzerland</option>
-                    <option>France</option>
-                    <option>United Kingdom</option>
+                    <option value="Germany">{t("Germany")}</option>
+                    <option value="Austria">{t("Austria")}</option>
+                    <option value="Switzerland">{t("Switzerland")}</option>
+                    <option value="France">{t("France")}</option>
+                    <option value="United Kingdom">{t("United Kingdom")}</option>
                   </select>
                 </label>
                 <div className="checkout-field-grid">
                   <label className="checkout-field">
-                    <span className="sr-only">First name</span>
+                    <span className="sr-only">{t("First name")}</span>
                     <input
                       required
                       value={form.firstName}
                       onChange={(event) =>
                         updateField("firstName", event.target.value)
                       }
-                      placeholder="First name"
+                      placeholder={t("First name")}
                       autoComplete="given-name"
                     />
                   </label>
                   <label className="checkout-field">
-                    <span className="sr-only">Last name</span>
+                    <span className="sr-only">{t("Last name")}</span>
                     <input
                       required
                       value={form.lastName}
                       onChange={(event) =>
                         updateField("lastName", event.target.value)
                       }
-                      placeholder="Last name"
+                      placeholder={t("Last name")}
                       autoComplete="family-name"
                     />
                   </label>
                 </div>
                 <label className="checkout-field">
-                  <span className="sr-only">Company</span>
+                  <span className="sr-only">{t("Company")}</span>
                   <input
                     value={form.company}
                     onChange={(event) =>
                       updateField("company", event.target.value)
                     }
-                    placeholder="Company (optional)"
+                    placeholder={t("Company (optional)")}
                     autoComplete="organization"
                   />
                 </label>
                 <label className="checkout-field">
-                  <span className="sr-only">Address</span>
+                  <span className="sr-only">{t("Address")}</span>
                   <input
                     required
                     value={form.address}
                     onChange={(event) =>
                       updateField("address", event.target.value)
                     }
-                    placeholder="Address"
+                    placeholder={t("Address")}
                     autoComplete="street-address"
                   />
                   <Search size={15} />
                 </label>
                 <label className="checkout-field">
-                  <span className="sr-only">Apartment, suite, etc.</span>
+                  <span className="sr-only">{t("Apartment, suite, etc.")}</span>
                   <input
                     value={form.apartment}
                     onChange={(event) =>
                       updateField("apartment", event.target.value)
                     }
-                    placeholder="Apartment, suite, etc. (optional)"
+                    placeholder={t("Apartment, suite, etc. (optional)")}
                     autoComplete="address-line2"
                   />
                 </label>
                 <div className="checkout-field-grid">
                   <label className="checkout-field">
-                    <span className="sr-only">Postal code</span>
+                    <span className="sr-only">{t("Postal code")}</span>
                     <input
                       required
                       value={form.postalCode}
                       onChange={(event) =>
                         updateField("postalCode", event.target.value)
                       }
-                      placeholder="Postal code"
+                      placeholder={t("Postal code")}
                       autoComplete="postal-code"
                     />
                   </label>
                   <label className="checkout-field">
-                    <span className="sr-only">City</span>
+                    <span className="sr-only">{t("City")}</span>
                     <input
                       required
                       value={form.city}
                       onChange={(event) =>
                         updateField("city", event.target.value)
                       }
-                      placeholder="City"
+                      placeholder={t("City")}
                       autoComplete="address-level2"
                     />
                   </label>
                 </div>
                 <label className="checkout-field">
-                  <span className="sr-only">Phone</span>
+                  <span className="sr-only">{t("Phone")}</span>
                   <input
                     required
                     type="tel"
@@ -2192,7 +2016,7 @@ function CheckoutPage() {
                     onChange={(event) =>
                       updateField("phone", event.target.value)
                     }
-                    placeholder="Phone"
+                    placeholder={t("Phone")}
                     autoComplete="tel"
                   />
                   <span className="field-help">?</span>
@@ -2200,19 +2024,17 @@ function CheckoutPage() {
               </section>
 
               <section className="checkout-section checkout-shipping">
-                <h2>Shipping method</h2>
+                <h2>{t("Shipping method")}</h2>
                 <div className="shipping-notice">
                   {hasAddress
-                    ? "Standard delivery · 3–5 working days"
-                    : "Enter your shipping address to view available shipping methods."}
+                    ? t("Standard delivery · 3–5 working days")
+                    : t("Enter your shipping address to view available shipping methods.")}
                 </div>
               </section>
 
               <section className="checkout-section checkout-payment">
-                <h2>Payment</h2>
-                <p className="payment-note">
-                  All transactions are secure and encrypted.
-                </p>
+                <h2>{t("Payment")}</h2>
+                <p className="payment-note">{t("All transactions are secure and encrypted.")}</p>
                 <div className="payment-methods">
                   <div
                     className={`payment-method ${paymentMethod === "card" ? "selected" : ""}`}
@@ -2223,71 +2045,71 @@ function CheckoutPage() {
                       onClick={() => setPaymentMethod("card")}
                     >
                       <span className="payment-radio" />
-                      <strong>Credit card</strong>
+                      <strong>{t("Credit card")}</strong>
                       <span className="card-brands">
-                        <b>VISA</b>
+                        <b>{t("VISA")}</b>
                         <b className="mastercard">●●</b>
-                        <b className="amex">MC</b>
+                        <b className="amex">{t("MC")}</b>
                         <b>+2</b>
                       </span>
                     </button>
                     {paymentMethod === "card" && (
                       <div className="card-fields">
                         <label className="checkout-field">
-                          <span className="sr-only">Card number</span>
+                          <span className="sr-only">{t("Card number")}</span>
                           <input
                             required
                             value={form.cardNumber}
                             onChange={(event) =>
                               updateField("cardNumber", event.target.value)
                             }
-                            placeholder="Card number"
+                            placeholder={t("Card number")}
                             autoComplete="cc-number"
                           />
                           <span className="field-lock">▢</span>
                         </label>
                         <div className="checkout-field-grid">
                           <label className="checkout-field">
-                            <span className="sr-only">Expiration date</span>
+                            <span className="sr-only">{t("Expiration date")}</span>
                             <input
                               required
                               value={form.expiration}
                               onChange={(event) =>
                                 updateField("expiration", event.target.value)
                               }
-                              placeholder="Expiration date (MM / YY)"
+                              placeholder={t("Expiration date (MM / YY)")}
                               autoComplete="cc-exp"
                             />
                           </label>
                           <label className="checkout-field">
-                            <span className="sr-only">Security code</span>
+                            <span className="sr-only">{t("Security code")}</span>
                             <input
                               required
                               value={form.securityCode}
                               onChange={(event) =>
                                 updateField("securityCode", event.target.value)
                               }
-                              placeholder="Security code"
+                              placeholder={t("Security code")}
                               autoComplete="cc-csc"
                             />
                             <span className="field-help">?</span>
                           </label>
                         </div>
                         <label className="checkout-field">
-                          <span className="sr-only">Name on card</span>
+                          <span className="sr-only">{t("Name on card")}</span>
                           <input
                             required
                             value={form.cardName}
                             onChange={(event) =>
                               updateField("cardName", event.target.value)
                             }
-                            placeholder="Name on card"
+                            placeholder={t("Name on card")}
                             autoComplete="cc-name"
                           />
                         </label>
                         <label className="checkout-checkbox billing-checkbox">
-                          <input type="checkbox" defaultChecked />{" "}
-                          <span>Use shipping address as billing address</span>
+                          <input type="checkbox" defaultChecked />{t(" ")}
+                          <span>{t("Use shipping address as billing address")}</span>
                         </label>
                       </div>
                     )}
@@ -2298,8 +2120,8 @@ function CheckoutPage() {
                     onClick={() => setPaymentMethod("paypal")}
                   >
                     <span className="payment-radio" />
-                    <strong>PayPal</strong>
-                    <b className="paypal-logo">PayPal</b>
+                    <strong>{t("PayPal")}</strong>
+                    <b className="paypal-logo">{t("PayPal")}</b>
                   </button>
                   <button
                     type="button"
@@ -2307,15 +2129,13 @@ function CheckoutPage() {
                     onClick={() => setPaymentMethod("klarna")}
                   >
                     <span className="payment-radio" />
-                    <strong>Klarna</strong>
-                    <b className="klarna-logo">Klarna</b>
+                    <strong>{t("Klarna")}</strong>
+                    <b className="klarna-logo">{t("Klarna")}</b>
                   </button>
                 </div>
               </section>
 
-              <button className="checkout-review-button" type="submit">
-                Review order
-              </button>
+              <button className="checkout-review-button" type="submit">{t("Review order")}</button>
             </>
           )}
 
@@ -2326,30 +2146,28 @@ function CheckoutPage() {
             >
               <div className="checkout-review-heading">
                 <div>
-                  <span className="checkout-overline">Final check</span>
-                  <h1 id="checkout-review-title">Review your order</h1>
+                  <span className="checkout-overline">{t("Final check")}</span>
+                  <h1 id="checkout-review-title">{t("Review your order")}</h1>
                 </div>
                 <button
                   type="button"
                   className="checkout-edit-button"
                   onClick={editDetails}
-                >
-                  Edit details
-                </button>
+                >{t("Edit details")}</button>
               </div>
 
               <div className="checkout-review-block">
-                <h2>Items</h2>
+                <h2>{t("Items")}</h2>
                 <div className="checkout-review-items">
                   {lines.map((line) => (
-                    <div key={`${line.product.id}-${line.scent}`}>
+                    <div key={`${line.product.id}-${t(line.scent)}`}>
                       <span>
                         <strong>{line.product.name}</strong>
                         <small>
-                          {line.scent} · Quantity {line.quantity}
+                          {t(line.scent)}{t(" · Quantity ")}{line.quantity}
                         </small>
                       </span>
-                      <b>€{(line.product.price * line.quantity).toFixed(2)}</b>
+                      <b>€{(line.product.price * line.quantity).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                     </div>
                   ))}
                 </div>
@@ -2357,38 +2175,38 @@ function CheckoutPage() {
 
               <div className="checkout-review-grid">
                 <div className="checkout-review-block">
-                  <h2>Contact</h2>
+                  <h2>{t("Contact")}</h2>
                   <p>{form.email}</p>
                   <p>{form.phone}</p>
                 </div>
                 <div className="checkout-review-block">
-                  <h2>Ship to</h2>
+                  <h2>{t("Ship to")}</h2>
                   <p>
                     {form.firstName} {form.lastName}
                   </p>
                   {form.company && <p>{form.company}</p>}
                   <p>
                     {form.address}
-                    {form.apartment ? `, ${form.apartment}` : ""}
+                    {form.apartment ? `, ${form.apartment}` : t("")}
                   </p>
                   <p>
                     {form.postalCode} {form.city}
                   </p>
-                  <p>{form.country}</p>
+                  <p>{t(form.country)}</p>
                 </div>
                 <div className="checkout-review-block">
-                  <h2>Shipping</h2>
-                  <p>Standard delivery</p>
-                  <p>3–5 working days · €{shipping.toFixed(2)}</p>
+                  <h2>{t("Shipping")}</h2>
+                  <p>{t("Standard delivery")}</p>
+                  <p>{t("3–5 working days · €")}{shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 <div className="checkout-review-block">
-                  <h2>Payment</h2>
+                  <h2>{t("Payment")}</h2>
                   <p>
                     {paymentMethod === "card"
                       ? `Credit card ending in ${form.cardNumber.replace(/\s/g, "").slice(-4)}`
                       : paymentMethod === "paypal"
-                        ? "PayPal"
-                        : "Klarna"}
+                        ? t("PayPal")
+                        : t("Klarna")}
                   </p>
                   {paymentMethod === "card" && <p>{form.cardName}</p>}
                 </div>
@@ -2396,26 +2214,22 @@ function CheckoutPage() {
 
               <div className="checkout-review-total">
                 <div>
-                  <span>Subtotal</span>
-                  <b>€{subtotal.toFixed(2)}</b>
+                  <span>{t("Subtotal")}</span>
+                  <b>€{subtotal.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                 </div>
                 <div>
-                  <span>Shipping</span>
-                  <b>€{shipping.toFixed(2)}</b>
+                  <span>{t("Shipping")}</span>
+                  <b>€{shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                 </div>
                 <div>
-                  <strong>Total</strong>
-                  <strong>EUR €{total.toFixed(2)}</strong>
+                  <strong>{t("Total")}</strong>
+                  <strong>{t("EUR €")}{total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </div>
               </div>
 
               <div className="checkout-review-notice" role="status">
-                <strong>No payment will be charged.</strong>
-                <span>
-                  Your order will be saved for the shop team
-                  {isSignedIn ? " and your account" : ""}. Payment and SMS are
-                  not connected.
-                </span>
+                <strong>{t("No payment will be charged.")}</strong>
+                <span>{t("Your order will be saved for the shop team")}{isSignedIn ? t(" and your account") : t("")}{t(". Payment and SMS are not connected.")}</span>
               </div>
                 <button
                   className="checkout-review-button"
@@ -2425,73 +2239,57 @@ function CheckoutPage() {
                   data-testid="button-place-order"
                 >
                   {!isLoaded
-                    ? "Loading checkout…"
+                    ? t("Loading checkout…")
                     : createOrder.isPending
-                      ? "Saving order…"
+                      ? t("Saving order…")
                       : isSignedIn
-                        ? "Place order"
-                        : "Place order as guest"}
+                        ? t("Place order")
+                        : t("Place order as guest")}
                 </button>
               {createOrder.isError && (
-                <p className="checkout-order-error">
-                  The order could not be saved. Please try again.
-                </p>
+                <p className="checkout-order-error">{t("The order could not be saved. Please try again.")}</p>
               )}
               <button
                 className="checkout-edit-secondary"
                 type="button"
                 onClick={editDetails}
-              >
-                Return to checkout details
-              </button>
+              >{t("Return to checkout details")}</button>
             </section>
           )}
 
           <nav
             className="checkout-footer-links"
-            aria-label="Checkout information"
+            aria-label={t("Checkout information")}
           >
-            <Link href="/returns" target="_blank" rel="noopener noreferrer">
-              Refund policy
-            </Link>
+            <Link href="/returns" target="_blank" rel="noopener noreferrer">{t("Refund policy")}</Link>
             <Link
               href="/shipping-policy"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              Shipping
-            </Link>
+            >{t("Shipping")}</Link>
             <Link
               href="/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              Privacy policy
-            </Link>
-            <Link href="/terms" target="_blank" rel="noopener noreferrer">
-              Terms of service
-            </Link>
+            >{t("Privacy policy")}</Link>
+            <Link href="/terms" target="_blank" rel="noopener noreferrer">{t("Terms of service")}</Link>
             <Link
               href="/legal-notice"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              Legal notice
-            </Link>
-            <Link href="/contact" target="_blank" rel="noopener noreferrer">
-              Contact
-            </Link>
-            <a href="#cookies">Cookies</a>
+            >{t("Legal notice")}</Link>
+            <Link href="/contact" target="_blank" rel="noopener noreferrer">{t("Contact")}</Link>
+            <a href="#cookies">{t("Cookies")}</a>
           </nav>
         </form>
 
-        <aside className="checkout-summary" aria-label="Order summary">
+        <aside className="checkout-summary" aria-label={t("Order summary")}>
           <div className="checkout-summary-inner">
             <div className="checkout-summary-items">
               {lines.map((line) => (
                 <div
                   className="checkout-summary-item"
-                  key={`${line.product.id}-${line.scent}`}
+                  key={`${line.product.id}-${t(line.scent)}`}
                 >
                   <div className="checkout-summary-thumb">
                     {line.product.images?.[0] ? (
@@ -2511,7 +2309,7 @@ function CheckoutPage() {
                   </div>
                   <div className="checkout-summary-item-info">
                     <strong>{line.product.name}</strong>
-                    <small>{line.scent}</small>
+                    <small>{t(line.scent)}</small>
                     <div className="checkout-summary-actions">
                       <div
                         className="checkout-quantity"
@@ -2543,34 +2341,31 @@ function CheckoutPage() {
                         onClick={() =>
                           removeCheckoutLine(line.product.id, line.scent)
                         }
-                      >
-                        Remove
-                      </button>
+                      >{t("Remove")}</button>
                     </div>
                   </div>
-                  <b>€{(line.product.price * line.quantity).toFixed(2)}</b>
+                  <b>€{(line.product.price * line.quantity).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                 </div>
               ))}
             </div>
             <div className="checkout-total-lines">
               <div>
-                <span>Subtotal</span>
-                <b>€{subtotal.toFixed(2)}</b>
+                <span>{t("Subtotal")}</span>
+                <b>€{subtotal.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
               </div>
               <div>
-                <span>
-                  Shipping <small>?</small>
+                <span>{t("Shipping ")}<small>?</small>
                 </span>
                 <span className={hasAddress ? "" : "checkout-muted"}>
                   {hasAddress
-                    ? `€${shipping.toFixed(2)}`
-                    : "Enter shipping address"}
+                    ? `€${shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : t("Enter shipping address")}
                 </span>
               </div>
               <div className="checkout-grand-total">
-                <strong>Total</strong>
+                <strong>{t("Total")}</strong>
                 <b>
-                  <small>EUR</small> €{total.toFixed(2)}
+                  <small>{t("EUR")}</small> €{total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </b>
               </div>
             </div>
@@ -2582,6 +2377,7 @@ function CheckoutPage() {
 }
 
 function Store() {
+  const { t, locale } = useLanguage();
   const { products, scents, isLoading } = useCatalogFrontend();
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -2597,9 +2393,7 @@ function Store() {
   if (isLoading)
     return (
       <div className="store-shell">
-        <div className="flex h-screen items-center justify-center">
-          Loading...
-        </div>
+        <div className="flex h-screen items-center justify-center">{t("Loading...")}</div>
       </div>
     );
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
@@ -2652,36 +2446,26 @@ function Store() {
         />
         <section className="intro-strip">
           <div className="intro-item">
-            <span className="intro-number">01 / Form</span>
-            <h2>
-              Cast in concrete.
-              <br />
-              Built to last.
-            </h2>
-            <p>Quiet architecture for the everyday.</p>
+            <span className="intro-number">{t("01 / Form")}</span>
+            <h2>{t("Cast in concrete.")}<br />{t("Built to last.")}</h2>
+            <p>{t("Quiet architecture for the everyday.")}</p>
           </div>
           <div className="intro-item">
-            <span className="intro-number">02 / Scent</span>
-            <h2>Four fragrances.</h2>
-            <p>Endlessly renewable, never overpowering.</p>
+            <span className="intro-number">{t("02 / Scent")}</span>
+            <h2>{t("Four fragrances.")}</h2>
+            <p>{t("Endlessly renewable, never overpowering.")}</p>
           </div>
           <div className="intro-item">
-            <span className="intro-number">03 / Ritual</span>
-            <h2>
-              Burn. Refill.
-              <br />
-              Repeat.
-            </h2>
-            <p>One beautiful object, many lives.</p>
+            <span className="intro-number">{t("03 / Ritual")}</span>
+            <h2>{t("Burn. Refill.")}<br />{t("Repeat.")}</h2>
+            <p>{t("One beautiful object, many lives.")}</p>
           </div>
         </section>
         <Collection products={products} scents={scents} onOpen={openProduct} />
         <section className="newsletter" id="newsletter">
-          <h2>Notes from the studio.</h2>
+          <h2>{t("Notes from the studio.")}</h2>
           {subscribed ? (
-            <span className="success-note">
-              You’re on the list. See you soon.
-            </span>
+            <span className="success-note">{t("You’re on the list. See you soon.")}</span>
           ) : (
             <form
               className="newsletter-form"
@@ -2693,12 +2477,11 @@ function Store() {
               <input
                 type="email"
                 required
-                placeholder="Your email address"
-                aria-label="Your email address"
+                placeholder={t("Your email address")}
+                aria-label={t("Your email address")}
                 data-testid="input-newsletter"
               />
-              <button type="submit" data-testid="button-subscribe">
-                Subscribe <ArrowRight size={13} />
+              <button type="submit" data-testid="button-subscribe">{t("Subscribe ")}<ArrowRight size={13} />
               </button>
             </form>
           )}
@@ -2744,47 +2527,43 @@ function AuthPage({ mode }: { mode: "sign-in" | "sign-up" }) {
 }
 
 function AccountContent() {
+  const { t, locale } = useLanguage();
   const me = useGetMe();
   const orders = useListMyOrders();
   return (
     <EditorialPageFrame>
       <section className="editorial-hero care-hero">
         <div className="editorial-hero-copy">
-          <div className="section-kicker">Account / Objet Décoratif</div>
+          <div className="section-kicker">{t("Account / Objet Décoratif")}</div>
           <span className="eyebrow">{me.data?.name || me.data?.email}</span>
-          <h1>
-            My
-            <br />
-            <em>orders.</em>
+          <h1>{t("My")}<br />
+            <em>{t("orders.")}</em>
           </h1>
-          <p>Review your saved orders and continue the ritual.</p>
+          <p>{t("Review your saved orders and continue the ritual.")}</p>
           <div className="account-hero-actions">
             {me.data?.role === "admin" && (
-              <Link href="/admin" className="outline-button">
-                Admin dashboard <ArrowRight size={13} />
+              <Link href="/admin" className="outline-button">{t("Admin dashboard ")}<ArrowRight size={13} />
               </Link>
             )}
             <UserButton />
             <LogoutButton className="outline-button" testId="button-logout-account" />
           </div>
         </div>
-        <div className="editorial-hero-note">Customer Account / History</div>
+        <div className="editorial-hero-note">{t("Customer Account / History")}</div>
       </section>
 
       <section className="editorial-section">
-        <div className="editorial-section-label">
-          01 / Order history
-          <br />
-          <span>Saved objects</span>
+        <div className="editorial-section-label">{t("01 / Order history")}<br />
+          <span>{t("Saved objects")}</span>
         </div>
         <div className="editorial-section-content">
-          <div className="section-kicker">Saved orders</div>
-          <h2>Forms & Refills</h2>
+          <div className="section-kicker">{t("Saved orders")}</div>
+          <h2>{t("Forms & Refills")}</h2>
 
-          {orders.isLoading && <p>Loading orders…</p>}
+          {orders.isLoading && <p>{t("Loading orders…")}</p>}
           {orders.data?.length === 0 && (
             <div className="account-empty-state">
-              <p>No orders have been saved yet.</p>
+              <p>{t("No orders have been saved yet.")}</p>
             </div>
           )}
 
@@ -2794,20 +2573,20 @@ function AccountContent() {
                 <div className="account-order-meta">
                   <strong>{order.orderNumber}</strong>
                   <span>
-                    {new Date(order.createdAt).toLocaleDateString("de-DE")}
+                    {new Date(order.createdAt).toLocaleDateString(locale)}
                   </span>
-                  <span className={`order-status order-status-${order.status}`}>
-                    {order.status}
+                  <span className={`order-status order-status-${t(order.status)}`}>
+                    {t(order.status)}
                   </span>
                 </div>
                 <div className="account-order-items">
                   {order.items.map((item) => (
                     <span key={item.id}>
-                      {item.quantity} × {item.name} · {item.scent}
+                      {item.quantity} × {item.name} · {t(item.scent)}
                     </span>
                   ))}
                 </div>
-                <b className="account-order-total">€{order.total.toFixed(2)}</b>
+                <b className="account-order-total">€{order.total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
               </article>
             ))}
           </div>
@@ -2818,12 +2597,13 @@ function AccountContent() {
 }
 
 function AccountPage() {
+  const { t, locale } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   if (!isLoaded)
     return (
       <EditorialPageFrame>
         <main className="section">
-          <p>Loading account…</p>
+          <p>{t("Loading account…")}</p>
         </main>
       </EditorialPageFrame>
     );
@@ -2833,20 +2613,17 @@ function AccountPage() {
       <EditorialPageFrame>
         <section className="editorial-hero about-hero">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">Account / Objet Décoratif</div>
-            <h1>
-              Please
-              <br />
-              <em>sign in.</em>
+            <div className="section-kicker">{t("Account / Objet Décoratif")}</div>
+            <h1>{t("Please")}<br />
+              <em>{t("sign in.")}</em>
             </h1>
-            <p>Access your saved orders and continue the ritual.</p>
+            <p>{t("Access your saved orders and continue the ritual.")}</p>
             <div className="account-hero-actions">
-              <Link href="/sign-in" className="outline-button">
-                Sign in <ArrowRight size={13} />
+              <Link href="/sign-in" className="outline-button">{t("Sign in ")}<ArrowRight size={13} />
               </Link>
             </div>
           </div>
-          <div className="editorial-hero-note">Customer Account</div>
+          <div className="editorial-hero-note">{t("Customer Account")}</div>
         </section>
       </EditorialPageFrame>
     );
@@ -2864,6 +2641,7 @@ function OrderDetailDrawer({
   onClose: () => void;
   isDemo?: boolean;
 }) {
+  const { t, locale } = useLanguage();
   if (!order) return null;
 
   const getGermanStatusLabel = (status: OrderStatus) => {
@@ -2893,14 +2671,14 @@ function OrderDetailDrawer({
         className={`cart-drawer order-detail-drawer ${order ? "open" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Order Details"
+        aria-label={t("Order Details")}
       >
         <div className="drawer-head">
-          <h2>Order {order.orderNumber}</h2>
+          <h2>{t("Order ")}{order.orderNumber}</h2>
           <button
             className="close-button"
             onClick={onClose}
-            aria-label="Close order details"
+            aria-label={t("Close order details")}
             type="button"
           >
             <X size={15} />
@@ -2908,24 +2686,21 @@ function OrderDetailDrawer({
         </div>
         <div className="order-detail-content">
           {isDemo && (
-            <p className="admin-demo-notice">
-              Demo-Bestellung · Nur Vorschau. Keine echte Bestellung oder
-              Zahlung.
-            </p>
+            <p className="admin-demo-notice">{t("Demo-Bestellung · Nur Vorschau. Keine echte Bestellung oder Zahlung.")}</p>
           )}
           <div className="order-detail-grid">
             <div className="order-detail-section">
-              <span className="order-detail-section-title">Order Info</span>
+              <span className="order-detail-section-title">{t("Order Info")}</span>
               <p className="order-detail-text">
-                <strong>Date:</strong>{" "}
-                {new Date(order.createdAt).toLocaleDateString("de-DE")}
+                <strong>{t("Date:")}</strong>{t(" ")}
+                {new Date(order.createdAt).toLocaleDateString(locale)}
                 <br />
-                <strong>Status:</strong> {getGermanStatusLabel(order.status)}
+                <strong>{t("Status:")}</strong> {getGermanStatusLabel(order.status)}
               </p>
             </div>
 
             <div className="order-detail-section">
-              <span className="order-detail-section-title">Customer</span>
+              <span className="order-detail-section-title">{t("Customer")}</span>
               <p className="order-detail-text">
                 <strong>{order.customerName}</strong>
                 <br />
@@ -2936,9 +2711,7 @@ function OrderDetailDrawer({
             </div>
 
             <div className="order-detail-section">
-              <span className="order-detail-section-title">
-                Delivery Address
-              </span>
+              <span className="order-detail-section-title">{t("Delivery Address")}</span>
               <p
                 className="order-detail-text"
                 style={{ whiteSpace: "pre-line" }}
@@ -2948,7 +2721,7 @@ function OrderDetailDrawer({
             </div>
 
             <div className="order-detail-section">
-              <span className="order-detail-section-title">Payment Method</span>
+              <span className="order-detail-section-title">{t("Payment Method")}</span>
               <p
                 className="order-detail-text"
                 style={{ textTransform: "capitalize" }}
@@ -2958,18 +2731,17 @@ function OrderDetailDrawer({
             </div>
 
             <div className="order-detail-items">
-              <span className="order-detail-section-title">Items</span>
+              <span className="order-detail-section-title">{t("Items")}</span>
               {order.items.map((item) => (
                 <div key={item.id} className="order-detail-item">
                   <div className="order-detail-item-info">
                     <strong>{item.name}</strong>
-                    <small>{item.scent}</small>
-                    <small>
-                      Qty: {item.quantity} × €{item.unitPrice.toFixed(2)}
+                    <small>{t(item.scent)}</small>
+                    <small>{t("Qty: ")}{item.quantity} × €{item.unitPrice.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </small>
                   </div>
                   <span className="order-detail-item-price">
-                    €{item.lineTotal.toFixed(2)}
+                    €{item.lineTotal.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               ))}
@@ -2977,16 +2749,16 @@ function OrderDetailDrawer({
 
             <div className="order-detail-totals">
               <div className="order-detail-total-row">
-                <span>Subtotal</span>
-                <span>€{order.subtotal.toFixed(2)}</span>
+                <span>{t("Subtotal")}</span>
+                <span>€{order.subtotal.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="order-detail-total-row">
-                <span>Shipping</span>
-                <span>€{order.shipping.toFixed(2)}</span>
+                <span>{t("Shipping")}</span>
+                <span>€{order.shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="order-detail-total-row grand-total">
-                <span>Total</span>
-                <span>€{order.total.toFixed(2)}</span>
+                <span>{t("Total")}</span>
+                <span>€{order.total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
@@ -2997,6 +2769,7 @@ function OrderDetailDrawer({
 }
 
 function AdminContent() {
+  const { t, locale } = useLanguage();
   const me = useGetMe();
   const orders = useListAdminOrders();
   const users = useListAdminUsers();
@@ -3031,7 +2804,7 @@ function AdminContent() {
     return (
       <EditorialPageFrame>
         <main className="section">
-          <p>Loading…</p>
+          <p>{t("Loading…")}</p>
         </main>
       </EditorialPageFrame>
     );
@@ -3041,17 +2814,12 @@ function AdminContent() {
       <EditorialPageFrame>
         <section className="editorial-hero">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">
-              Administration / Objet Décoratif
-            </div>
-            <h1>
-              Admin access
-              <br />
-              <em>required.</em>
+            <div className="section-kicker">{t("Administration / Objet Décoratif")}</div>
+            <h1>{t("Admin access")}<br />
+              <em>{t("required.")}</em>
             </h1>
             <div className="account-hero-actions">
-              <Link href="/account" className="outline-button">
-                Return to account <ArrowRight size={13} />
+              <Link href="/account" className="outline-button">{t("Return to account ")}<ArrowRight size={13} />
               </Link>
             </div>
           </div>
@@ -3070,76 +2838,65 @@ function AdminContent() {
       <EditorialPageFrame>
         <section className="editorial-hero about-hero">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">
-              Administration / Objet Décoratif
-            </div>
+            <div className="section-kicker">{t("Administration / Objet Décoratif")}</div>
             <span className="eyebrow">{me.data?.name || me.data?.email}</span>
-            <h1>
-              Admin
-              <br />
-              <em>dashboard.</em>
+            <h1>{t("Admin")}<br />
+              <em>{t("dashboard.")}</em>
             </h1>
-            <p>Manage customers and fulfillment across the store.</p>
+            <p>{t("Manage customers and fulfillment across the store.")}</p>
             <div className="account-hero-actions">
-              <Link href="/admin/catalog" className="solid-button">
-                Catalog CMS <ArrowRight size={13} />
+              <Link href="/admin/catalog" className="solid-button">{t("Catalog CMS ")}<ArrowRight size={13} />
               </Link>
-              <Link href="/account" className="outline-button">
-                Customer view <ArrowRight size={13} />
+              <Link href="/account" className="outline-button">{t("Customer view ")}<ArrowRight size={13} />
               </Link>
               <UserButton />
             </div>
           </div>
-          <div className="editorial-hero-note">
-            Orders: {orders.data?.length ?? 0} / Revenue: €{revenue.toFixed(2)}
+          <div className="editorial-hero-note">{t("Orders: ")}{orders.data?.length ?? 0}{t(" / Revenue: €")}{revenue.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </section>
 
         <section className="editorial-section">
-          <div className="editorial-section-label">
-            01 / Store overview
-            <br />
-            <span>Fulfilment & Customers</span>
+          <div className="editorial-section-label">{t("01 / Store overview")}<br />
+            <span>{t("Fulfilment & Customers")}</span>
           </div>
           <div className="editorial-section-content">
-            <div className="section-kicker">Store metrics</div>
-            <h2>Overview</h2>
+            <div className="section-kicker">{t("Store metrics")}</div>
+            <h2>{t("Overview")}</h2>
             <div className="admin-metrics">
               <div className="admin-metric">
-                <span>Orders</span>
+                <span>{t("Orders")}</span>
                 <strong>{orders.data?.length ?? 0}</strong>
               </div>
               <div className="admin-metric">
-                <span>Customers</span>
+                <span>{t("Customers")}</span>
                 <strong>
                   {users.data?.filter((user) => user.role === "customer")
                     .length ?? 0}
                 </strong>
               </div>
               <div className="admin-metric">
-                <span>Order value</span>
-                <strong>€{revenue.toFixed(2)}</strong>
+                <span>{t("Order value")}</span>
+                <strong>€{revenue.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
               </div>
             </div>
           </div>
         </section>
 
         <section className="editorial-section">
-          <div className="editorial-section-label">
-            02 / All orders
-            <br />
-            <span>Fulfilment</span>
+          <div className="editorial-section-label">{t("02 / All orders")}<br />
+            <span>{t("Fulfilment")}</span>
           </div>
           <div className="editorial-section-content">
-            <div className="section-kicker">Order management</div>
-            <h2>All orders</h2>
+            <div className="section-kicker">{t("Order management")}</div>
+            <h2>{t("All orders")}</h2>
             <div className="admin-orders-list">
               <div className="admin-orders-header">
-                <span>Order</span>
-                <span>Customer</span>
-                <span>Items</span>
-                <span>Total</span>
-                <span>Status</span>
+                <span>{t("Order")}</span>
+                <span>{t("Customer")}</span>
+                <span>{t("Items")}</span>
+                <span>{t("Total")}</span>
+                <span>{t("Status")}</span>
               </div>
               {orders.data?.map((order) => (
                 <div
@@ -3151,7 +2908,7 @@ function AdminContent() {
                   <div>
                     <strong>{order.orderNumber}</strong>
                     <small>
-                      {new Date(order.createdAt).toLocaleDateString("de-DE")}
+                      {new Date(order.createdAt).toLocaleDateString(locale)}
                     </small>
                   </div>
                   <div>
@@ -3159,12 +2916,12 @@ function AdminContent() {
                       {order.customerName}
                     </span>
                     <small>{order.customerEmail}</small>
-                    {order.isGuest && <small>Guest order</small>}
+                    {order.isGuest && <small>{t("Guest order")}</small>}
                   </div>
                   <div>
                     {order.items.reduce((sum, item) => sum + item.quantity, 0)}
                   </div>
-                  <div>€{order.total.toFixed(2)}</div>
+                  <div>€{order.total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   <div onClick={(e) => e.stopPropagation()}>
                     <select
                       className="admin-status-select"
@@ -3179,20 +2936,17 @@ function AdminContent() {
                       }
                       data-testid={`select-status-${order.id}`}
                     >
-                      <option value="processing">Bestellt</option>
-                      <option value="shipped">In Zustellung</option>
-                      <option value="completed">Geliefert</option>
-                      <option value="cancelled">Storniert</option>
+                      <option value="processing">{t("Bestellt")}</option>
+                      <option value="shipped">{t("In Zustellung")}</option>
+                      <option value="completed">{t("Geliefert")}</option>
+                      <option value="cancelled">{t("Storniert")}</option>
                     </select>
                   </div>
                 </div>
               ))}
               <div className="admin-demo-heading">
-                <span className="admin-demo-label">Demo · Nur Vorschau</span>
-                <p>
-                  Beispielbestellungen – nicht in Umsatz und Kennzahlen
-                  enthalten.
-                </p>
+                <span className="admin-demo-label">{t("Demo · Nur Vorschau")}</span>
+                <p>{t("Beispielbestellungen – nicht in Umsatz und Kennzahlen enthalten.")}</p>
               </div>
               {demoOrders.map((order) => (
                 <div
@@ -3204,7 +2958,7 @@ function AdminContent() {
                   <div>
                     <strong>{order.orderNumber}</strong>
                     <small>
-                      {new Date(order.createdAt).toLocaleDateString("de-DE")}
+                      {new Date(order.createdAt).toLocaleDateString(locale)}
                     </small>
                   </div>
                   <div>
@@ -3216,7 +2970,7 @@ function AdminContent() {
                   <div>
                     {order.items.reduce((sum, item) => sum + item.quantity, 0)}
                   </div>
-                  <div>€{order.total.toFixed(2)}</div>
+                  <div>€{order.total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   <div>
                     <span className="admin-demo-status">
                       {getGermanStatusLabel(order.status)}
@@ -3229,14 +2983,12 @@ function AdminContent() {
         </section>
 
         <section className="editorial-section">
-          <div className="editorial-section-label">
-            03 / Users
-            <br />
-            <span>Accounts</span>
+          <div className="editorial-section-label">{t("03 / Users")}<br />
+            <span>{t("Accounts")}</span>
           </div>
           <div className="editorial-section-content">
-            <div className="section-kicker">Customer management</div>
-            <h2>All users</h2>
+            <div className="section-kicker">{t("Customer management")}</div>
+            <h2>{t("All users")}</h2>
             <div className="admin-users-list">
               {users.data?.map((user) => (
                 <div key={user.id} className="admin-user-row">
@@ -3247,24 +2999,24 @@ function AdminContent() {
                     </small>
                   </div>
                   <div className="admin-user-stats">
-                    <span>{user.orderCount} orders</span>
-                    <b>€{user.totalSpent.toFixed(2)}</b>
+                    <span>{user.orderCount}{t(" orders")}</span>
+                    <b>€{user.totalSpent.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                   </div>
                 </div>
               ))}
               <div className="admin-demo-heading">
-                <span className="admin-demo-label">Demo · Nur Vorschau</span>
-                <p>Beispielkunden – keine echten Nutzerkonten.</p>
+                <span className="admin-demo-label">{t("Demo · Nur Vorschau")}</span>
+                <p>{t("Beispielkunden – keine echten Nutzerkonten.")}</p>
               </div>
               {demoUsers.map((user) => (
                 <div key={user.id} className="admin-user-row admin-demo-row">
                   <div className="admin-user-info">
                     <strong>{user.name}</strong>
-                    <small>{user.email} · Demo-Kunde</small>
+                    <small>{user.email}{t(" · Demo-Kunde")}</small>
                   </div>
                   <div className="admin-user-stats">
-                    <span>{user.orderCount} Demo-Bestellungen</span>
-                    <b>€{user.totalSpent.toFixed(2)} Demo</b>
+                    <span>{user.orderCount}{t(" Demo-Bestellungen")}</span>
+                    <b>€{user.totalSpent.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{t(" Demo")}</b>
                   </div>
                 </div>
               ))}
@@ -3281,12 +3033,13 @@ function AdminContent() {
   );
 }
 function AdminPage() {
+  const { t, locale } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   if (!isLoaded)
     return (
       <EditorialPageFrame>
         <main className="section">
-          <p>Loading administration…</p>
+          <p>{t("Loading administration…")}</p>
         </main>
       </EditorialPageFrame>
     );
@@ -3296,17 +3049,12 @@ function AdminPage() {
       <EditorialPageFrame>
         <section className="editorial-hero">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">
-              Administration / Objet Décoratif
-            </div>
-            <h1>
-              Please
-              <br />
-              <em>sign in.</em>
+            <div className="section-kicker">{t("Administration / Objet Décoratif")}</div>
+            <h1>{t("Please")}<br />
+              <em>{t("sign in.")}</em>
             </h1>
             <div className="account-hero-actions">
-              <Link href="/sign-in" className="outline-button">
-                Sign in <ArrowRight size={13} />
+              <Link href="/sign-in" className="outline-button">{t("Sign in ")}<ArrowRight size={13} />
               </Link>
             </div>
           </div>
@@ -3319,6 +3067,7 @@ function AdminPage() {
 }
 
 function AdminCatalogPage() {
+  const { t, locale } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   const me = useGetMe({
     query: { queryKey: getGetMeQueryKey(), enabled: isLoaded && !!isSignedIn, retry: false },
@@ -3328,7 +3077,7 @@ function AdminCatalogPage() {
     return (
       <EditorialPageFrame>
         <main className="section">
-          <p>Loading administration…</p>
+          <p>{t("Loading administration…")}</p>
         </main>
       </EditorialPageFrame>
     );
@@ -3339,20 +3088,16 @@ function AdminCatalogPage() {
       <EditorialPageFrame>
         <section className="editorial-hero">
           <div className="editorial-hero-copy">
-            <div className="section-kicker">
-              Administration / Objet Décoratif
-            </div>
-            <h1>
-              Admin access
-              <br />
-              <em>required.</em>
+            <div className="section-kicker">{t("Administration / Objet Décoratif")}</div>
+            <h1>{t("Admin access")}<br />
+              <em>{t("required.")}</em>
             </h1>
             <div className="account-hero-actions">
               <Link
                 href={!isSignedIn ? "/sign-in" : "/account"}
                 className="outline-button"
               >
-                {!isSignedIn ? "Sign in" : "Return"} <ArrowRight size={13} />
+                {!isSignedIn ? t("Sign in") : t("Return")} <ArrowRight size={13} />
               </Link>
             </div>
           </div>
