@@ -14,3 +14,9 @@ The automated Chromium browser can reject valid H.264/AAC MP4 files with `DEMUXE
 **Why:** This occurred both with a controlled H.264 fixture and a real live-shop video whose file metadata and byte-range responses were valid. A test-browser decoder failure alone does not prove an upload or rendering defect.
 
 **How to apply:** Distinguish a missing object (404), an incorrect image element, and a native video decoding failure. Confirm the affected page and the user's browser before changing upload or playback behavior for a decoder-only failure.
+
+Public scent videos should autoplay muted in a continuous loop without player controls, both in Signature Scents and in product scent previews. CMS previews and ordinary product videos are not covered by this rule.
+
+**Why:** The shop owner explicitly requested scent videos as automatic looping media rather than visible players.
+
+**How to apply:** Start or resume the selected scent video and pause it when switching to another scent. Preserve inline mobile playback and keep CMS playback controls for inspecting uploads.

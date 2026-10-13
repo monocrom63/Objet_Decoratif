@@ -7,6 +7,8 @@ export function CatalogMedia({
   className,
   active = true,
   controls = true,
+  autoPlay = false,
+  loop = false,
   style,
   "aria-hidden": ariaHidden,
 }: {
@@ -15,6 +17,8 @@ export function CatalogMedia({
   className?: string;
   active?: boolean;
   controls?: boolean;
+  autoPlay?: boolean;
+  loop?: boolean;
   style?: CSSProperties;
   "aria-hidden"?: boolean;
 }) {
@@ -23,7 +27,11 @@ export function CatalogMedia({
   useEffect(() => setFailed(false), [src]);
   useEffect(() => {
     if (!active) video.current?.pause();
-  }, [active, src]);
+    else if (autoPlay) {
+      // Browsers may block autoplay despite muted playback; keep their policy intact.
+      void video.current?.play().catch(() => {});
+    }
+  }, [active, src, autoPlay]);
   if (!isVideoPath(src)) {
     return (
       <img
@@ -43,6 +51,8 @@ export function CatalogMedia({
         className={className}
         style={style}
         controls={controls && active}
+        autoPlay={autoPlay && active}
+        loop={loop}
         muted
         playsInline
         preload={active ? "metadata" : "none"}
@@ -53,7 +63,7 @@ export function CatalogMedia({
       >
         Dein Browser unterstützt dieses Video nicht.
       </video>
-      {failed && active && controls && (
+      {failed && active && (controls || autoPlay) && (
         <p className="catalog-media-error" role="alert">
           Dieses Video kann in diesem Browser nicht abgespielt werden.{" "}
           <a href={src} download>

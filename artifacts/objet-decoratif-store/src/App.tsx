@@ -206,6 +206,9 @@ function ScentSelector({
                   className={`scent-slide-image ${index === selectedIndex ? "active" : ""}`}
                   src={option.image}
                   active={index === selectedIndex}
+                  controls={false}
+                  autoPlay
+                  loop
                   alt={`${option.name} fragrance`}
                   aria-hidden={index !== selectedIndex}
                 />
@@ -456,6 +459,9 @@ function ScentShowcase({
                 className={`object-photo ${index === activeIndex ? "active" : ""}`}
                 src={option.image}
                 active={index === activeIndex}
+                controls={false}
+                autoPlay
+                loop
                 alt={`${option.name} scent study`}
                 aria-hidden={index !== activeIndex}
               />
