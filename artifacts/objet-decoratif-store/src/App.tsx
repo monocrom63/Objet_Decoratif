@@ -31,6 +31,8 @@ import {
 } from "@workspace/api-client-react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { LogoutButton } from "@/components/logout-button";
+import { CatalogMedia } from "@/components/catalog-media";
+import { isVideoPath } from "@/lib/media";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -115,34 +117,39 @@ function ObjectSlideshow({ product }: { product: Product }) {
   const images = product.images ?? [];
 
   useEffect(() => {
-    if (images.length < 2) return;
+    setActiveIndex((current) => current < images.length ? current : 0);
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length < 2 || isVideoPath(images[activeIndex])) return;
     const timer = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % images.length);
     }, 4300);
     return () => window.clearInterval(timer);
-  }, [images.length]);
+  }, [images.length, activeIndex, images[activeIndex]]);
 
   return (
     <div
       className="object-media"
       role="group"
-      aria-label={`${product.name} images`}
+      aria-label={`${product.name} images and videos`}
     >
       {images.map((image, index) => (
-        <img
+        <CatalogMedia
           key={image}
           className={`object-photo ${index === activeIndex ? "active" : ""}`}
           src={image}
+          active={index === activeIndex}
           alt={`${product.name} view ${index + 1}`}
         />
       ))}
-      <div className="slide-controls" aria-label="Choose product image">
+      <div className="slide-controls" aria-label="Choose product media">
         {images.map((image, index) => (
           <button
             key={image}
             className={`slide-dot ${index === activeIndex ? "active" : ""}`}
             type="button"
-            aria-label={`Show image ${index + 1}`}
+            aria-label={`Show ${isVideoPath(image) ? "video" : "image"} ${index + 1}`}
             aria-pressed={index === activeIndex}
             onClick={() => setActiveIndex(index)}
           />
@@ -194,10 +201,11 @@ function ScentSelector({
           <div className="scent-slide-image-wrap">
             {options.map((option, index) =>
               option.image ? (
-                <img
+                <CatalogMedia
                   key={option.name}
                   className={`scent-slide-image ${index === selectedIndex ? "active" : ""}`}
                   src={option.image}
+                  active={index === selectedIndex}
                   alt={`${option.name} fragrance`}
                   aria-hidden={index !== selectedIndex}
                 />
@@ -440,13 +448,14 @@ function ScentShowcase({
           <div
             className="object-media scent-showcase-media"
             role="group"
-            aria-label="Signature scent images"
+            aria-label="Signature scent images and videos"
           >
             {scents.map((option, index) => (
-              <img
+              <CatalogMedia
                 key={option.name}
                 className={`object-photo ${index === activeIndex ? "active" : ""}`}
                 src={option.image}
+                active={index === activeIndex}
                 alt={`${option.name} scent study`}
                 aria-hidden={index !== activeIndex}
               />
@@ -1587,7 +1596,7 @@ function ProductModal({
     >
       <div className="product-modal">
         {product.images ? (
-          <img
+          <CatalogMedia
             className="modal-product-image"
             src={product.images[0]}
             alt={`${product.name} product view`}
@@ -1715,8 +1724,9 @@ function CartDrawer({
               >
                 <div className="cart-thumb">
                   {line.product.images?.[0] ? (
-                    <img
+                    <CatalogMedia
                       src={line.product.images[0]}
+                      controls={false}
                       alt={`${line.product.name} product view`}
                     />
                   ) : (
@@ -2419,8 +2429,9 @@ function CheckoutPage() {
                 >
                   <div className="checkout-summary-thumb">
                     {line.product.images?.[0] ? (
-                      <img
+                      <CatalogMedia
                         src={line.product.images[0]}
+                        controls={false}
                         alt={`${line.product.name} product view`}
                       />
                     ) : (

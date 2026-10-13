@@ -1,3 +1,5 @@
+import { isManagedCatalogUpload } from "./catalogMediaPolicy.ts";
+
 export const ABANDONED_UPLOAD_AGE_MS = 24 * 60 * 60 * 1000;
 
 export interface CatalogImageReferences {
@@ -41,7 +43,7 @@ export function unreferencedManagedImagePaths(
 ): string[] {
   return Array.from(new Set(paths)).filter(
     (path) =>
-      /^\/objects\/uploads\/[0-9a-f-]+$/i.test(path) &&
+      isManagedCatalogUpload(path) &&
       !referenced.has(path),
   );
 }

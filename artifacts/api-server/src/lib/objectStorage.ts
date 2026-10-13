@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { File, Storage } from "@google-cloud/storage";
+import { byteRange, isManagedCatalogUpload } from "./catalogMediaPolicy.ts";
 
 import {
   canAccessObject,
@@ -91,15 +92,14 @@ export class ObjectStorageService {
   async downloadObject(
     file: File,
     cacheTtlSec: number = 3600,
+    rangeHeader?: string,
   ): Promise<Response> {
     const [metadata] = await file.getMetadata();
     const aclPolicy = await getObjectAclPolicy(file);
     const isPublic = aclPolicy?.visibility === "public";
 
-    const nodeStream = file.createReadStream();
-    const webStream = Readable.toWeb(nodeStream) as ReadableStream;
-
     const headers: Record<string, string> = {
+      "Accept-Ranges": "bytes",
       "Content-Type":
         (metadata.contentType as string) || "application/octet-stream",
       "Cache-Control": `${isPublic ? "public" : "private"}, max-age=${cacheTtlSec}`,
@@ -107,11 +107,23 @@ export class ObjectStorageService {
     if (metadata.size) {
       headers["Content-Length"] = String(metadata.size);
     }
-
-    return new Response(webStream, { headers });
+    const size = Number(metadata.size);
+    const range = rangeHeader ? byteRange(rangeHeader, size) : undefined;
+    if (rangeHeader && !range) {
+      delete headers["Content-Length"];
+      headers["Content-Range"] = `bytes */${size}`;
+      return new Response(null, { status: 416, headers });
+    }
+    if (range) {
+      headers["Content-Range"] = `bytes ${range.start}-${range.end}/${size}`;
+      headers["Content-Length"] = String(range.end - range.start + 1);
+    }
+    const nodeStream = file.createReadStream(range ?? {});
+    const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+    return new Response(webStream, { status: range ? 206 : 200, headers });
   }
 
-  async getObjectEntityUploadURL(): Promise<string> {
+  async getObjectEntityUploadURL(extension: "" | ".mp4" | ".webm" = ""): Promise<string> {
     const privateObjectDir = this.getPrivateObjectDir();
     if (!privateObjectDir) {
       throw new Error(
@@ -120,7 +132,7 @@ export class ObjectStorageService {
       );
     }
 
-    const objectId = randomUUID();
+    const objectId = `${randomUUID()}${extension}`;
     const fullPath = `${privateObjectDir}/uploads/${objectId}`;
 
     const { bucketName, objectName } = parseObjectPath(fullPath);
@@ -250,7 +262,7 @@ export class ObjectStorageService {
   }
 
   isManagedUploadPath(objectPath: string): boolean {
-    return /^\/objects\/uploads\/[0-9a-f-]+$/i.test(objectPath);
+    return isManagedCatalogUpload(objectPath);
   }
 
   async deleteManagedUpload(objectPath: string): Promise<boolean> {

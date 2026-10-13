@@ -53,10 +53,14 @@ function ProductForm({
   product,
   scents,
   onClose,
+  uploading,
+  onUploadingChange,
 }: {
   product?: Product;
   scents: Scent[];
   onClose: () => void;
+  uploading: boolean;
+  onUploadingChange: (uploading: boolean) => void;
 }) {
   const queryClient = useQueryClient();
   const createProduct = useCreateProduct();
@@ -89,6 +93,7 @@ function ProductForm({
   });
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
+    if (uploading) return;
     try {
       const data = {
         ...values,
@@ -261,10 +266,12 @@ function ProductForm({
       </div>
 
       <div className="admin-form-group mt-6">
-        <label>Images</label>
+        <label>Images / Videos</label>
+        <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <MultiImageUploader
           value={watch("imagePaths") || []}
           onChange={(paths) => setValue("imagePaths", paths)}
+          onUploadingChange={onUploadingChange}
         />
         {errors.imagePaths && (
           <span className="error">{errors.imagePaths.message}</span>
@@ -274,7 +281,12 @@ function ProductForm({
   );
 }
 
-function ScentForm({ scent, onClose }: { scent?: Scent; onClose: () => void }) {
+function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
+  scent?: Scent;
+  onClose: () => void;
+  uploading: boolean;
+  onUploadingChange: (uploading: boolean) => void;
+}) {
   const queryClient = useQueryClient();
   const createScent = useCreateScent();
   const updateScent = useUpdateScent();
@@ -295,6 +307,7 @@ function ScentForm({ scent, onClose }: { scent?: Scent; onClose: () => void }) {
   });
 
   const onSubmit = async (values: z.infer<typeof scentSchema>) => {
+    if (uploading) return;
     try {
       if (scent) {
         await updateScent.mutateAsync({ id: scent.id, data: values });
@@ -382,10 +395,12 @@ function ScentForm({ scent, onClose }: { scent?: Scent; onClose: () => void }) {
       </div>
 
       <div className="admin-form-group mt-6">
-        <label>Scent Image</label>
+        <label>Scent Image / Video</label>
+        <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <SingleImageUploader
           value={watch("imagePath")}
           onChange={(path) => setValue("imagePath", path)}
+          onUploadingChange={onUploadingChange}
         />
         {errors.imagePath && (
           <span className="error">{errors.imagePath.message}</span>
@@ -404,6 +419,8 @@ export function CatalogCms() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const [productUploading, setProductUploading] = useState(false);
+  const [scentUploading, setScentUploading] = useState(false);
   const [productSheet, setProductSheet] = useState<{
     open: boolean;
     product?: Product;
@@ -736,6 +753,8 @@ export function CatalogCms() {
               product={productSheet.product}
               scents={scents.data || []}
               onClose={() => setProductSheet({ open: false })}
+              uploading={productUploading}
+              onUploadingChange={setProductUploading}
             />
           )}
         </div>
@@ -747,8 +766,8 @@ export function CatalogCms() {
           >
             Cancel
           </button>
-          <button type="submit" form="product-form" className="solid-button">
-            Save Product <ArrowRight size={13} />
+          <button type="submit" form="product-form" className="solid-button" disabled={productUploading}>
+            {productUploading ? "Uploading media…" : "Save Product"} <ArrowRight size={13} />
           </button>
         </div>
       </aside>
@@ -785,6 +804,8 @@ export function CatalogCms() {
             <ScentForm
               scent={scentSheet.scent}
               onClose={() => setScentSheet({ open: false })}
+              uploading={scentUploading}
+              onUploadingChange={setScentUploading}
             />
           )}
         </div>
@@ -796,8 +817,8 @@ export function CatalogCms() {
           >
             Cancel
           </button>
-          <button type="submit" form="scent-form" className="solid-button">
-            Save Scent <ArrowRight size={13} />
+          <button type="submit" form="scent-form" className="solid-button" disabled={scentUploading}>
+            {scentUploading ? "Uploading media…" : "Save Scent"} <ArrowRight size={13} />
           </button>
         </div>
       </aside>

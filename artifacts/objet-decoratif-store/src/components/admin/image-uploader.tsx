@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   useDiscardUpload,
   useRequestUploadUrl,
 } from "@workspace/api-client-react";
 import { Loader2, Upload, X, ArrowUp, ArrowDown } from "lucide-react";
 import { resolveImagePath } from "@/lib/catalog";
+import { CatalogMedia } from "@/components/catalog-media";
+import { CATALOG_MEDIA_ACCEPT, validateCatalogFile } from "@/lib/media";
 
 type UploadState = {
   file: File;
@@ -15,14 +17,20 @@ type UploadState = {
 export function MultiImageUploader({
   value = [],
   onChange,
+  onUploadingChange,
 }: {
   value: string[];
   onChange: (paths: string[]) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const requestUrl = useRequestUploadUrl();
   const discardUpload = useDiscardUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<UploadState | null>(null);
+  useEffect(() => {
+    onUploadingChange?.(!!uploading && !uploading.error);
+  }, [uploading, onUploadingChange]);
+  useEffect(() => () => onUploadingChange?.(false), [onUploadingChange]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,11 +40,12 @@ export function MultiImageUploader({
 
     let objectPath: string | undefined;
     try {
+      const contentType = validateCatalogFile(file);
       const upload = await requestUrl.mutateAsync({
         data: {
           name: file.name,
           size: file.size,
-          contentType: file.type,
+          contentType,
         },
       });
       objectPath = upload.objectPath;
@@ -47,7 +56,7 @@ export function MultiImageUploader({
         method: "PUT",
         body: file,
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": contentType,
         },
       });
 
@@ -88,14 +97,14 @@ export function MultiImageUploader({
       <div className="admin-image-grid">
         {value.map((path, index) => (
           <div key={path} className="admin-image-preview">
-            <img src={resolveImagePath(path)} alt="" />
+            <CatalogMedia src={resolveImagePath(path)} alt={`Media ${index + 1}`} />
             <div className="admin-image-actions">
               <div className="flex gap-2">
                 <button
                   type="button"
                   className="admin-icon-btn"
                   onClick={() => move(index, -1)}
-                  disabled={index === 0}
+                  disabled={index === 0 || (!!uploading && !uploading.error)}
                   aria-label="Move left"
                 >
                   <ArrowUp size={14} className="-rotate-90" />
@@ -104,7 +113,7 @@ export function MultiImageUploader({
                   type="button"
                   className="admin-icon-btn"
                   onClick={() => move(index, 1)}
-                  disabled={index === value.length - 1}
+                  disabled={index === value.length - 1 || (!!uploading && !uploading.error)}
                   aria-label="Move right"
                 >
                   <ArrowDown size={14} className="-rotate-90" />
@@ -114,6 +123,7 @@ export function MultiImageUploader({
                 type="button"
                 className="admin-text-btn"
                 onClick={() => remove(index)}
+                disabled={!!uploading && !uploading.error}
               >
                 <X size={12} /> Remove
               </button>
@@ -160,7 +170,7 @@ export function MultiImageUploader({
           }}
         >
           <Upload size={20} className="mb-2" />
-          <span>Add Image</span>
+          <span>Add Image / Video</span>
         </div>
       </div>
 
@@ -168,7 +178,7 @@ export function MultiImageUploader({
         type="file"
         ref={fileInputRef}
         className="hidden"
-        accept="image/png, image/jpeg, image/webp"
+        accept={CATALOG_MEDIA_ACCEPT}
         onChange={handleFile}
       />
     </div>
@@ -178,14 +188,20 @@ export function MultiImageUploader({
 export function SingleImageUploader({
   value,
   onChange,
+  onUploadingChange,
 }: {
   value: string | null | undefined;
   onChange: (path: string | null) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const requestUrl = useRequestUploadUrl();
   const discardUpload = useDiscardUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<UploadState | null>(null);
+  useEffect(() => {
+    onUploadingChange?.(!!uploading && !uploading.error);
+  }, [uploading, onUploadingChange]);
+  useEffect(() => () => onUploadingChange?.(false), [onUploadingChange]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -195,11 +211,12 @@ export function SingleImageUploader({
 
     let objectPath: string | undefined;
     try {
+      const contentType = validateCatalogFile(file);
       const upload = await requestUrl.mutateAsync({
         data: {
           name: file.name,
           size: file.size,
-          contentType: file.type,
+          contentType,
         },
       });
       objectPath = upload.objectPath;
@@ -208,7 +225,7 @@ export function SingleImageUploader({
         method: "PUT",
         body: file,
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": contentType,
         },
       });
 
@@ -233,7 +250,7 @@ export function SingleImageUploader({
     <div>
       {value && !uploading ? (
         <div className="admin-image-preview single">
-          <img src={resolveImagePath(value)} alt="" />
+          <CatalogMedia src={resolveImagePath(value)} alt="Scent media preview" />
           <div className="admin-image-actions">
             <button
               type="button"
@@ -278,7 +295,7 @@ export function SingleImageUploader({
           onClick={() => fileInputRef.current?.click()}
         >
           <Upload size={20} className="mb-2" />
-          <span>Upload Image</span>
+          <span>Upload Image / Video</span>
         </div>
       )}
 
@@ -286,7 +303,7 @@ export function SingleImageUploader({
         type="file"
         ref={fileInputRef}
         className="hidden"
-        accept="image/png, image/jpeg, image/webp"
+        accept={CATALOG_MEDIA_ACCEPT}
         onChange={handleFile}
       />
     </div>

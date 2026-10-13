@@ -17,6 +17,7 @@ import {
 } from '../lib/catalogImageCleanup';
 import { currentUser } from './commerce';
 import { createDiscardUploadRouter } from './storageDiscard';
+import { catalogUploadExtension } from '../lib/catalogMediaPolicy.ts';
 
 const objectStorageService = new ObjectStorageService();
 
@@ -87,13 +88,14 @@ router.post(
 
     try {
       const { name, size, contentType } = parsed.data;
-      if (!/^image\/(jpeg|png|webp|gif|avif|svg\+xml)$/.test(contentType) || size > 10 * 1024 * 1024) {
-        res.status(400).json({ error: 'Only images up to 10 MB are accepted' });
+      const extension = catalogUploadExtension(contentType, size);
+      if (extension === null) {
+        res.status(400).json({ error: 'Images up to 10 MB or MP4/WebM videos up to 100 MB are accepted' });
         return;
       }
 
       const uploadURL =
-        await dependencies.objectStorageService.getObjectEntityUploadURL();
+        await dependencies.objectStorageService.getObjectEntityUploadURL(extension);
       const objectPath =
         dependencies.objectStorageService.normalizeObjectEntityPath(uploadURL);
 
@@ -156,7 +158,7 @@ router.get(
       }
 
       const response =
-        await dependencies.objectStorageService.downloadObject(file);
+        await dependencies.objectStorageService.downloadObject(file, 3600, req.get('range'));
 
       res.status(response.status);
       response.headers.forEach((value, key) => res.setHeader(key, value));
@@ -207,7 +209,7 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
     // }
 
     const response =
-      await dependencies.objectStorageService.downloadObject(objectFile);
+      await dependencies.objectStorageService.downloadObject(objectFile, 3600, req.get('range'));
 
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
