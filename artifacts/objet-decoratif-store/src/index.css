@@ -79,7 +79,7 @@ a {
   backdrop-filter: blur(14px);
 }
 .logo {
-  font: 500 clamp(18px, 1.8vw, 25px)/1 var(--hero);
+  font: 500 clamp(18px, 1.8vw, 25px)/1 "Chakra Petch", sans-serif;
   letter-spacing: -0.035em;
   text-transform: uppercase;
   white-space: nowrap;
