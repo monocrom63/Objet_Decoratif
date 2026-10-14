@@ -3428,7 +3428,7 @@ a {
   .scent-slideshow {
     grid-template-columns: minmax(120px, 0.8fr) 1fr;
     gap: 14px;
-    min-height: 270px;
+    min-height: 220px;
   }
   .scent-slide-image-wrap,
   .scent-slide-image,
@@ -3442,7 +3442,7 @@ a {
     margin-bottom: 14px;
   }
   .object-explanation {
-    margin-top: 17.5px;
+    margin-top: 9px;
   }
   .refill-copy p + p {
     margin-top: 7.5px;
@@ -3459,7 +3459,7 @@ a {
   }
   .newsletter {
     display: block;
-    padding: 27.5px 20px 55px;
+    padding: 14px 20px 55px;
   }
   .newsletter-form {
     min-width: 0;
