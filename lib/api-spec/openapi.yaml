@@ -356,6 +356,7 @@ components:
         notes: { type: string }
         description: { type: string }
         imagePath: { type: ["string", "null"] }
+        showcaseMediaPath: { type: ["string", "null"] }
         active: { type: boolean }
         published: { type: boolean }
         sortOrder: { type: integer }
@@ -368,6 +369,7 @@ components:
         notes: { type: string }
         description: { type: string }
         imagePath: { type: ["string", "null"] }
+        showcaseMediaPath: { type: ["string", "null"] }
         active: { type: boolean }
         published: { type: boolean }
         sortOrder: { type: integer }
@@ -378,6 +380,7 @@ components:
         notes: { type: string }
         description: { type: string }
         imagePath: { type: ["string", "null"] }
+        showcaseMediaPath: { type: ["string", "null"] }
         active: { type: boolean }
         published: { type: boolean }
         sortOrder: { type: integer }

@@ -19,6 +19,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { MultiImageUploader, SingleImageUploader } from "./image-uploader";
+import { useLanguage } from "@/lib/language";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,6 +45,7 @@ const scentSchema = z.object({
   notes: z.string().min(1, "Notes is required"),
   description: z.string().min(1, "Description is required"),
   imagePath: z.string().nullable().optional(),
+  showcaseMediaPath: z.string().nullable().optional(),
   active: z.boolean().default(true),
   published: z.boolean().default(true),
   sortOrder: z.coerce.number().default(0),
@@ -287,6 +289,12 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
   uploading: boolean;
   onUploadingChange: (uploading: boolean) => void;
 }) {
+  const { t } = useLanguage();
+  const [productUploading, setProductUploading] = useState(false);
+  const [showcaseUploading, setShowcaseUploading] = useState(false);
+  useEffect(() => {
+    onUploadingChange(productUploading || showcaseUploading);
+  }, [productUploading, showcaseUploading, onUploadingChange]);
   const queryClient = useQueryClient();
   const createScent = useCreateScent();
   const updateScent = useUpdateScent();
@@ -300,6 +308,7 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
       notes: "",
       description: "",
       imagePath: null,
+      showcaseMediaPath: null,
       active: true,
       published: true,
       sortOrder: 0,
@@ -307,7 +316,7 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
   });
 
   const onSubmit = async (values: z.infer<typeof scentSchema>) => {
-    if (uploading) return;
+    if (uploading || productUploading || showcaseUploading) return;
     try {
       if (scent) {
         await updateScent.mutateAsync({ id: scent.id, data: values });
@@ -395,15 +404,29 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
       </div>
 
       <div className="admin-form-group mt-6">
-        <label>Scent Image / Video</label>
+        <label>{t("Product scent media · portrait")}</label>
+        <p className="text-xs text-[#777369] mb-3">{t("Shown in the product's scent selector. Separate from the landscape Scents section.")}</p>
         <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <SingleImageUploader
           value={watch("imagePath")}
           onChange={(path) => setValue("imagePath", path)}
-          onUploadingChange={onUploadingChange}
+          onUploadingChange={setProductUploading}
         />
         {errors.imagePath && (
           <span className="error">{errors.imagePath.message}</span>
+        )}
+      </div>
+      <div className="admin-form-group mt-6" data-testid="scent-showcase-media-upload">
+        <label>{t("Scents section media · landscape 16:9")}</label>
+        <p className="text-xs text-[#777369] mb-3">{t("Upload a separate landscape video or image for Signature Scents. Videos loop automatically without player controls. Portrait videos are not reused here.")}</p>
+        <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP ≤ 10 MB · MP4, WebM ≤ 100 MB</p>
+        <SingleImageUploader
+          value={watch("showcaseMediaPath")}
+          onChange={(path) => setValue("showcaseMediaPath", path, { shouldDirty: true })}
+          onUploadingChange={setShowcaseUploading}
+        />
+        {errors.showcaseMediaPath && (
+          <span className="error">{errors.showcaseMediaPath.message}</span>
         )}
       </div>
     </form>

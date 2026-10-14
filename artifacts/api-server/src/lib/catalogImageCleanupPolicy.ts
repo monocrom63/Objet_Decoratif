@@ -4,7 +4,7 @@ export const ABANDONED_UPLOAD_AGE_MS = 24 * 60 * 60 * 1000;
 
 export interface CatalogImageReferences {
   products: Array<{ imagePaths: string[] }>;
-  scents: Array<{ imagePath: string | null }>;
+  scents: Array<{ imagePath: string | null; showcaseMediaPath?: string | null }>;
 }
 
 export interface ManagedUpload {
@@ -33,7 +33,9 @@ export function referencedCatalogImagePaths({
 }: CatalogImageReferences): Set<string> {
   return new Set([
     ...products.flatMap((product) => product.imagePaths),
-    ...scents.flatMap((scent) => (scent.imagePath ? [scent.imagePath] : [])),
+    ...scents.flatMap((scent) => [scent.imagePath, scent.showcaseMediaPath].filter(
+      (path): path is string => Boolean(path),
+    )),
   ]);
 }
 

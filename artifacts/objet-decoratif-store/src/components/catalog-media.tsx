@@ -32,6 +32,9 @@ export function CatalogMedia({
       void video.current?.play().catch(() => {});
     }
   }, [active, src, autoPlay]);
+  if (!src) {
+    return <span className={className} style={style} role="img" aria-label={alt} aria-hidden={ariaHidden} />;
+  }
   if (!isVideoPath(src)) {
     return (
       <img

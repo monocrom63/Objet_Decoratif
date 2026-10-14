@@ -1,6 +1,10 @@
 import { catalogGerman } from "./catalog-translations.ts";
 // Original English copy is the translation key. Brand and product names stay unchanged.
 export const german: Record<string, string> = {
+  "Product scent media · portrait": "Duft-Medium am Produkt · Hochformat",
+  "Shown in the product's scent selector. Separate from the landscape Scents section.": "Wird in der Duftauswahl am Produkt angezeigt. Unabhängig vom Querformat im Scents-Bereich.",
+  "Scents section media · landscape 16:9": "Medium im Scents-Bereich · Querformat 16:9",
+  "Upload a separate landscape video or image for Signature Scents. Videos loop automatically without player controls. Portrait videos are not reused here.": "Eigenes Querformat-Video oder Bild für Signature Scents hochladen. Videos starten automatisch als Loop ohne Player-Steuerung. Hochformat-Videos werden hier nicht automatisch übernommen.",
   ...catalogGerman,
   "Products": "Produkte",
   "Candels": "Kerzen",

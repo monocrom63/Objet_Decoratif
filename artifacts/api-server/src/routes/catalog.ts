@@ -237,7 +237,10 @@ router.patch("/admin/catalog/scents/:id", async (req, res): Promise<void> => {
     return;
   }
   enqueueCatalogImageCleanup(
-    replacedScentImagePaths(existing?.imagePath, scent.imagePath),
+    [
+      ...replacedScentImagePaths(existing?.imagePath, scent.imagePath),
+      ...replacedScentImagePaths(existing?.showcaseMediaPath, scent.showcaseMediaPath),
+    ],
   );
   res.json(UpdateScentResponse.parse(scent));
 });
@@ -259,7 +262,9 @@ router.delete("/admin/catalog/scents/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Scent not found" });
     return;
   }
-  enqueueCatalogImageCleanup(scent.imagePath ? [scent.imagePath] : []);
+  enqueueCatalogImageCleanup(
+    [scent.imagePath, scent.showcaseMediaPath].filter((path): path is string => Boolean(path)),
+  );
   res.sendStatus(204);
 });
 export default router;

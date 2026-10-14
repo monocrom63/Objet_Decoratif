@@ -12,6 +12,7 @@ export type ScentOption = {
   notes: string;
   description: string;
   image?: string;
+  showcaseMedia?: string;
 };
 
 export type FrontendProduct = {
@@ -63,6 +64,7 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         notes: s.notes,
         description: s.description,
         image: resolveImagePath(s.imagePath),
+        showcaseMedia: resolveImagePath(s.showcaseMediaPath),
       };
       scentMap.set(s.id, option);
       return option;

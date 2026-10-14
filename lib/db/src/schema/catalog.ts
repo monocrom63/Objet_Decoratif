@@ -8,6 +8,7 @@ export const scentsTable = pgTable("catalog_scents", {
   notes: text("notes").notNull(),
   description: text("description").notNull(),
   imagePath: text("image_path"),
+  showcaseMediaPath: text("showcase_media_path"),
   active: boolean("active").notNull().default(true),
   published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),

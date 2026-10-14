@@ -34,7 +34,10 @@ let catalogImageCleanupAttempt = 0;
 async function referencedCatalogImagePaths(): Promise<Set<string>> {
   const [products, scents] = await Promise.all([
     db.select({ imagePaths: productsTable.imagePaths }).from(productsTable),
-    db.select({ imagePath: scentsTable.imagePath }).from(scentsTable),
+    db.select({
+      imagePath: scentsTable.imagePath,
+      showcaseMediaPath: scentsTable.showcaseMediaPath,
+    }).from(scentsTable),
   ]);
 
   return collectReferencedCatalogImagePaths({ products, scents });

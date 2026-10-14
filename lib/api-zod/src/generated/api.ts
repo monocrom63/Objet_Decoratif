@@ -251,6 +251,7 @@ export const GetCatalogResponse = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullable(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean(),
   "published": zod.boolean(),
   "sortOrder": zod.number().int()
@@ -287,6 +288,7 @@ export const InitializeCatalogResponse = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullable(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean(),
   "published": zod.boolean(),
   "sortOrder": zod.number().int()
@@ -415,6 +417,7 @@ export const ListAdminScentsResponseItem = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullable(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean(),
   "published": zod.boolean(),
   "sortOrder": zod.number().int()
@@ -431,6 +434,7 @@ export const CreateScentBody = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullish(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean().optional(),
   "published": zod.boolean().optional(),
   "sortOrder": zod.number().int().optional()
@@ -442,6 +446,7 @@ export const CreateScentResponse = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullable(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean(),
   "published": zod.boolean(),
   "sortOrder": zod.number().int()
@@ -457,6 +462,7 @@ export const UpdateScentBody = zod.object({
   "notes": zod.string().optional(),
   "description": zod.string().optional(),
   "imagePath": zod.string().nullish(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean().optional(),
   "published": zod.boolean().optional(),
   "sortOrder": zod.number().int().optional()
@@ -468,6 +474,7 @@ export const UpdateScentResponse = zod.object({
   "notes": zod.string(),
   "description": zod.string(),
   "imagePath": zod.string().nullable(),
+  "showcaseMediaPath": zod.string().nullish(),
   "active": zod.boolean(),
   "published": zod.boolean(),
   "sortOrder": zod.number().int()

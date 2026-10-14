@@ -5,6 +5,18 @@ description: Cross-layer requirements when extending catalog media formats witho
 
 Keep existing catalog media paths compatible when adding media formats. Any format change must cover upload validation, public rendering, managed-file deletion and abandoned-upload cleanup together.
 
+Product scent media and the main Signature Scents media are independently curated. The owner requested 16:9 videos for Scents instead of automatically repeating the product's 9:16 video everywhere.
+
+**Why:** A portrait product composition is not necessarily the intended landscape composition; cropping or stretching the same video does not meet the request.
+
+**How to apply:** Keep the two media choices independent, retain autoplay/muted/loop without player controls publicly, and do not automatically reuse product videos when landscape media is unset. Legacy still images can remain as a compatibility fallback.
+
+The browser-testing Chromium build may decode WebM while rejecting an existing H.264 MP4.
+
+**Why:** Codec availability in the testing browser is not necessarily the same as in visitors' browsers; successful URL delivery alone does not prove decoding.
+
+**How to apply:** Use a small real WebM for deterministic upload/playback fixtures, check decoded dimensions and playback state, and report an existing MP4 codec limitation separately from regressions in media selection or rendering.
+
 **Why:** Catalog storage historically used extensionless image objects. Videos need a reliable type indication, but changing only uploads or rendering would leave either broken public media or files that cleanup cannot safely remove.
 
 **How to apply:** Derive supported video suffixes from the accepted MIME type, never arbitrary user filenames. Preserve extensionless legacy image URLs. Extend managed-path validation and reference-preserving cleanup for every new supported video suffix; retain byte-range serving so browsers can seek without downloading entire videos.

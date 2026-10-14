@@ -907,6 +907,13 @@ a {
 }
 .scent-showcase-media {
   background: #d7d0c3;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 0;
+}
+.scent-showcase-media .object-photo {
+  object-fit: contain;
+  transform: none;
 }
 .scent-showcase-details {
   min-height: 520px;
@@ -3385,6 +3392,10 @@ a {
   .object-media {
     min-height: 520px;
   }
+  .scent-showcase-media {
+    min-height: 0;
+    height: auto;
+  }
   .object-details {
     height: auto;
     padding: 42px 0 0;
@@ -4105,6 +4116,20 @@ a {
   position: static;
   opacity: 1;
   padding: 8px;
+}
+[data-testid="scent-showcase-media-upload"] .admin-image-preview.single {
+  max-width: 100%;
+  width: 360px;
+  aspect-ratio: 16 / 9;
+}
+[data-testid="scent-showcase-media-upload"] .admin-image-preview.single:has(video) {
+  aspect-ratio: auto;
+}
+[data-testid="scent-showcase-media-upload"] .admin-image-preview img,
+[data-testid="scent-showcase-media-upload"] .admin-image-preview video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  height: auto;
 }
 .object-photo:not(.active),
 .scent-slide-image:not(.active) {

@@ -37,6 +37,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
 import { useLanguage } from "@/lib/language";
 import { CONTACT_EMAIL } from "@/lib/store-config";
+import { scentShowcaseSource } from "@/lib/scent-media";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -451,7 +452,7 @@ function ScentShowcase({
               <CatalogMedia
                 key={option.name}
                 className={`object-photo ${index === activeIndex ? "active" : ""}`}
-                src={option.image}
+                src={scentShowcaseSource(option)}
                 active={index === activeIndex}
                 controls={false}
                 autoPlay

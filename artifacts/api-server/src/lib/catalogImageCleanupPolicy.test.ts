@@ -13,6 +13,24 @@ import {
 const shared = "/objects/uploads/00000000-0000-4000-8000-000000000001";
 const replacement = "/objects/uploads/00000000-0000-4000-8000-000000000002";
 
+test("independent landscape uploads remain referenced, including shared product media", () => {
+  const landscape = `${replacement}.webm`;
+  const references = referencedCatalogImagePaths({
+    products: [{ imagePaths: [shared] }],
+    scents: [{ imagePath: shared, showcaseMediaPath: landscape }],
+  });
+  assert.equal(references.has(landscape), true);
+  assert.deepEqual(unreferencedManagedImagePaths([landscape, shared], references), []);
+  assert.deepEqual(abandonedCatalogUploads([
+    { objectPath: landscape, createdAt: new Date(0) },
+  ], references, ABANDONED_UPLOAD_AGE_MS * 2), []);
+  const afterRemoval = referencedCatalogImagePaths({
+    products: [{ imagePaths: [shared] }],
+    scents: [{ imagePath: shared, showcaseMediaPath: null }],
+  });
+  assert.deepEqual(unreferencedManagedImagePaths([landscape, shared], afterRemoval), [landscape]);
+});
+
 test("product routes submit only removed images after replacement and all images after deletion", () => {
   assert.deepEqual(
     removedProductImagePaths([shared, replacement], [replacement]),

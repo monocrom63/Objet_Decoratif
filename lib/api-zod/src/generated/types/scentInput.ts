@@ -14,6 +14,8 @@ export interface ScentInput {
   description: string;
   /** @nullable */
   imagePath?: string | null;
+  /** @nullable */
+  showcaseMediaPath?: string | null;
   active?: boolean;
   published?: boolean;
   sortOrder?: number;
