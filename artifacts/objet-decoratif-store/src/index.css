@@ -3348,8 +3348,8 @@ a {
     grid-template-columns: 1fr;
   }
   .intro-item {
-    min-height: 170px;
-    padding: 27px 20px;
+    min-height: auto;
+    padding: 27px 20px 20px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
@@ -3357,7 +3357,7 @@ a {
     border-bottom: 0;
   }
   .intro-number {
-    margin-bottom: 28px;
+    margin-bottom: 14px;
   }
   .section {
     padding: 75px 20px;
