@@ -3362,12 +3362,18 @@ a {
   .section {
     padding: 75px 20px;
   }
+  #collection.section {
+    padding-top: 27px;
+  }
   .section-header {
     display: block;
-    margin-bottom: 35px;
+    margin-bottom: 17.5px;
   }
   .section-intro {
-    margin-top: 18px;
+    margin-top: 9px;
+  }
+  .filter-bar {
+    margin-bottom: 13px;
   }
   .product-grid {
     grid-template-columns: 1fr;
@@ -3384,7 +3390,7 @@ a {
     font-size: 28px;
   }
   .object-list {
-    gap: 78px;
+    gap: 39px;
   }
   .object-showcase {
     display: block;
@@ -3405,10 +3411,10 @@ a {
   }
   .scent-showcase-heading {
     display: block;
-    margin: 92px 0 35px;
+    margin: 46px 0 17.5px;
   }
   .scent-showcase-heading .section-intro {
-    margin-top: 18px;
+    margin-top: 9px;
   }
   .scent-showcase-details {
     min-height: 0;
@@ -3436,18 +3442,24 @@ a {
     margin-bottom: 14px;
   }
   .object-explanation {
-    margin-top: 35px;
+    margin-top: 17.5px;
+  }
+  .refill-copy p + p {
+    margin-top: 7.5px;
   }
   .object-buy-button {
     width: 100%;
     margin-top: 26px;
+  }
+  .refill-buy-button {
+    margin-top: 13px;
   }
   .search-panel {
     top: 94px;
   }
   .newsletter {
     display: block;
-    padding: 55px 20px;
+    padding: 27.5px 20px 55px;
   }
   .newsletter-form {
     min-width: 0;
