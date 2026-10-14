@@ -25,4 +25,4 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-SHOP_ADMIN_EMAILS = "thorsten.magers@macabe.de"
+SHOP_ADMIN_EMAILS = "thorsten.magers@macabe.de,thorsten@objetdecoratif.art"
