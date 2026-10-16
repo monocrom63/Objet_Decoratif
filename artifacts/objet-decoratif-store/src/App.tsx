@@ -320,10 +320,12 @@ function ScentSelector({
   product,
   selectedScent,
   onSelect,
+  onAdd,
 }: {
   product: Product;
   selectedScent: string;
   onSelect: (scent: string) => void;
+  onAdd: () => void;
 }) {
   const { t, locale } = useLanguage();
   const options: ScentOption[] =
@@ -403,6 +405,15 @@ function ScentSelector({
             <strong>{selected.name}</strong>
             <small>{t(selected.notes)}</small>
             <p>{t(selected.description)}</p>
+            <button
+              className="solid-button object-buy-button scent-slide-buy-button"
+              type="button"
+              onClick={onAdd}
+              data-testid={`button-open-object-${product.id}`}
+            >
+              {t("Add to cart")} · €{product.price.toFixed(2)}{" "}
+              <ArrowRight size={14} />
+            </button>
           </div>
         </div>
       )}
@@ -459,6 +470,7 @@ function ObjectShowcase({
             product={product}
             selectedScent={selectedScent}
             onSelect={setSelectedScent}
+            onAdd={() => onAdd(product, selectedScent, 1)}
           />
         </div>
       </div>
@@ -467,13 +479,6 @@ function ObjectShowcase({
           <span className="object-explanation-label">{t("About the object")}</span>
           <p>{t(product.explanation)}</p>
         </div>
-        <button
-          className="solid-button object-buy-button object-explanation-button"
-          type="button"
-          onClick={() => onAdd(product, selectedScent, 1)}
-          data-testid={`button-open-object-${product.id}`}
-        >{t("Add to cart")} · €{product.price.toFixed(2)} <ArrowRight size={14} />
-        </button>
       </div>
     </article>
   );

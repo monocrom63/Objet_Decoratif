@@ -354,9 +354,6 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
   ) => {
     const mediaPath = getValues(field);
     if (!mediaPath || removingMedia) return;
-    if (!window.confirm(t("Remove this media from the scent? The change is saved immediately."))) {
-      return;
-    }
 
     if (!scent) {
       setValue(field, null, { shouldDirty: true, shouldValidate: true });
@@ -370,7 +367,10 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
           ? { imagePath: null }
           : { showcaseMediaPath: null };
       await updateScent.mutateAsync({ id: scent.id, data });
-      setValue(field, null, { shouldDirty: true, shouldValidate: true });
+      setValue(field, null, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["/api/admin/catalog/scents"],

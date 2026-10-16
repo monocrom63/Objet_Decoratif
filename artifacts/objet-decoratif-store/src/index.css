@@ -1233,6 +1233,27 @@ a {
   }
 }
 
+.scent-slide-copy .scent-slide-buy-button {
+  align-self: flex-end;
+  margin: 14px 0 0;
+}
+
+@media (max-width: 980px) {
+  .object-showcase:not(.scent-showcase):not(.refill-showcase) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    row-gap: 18px;
+  }
+  .object-media {
+    height: clamp(360px, 72vw, 520px);
+    min-height: 0;
+  }
+  .object-details {
+    height: auto;
+    padding: 18px 0 0;
+  }
+}
+
 .ritual {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
