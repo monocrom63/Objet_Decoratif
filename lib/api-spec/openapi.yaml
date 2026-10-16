@@ -307,7 +307,7 @@ components:
         postalCode: { type: string }
         city: { type: string }
         country: { type: string }
-        paymentMethod: { type: string, enum: [card, paypal, klarna, manual] }
+        paymentMethod: { type: string, enum: [card, paypal, klarna] }
         cardLastFour: { type: ["string", "null"], pattern: "^[0-9]{4}$" }
         items:
           type: array

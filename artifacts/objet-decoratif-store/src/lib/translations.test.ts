@@ -18,15 +18,13 @@ test("German price disclosures include VAT, shipping, and the existing delivery 
   assert.equal(translate("Delivery time: 3–5 working days", "DE"), "Lieferzeit: 3–5 Werktage");
 });
 
-test("manual-payment checkout uses the German payment-obligation button", () => {
-  assert.equal(
-    translate("Place order with payment obligation", "DE"),
-    "Zahlungspflichtig bestellen",
-  );
+test("checkout retains its pre-payment-provider order actions", () => {
+  assert.equal(translate("Place order", "DE"), "Bestellung aufgeben");
+  assert.equal(translate("Place order as guest", "DE"), "Als Gast bestellen");
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
-  assert.match(app, /paymentMethod:\s*"manual"/);
-  assert.match(app, /t\("Place order with payment obligation"\)/);
-  assert.ok(!app.includes('autoComplete="cc-number"'));
+  assert.match(app, /^\s*paymentMethod,\s*$/m);
+  assert.match(app, /autoComplete="cc-number"/);
+  assert.match(app, /t\("Place order as guest"\)/);
 });
 
 test("inline spacing survives translation", () => {

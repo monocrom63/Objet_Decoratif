@@ -9,8 +9,8 @@ Guest ordering must not create an account or grant a store role. Do not automati
 
 **How to apply:** Preserve authenticated account-order access checks and admin-only order management. Any future guest-order claiming flow needs explicit ownership verification rather than implicit email matching.
 
-Both guest and account checkout submissions are binding orders; the shop requests payment separately after submission, and no online payment is collected in the current flow.
+The owner plans to integrate a payment provider later; until then, preserve the existing pre-provider checkout behavior and its notice that no payment is charged.
 
-**Why:** The owner confirmed this order and payment behavior for the checkout. The final action must communicate a payment obligation without pretending a payment processor is connected.
+**Why:** The owner explicitly asked to restore the prior payment state and defer payment-provider integration.
 
-**How to apply:** Keep the final action labeled “Zahlungspflichtig bestellen” in German, store the order with the manual-payment method, and do not collect card or wallet details unless a real payment provider is added.
+**How to apply:** Do not add a manual payment request or claim an online payment is complete before the owner selects and connects a real provider.
