@@ -702,6 +702,33 @@ a {
   font: 12px var(--mono);
   white-space: nowrap;
 }
+.price-disclosure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 5px;
+  margin: -6px 0 14px;
+  color: #77746c;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.price-disclosure a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.price-disclosure__delivery {
+  flex-basis: 100%;
+}
+.price-disclosure--product {
+  margin: 10px 0 18px;
+}
+.price-disclosure--modal {
+  margin: -9px 0 20px;
+}
+.price-disclosure--checkout {
+  margin: 12px 0 16px;
+}
 .object-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

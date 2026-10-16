@@ -16,5 +16,9 @@ export async function decodePolicyHtml(encoded: string) {
   const bytes = Uint8Array.from(window.atob(completeData), (character) => character.charCodeAt(0));
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
   const html = await new Response(stream).text();
+  if (encoded === legalNoticeData) {
+    const updatedLegalReference = html.replaceAll("§ 5 TMG", "§ 5 DDG");
+    return updatedLegalReference.replaceAll("info@objetdecoratif.de", CONTACT_EMAIL);
+  }
   return html.replaceAll("info@objetdecoratif.de", CONTACT_EMAIL);
 }

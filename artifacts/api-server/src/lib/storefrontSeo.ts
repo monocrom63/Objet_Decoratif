@@ -222,6 +222,12 @@ export function renderProductSeoHtml(
                 <h1 id="od-product-title">${escapeHtml(product.name)}</h1>
                 <span class="od-product-page__price">€${price}</span>
               </div>
+              <p class="price-disclosure price-disclosure--product">
+                <span>Prices include VAT; shipping extra</span>
+                <span aria-hidden="true">·</span>
+                <a href="/shipping-policy">Shipping costs &amp; delivery</a>
+                <span class="price-disclosure__delivery">Delivery time: 3–5 working days</span>
+              </p>
               <p class="od-product-page__description">${escapeHtml(product.description)}</p>
               ${scentMarkup}
               <a class="od-product-page__buy" href="/?product=${encodedProductId}#collection"><span>Add to cart</span> →</a>

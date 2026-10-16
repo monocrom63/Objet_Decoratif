@@ -12,6 +12,12 @@ test("DE changes shop and checkout copy; EN retains the exact original headline"
   assert.equal(translate("Products", "EN"), "Products");
 });
 
+test("German price disclosures include VAT, shipping, and the existing delivery estimate", () => {
+  assert.equal(translate("Prices include VAT; shipping extra", "DE"), "inkl. MwSt., zzgl. Versand");
+  assert.equal(translate("Shipping costs & delivery", "DE"), "Versandkosten & Lieferzeit");
+  assert.equal(translate("Delivery time: 3–5 working days", "DE"), "Lieferzeit: 3–5 Werktage");
+});
+
 test("inline spacing survives translation", () => {
   assert.equal(translate("Choose ", "DE"), "Auswählen: ");
   assert.equal(translate(" and your account", "DE"), " und dein Konto");

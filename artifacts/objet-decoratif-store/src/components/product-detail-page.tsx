@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { CatalogMedia } from "@/components/catalog-media";
+import { PriceDisclosure } from "@/components/price-disclosure";
 import { useLanguage } from "@/lib/language";
 import type { FrontendProduct } from "@/lib/catalog";
 import "./product-detail-page.css";
@@ -130,6 +131,7 @@ export function ProductDetailPage({
               €{product.price}
             </span>
           </div>
+          <PriceDisclosure className="price-disclosure--product" />
           <p className="od-product-page__description">{t(product.description)}</p>
 
           {scents.length > 0 && (

@@ -33,6 +33,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { LogoutButton } from "@/components/logout-button";
 import { CatalogMedia } from "@/components/catalog-media";
 import { ProductDetailPage } from "@/components/product-detail-page";
+import { PriceDisclosure } from "@/components/price-disclosure";
 import { HeaderNavMenu } from "@/components/header-nav-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
@@ -422,6 +423,7 @@ function ObjectShowcase({
           </div>
           <span className="object-price">€{product.price}</span>
         </div>
+        <PriceDisclosure className="price-disclosure--catalog" />
         <div className="object-actions">
           <ScentSelector
             product={product}
@@ -478,6 +480,7 @@ function RefillShowcase({
           </div>
           <span className="object-price">€{product.price}</span>
         </div>
+        <PriceDisclosure className="price-disclosure--catalog" />
         <div className="refill-options">
           <span className="option-label">{t("Choose your refill")}</span>
           <div className="refill-select-row">
@@ -628,6 +631,7 @@ function ScentShowcase({
             </div>
             <span className="object-price">€{product.price}</span>
           </div>
+          <PriceDisclosure className="price-disclosure--catalog" />
           <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
             <span className="scent-showcase-label">{t("The atmosphere")}</span>
             <p>{t(selected.description)}</p>
@@ -1636,6 +1640,7 @@ function ProductModal({
           <h2>{product.name}</h2>
           <p className="modal-subtitle">{t(product.description)}</p>
           <div className="modal-price">€{product.price}{t(" EUR")}</div>
+          <PriceDisclosure className="price-disclosure--modal" />
           <span className="option-label">
             {product.id === "refill"
               ? t("Choose size & scent")
@@ -2353,6 +2358,7 @@ function CheckoutPage() {
                   <strong>{t("EUR €")}{total.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </div>
               </div>
+              <PriceDisclosure className="price-disclosure--checkout" />
 
               <div className="checkout-review-notice" role="status">
                 <strong>{t("No payment will be charged.")}</strong>
@@ -2496,6 +2502,7 @@ function CheckoutPage() {
                 </b>
               </div>
             </div>
+            <PriceDisclosure className="price-disclosure--checkout" />
           </div>
         </aside>
       </main>
