@@ -21,6 +21,7 @@ export function ProductDetailPage({
   const scents = product.scentOptions ?? [];
   const [activeImage, setActiveImage] = useState(0);
   const [selectedScent, setSelectedScent] = useState(scents[0]?.name ?? "");
+  const [selectedSize, setSelectedSize] = useState<"Small" | "Big">("Small");
 
   useEffect(() => {
     setActiveImage(0);
@@ -28,6 +29,7 @@ export function ProductDetailPage({
 
   useEffect(() => {
     setSelectedScent(scents[0]?.name ?? "");
+    setSelectedSize("Small");
   }, [product.id, product.scentOptions]);
 
   const moveImage = (direction: number) => {
@@ -65,7 +67,8 @@ export function ProductDetailPage({
                     src={image}
                     active={index === activeImage}
                     controls
-                    alt={`${product.name} — ${t("view")} ${index + 1}`}
+                    alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
+                    loading={index === activeImage ? "eager" : "lazy"}
                     aria-hidden={index !== activeImage}
                   />
                 ))}
@@ -134,6 +137,26 @@ export function ProductDetailPage({
           <PriceDisclosure className="price-disclosure--product" />
           <p className="od-product-page__description">{t(product.description)}</p>
 
+          {product.id === "refill" && (
+            <fieldset className="od-product-page__scent-options">
+              <legend>{t("Refill size")}</legend>
+              <div className="product-card__sizes">
+                {(["Small", "Big"] as const).map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    className={selectedSize === size ? "is-selected" : ""}
+                    onClick={() => setSelectedSize(size)}
+                    aria-pressed={selectedSize === size}
+                    data-testid={`button-product-detail-size-${size.toLowerCase()}`}
+                  >
+                    {t(size === "Small" ? "Small (190g)" : "Big (245g)")}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
           {scents.length > 0 && (
             <fieldset className="od-product-page__scent-options">
               <legend>{t("Choose a scent")}</legend>
@@ -171,12 +194,23 @@ export function ProductDetailPage({
           <button
             className="od-product-page__buy"
             type="button"
-            onClick={() => onBuy(product, selectedScent)}
+            onClick={() =>
+              onBuy(
+                product,
+                product.id === "refill"
+                  ? `${selectedSize} / ${selectedScent}`
+                  : selectedScent,
+              )
+            }
             data-testid={`button-buy-${product.id}`}
           >
-            <span>{t("Add to cart")}</span>
+            <span>{t("Add to cart")} · €{product.price.toFixed(2)}</span>
             <ArrowRight size={16} aria-hidden="true" />
           </button>
+          <div className="od-product-page__trust" data-testid="product-trust-details">
+            <span>{t("Standard delivery · 3–5 working days")}</span>
+            <Link href="/returns">{t("Return terms")}</Link>
+          </div>
 
           <div className="od-product-page__about">
             <span>{t("About the object")}</span>

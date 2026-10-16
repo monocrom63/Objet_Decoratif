@@ -16,6 +16,7 @@ import {
 } from "@workspace/api-zod";
 import { configuredAdminEmails, isVerifiedConfiguredAdmin, initialStoreRole } from "../lib/storeAdminAccess.ts";
 import { createGuestOrderLimiter } from "../lib/guestOrderLimit.ts";
+import { shippingCentsForSubtotal } from "../lib/commercePricing.ts";
 
 const router: IRouter = Router();
 const allowGuestOrder = createGuestOrderLimiter();
@@ -122,7 +123,7 @@ router.post("/orders", async (req, res): Promise<void> => {
     return;
   }
   const subtotalCents = Math.round(items.reduce((sum, item) => sum + item.lineTotal, 0) * 100);
-  const shippingCents = 800;
+  const shippingCents = shippingCentsForSubtotal(subtotalCents);
   const [order] = await db.insert(ordersTable).values({
     orderNumber: `OD-${Date.now().toString(36).toUpperCase()}-${randomUUID().slice(0, 8).toUpperCase()}`,
     userId: user?.id ?? null,

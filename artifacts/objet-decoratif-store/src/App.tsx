@@ -1,8 +1,10 @@
 import {
   type FormEvent,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -33,12 +35,15 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { LogoutButton } from "@/components/logout-button";
 import { CatalogMedia } from "@/components/catalog-media";
 import { ProductDetailPage } from "@/components/product-detail-page";
+import { ProductCardGrid } from "@/components/product-card-grid";
+import { FaqPage } from "@/components/faq-page";
 import { PriceDisclosure } from "@/components/price-disclosure";
 import { HeaderNavMenu } from "@/components/header-nav-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
 import { useLanguage } from "@/lib/language";
 import { CONTACT_EMAIL } from "@/lib/store-config";
+import { freeShippingProgress, shippingForSubtotal } from "@/lib/commerce-pricing";
 import { scentShowcaseSource } from "@/lib/scent-media";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -115,10 +120,14 @@ function updateStorePageSeo(
       : isRefill
         ? `${product.name} – Candle Wax Refill | Objet Décoratif`
         : `${product.name} – Refillable Concrete Candle | Objet Décoratif`
-    : "Objet Décoratif — Refillable Concrete Candle Vessels";
+    : isGerman
+      ? "Nachfüllbare Betonkerzen | Objet Décoratif"
+      : "Refillable Concrete Candles | Objet Décoratif";
   const rawDescription = product
     ? `${product.name}: ${t(product.description)} ${t(product.explanation)}`
-    : homeDescription;
+    : isGerman
+      ? "Skulpturale Betonkerzen mit ausgewählten Düften und austauschbarem Wachs-Refill. Entdecke die Formen von Objet Décoratif."
+      : homeDescription;
   const description =
     rawDescription.length > 160
       ? `${rawDescription.slice(0, 157).trimEnd()}…`
@@ -140,10 +149,18 @@ function updateStorePageSeo(
   updateMetaTag("name", "twitter:description", description);
   updateCanonical(canonicalUrl);
 
-  const image = product?.images?.find((path) => !isVideoPath(path));
+  const image =
+    product?.images?.find((path) => !isVideoPath(path)) ??
+    (product ? undefined : "/images/products/elephant-01.webp");
   const absoluteImage = image ? new URL(image, publicStoreOrigin).toString() : null;
   updateMetaTag("property", "og:image", absoluteImage);
-  updateMetaTag("property", "og:image:alt", image ? `${product?.name} concrete candle` : null);
+  updateMetaTag(
+    "property",
+    "og:image:alt",
+    image
+      ? `${product?.name ?? "Objet Décoratif"} concrete candle vessel`
+      : null,
+  );
   updateMetaTag("name", "twitter:image", absoluteImage);
 
   let structuredData = document.head.querySelector<HTMLScriptElement>(
@@ -164,21 +181,33 @@ function updateStorePageSeo(
     .map((path) => new URL(path, publicStoreOrigin).toString());
   structuredData.textContent = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: `${t(product.description)} ${t(product.explanation)}`,
-    sku: product.id,
-    category: product.category,
-    ...(images.length ? { image: images } : {}),
-    brand: { "@type": "Brand", name: "Objet Décoratif" },
-    offers: {
-      "@type": "Offer",
-      url: canonicalUrl,
-      priceCurrency: "EUR",
-      price: product.price.toFixed(2),
-      availability: "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
-    },
+    "@graph": [
+      {
+        "@type": "Product",
+        name: product.name,
+        description: `${t(product.description)} ${t(product.explanation)}`,
+        sku: product.id,
+        category: product.category,
+        ...(images.length ? { image: images } : {}),
+        brand: { "@type": "Brand", name: "Objet Décoratif" },
+        offers: {
+          "@type": "Offer",
+          url: canonicalUrl,
+          priceCurrency: "EUR",
+          price: product.price.toFixed(2),
+          availability: "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
+          seller: { "@type": "Organization", name: "Objet Décoratif" },
+        },
+      },
+      {
+        "@type": "Organization",
+        name: "Objet Décoratif",
+        url: `${publicStoreOrigin}/`,
+        email: CONTACT_EMAIL,
+        sameAs: ["https://www.instagram.com/objet_decoratif/"],
+      },
+    ],
   });
 }
 
@@ -267,7 +296,8 @@ function ObjectSlideshow({ product }: { product: Product }) {
           className={`object-photo ${index === activeIndex ? "active" : ""}`}
           src={image}
           active={index === activeIndex}
-          alt={`${product.name} view ${index + 1}`}
+          alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
+          loading={index === activeIndex ? "eager" : "lazy"}
         />
       ))}
       <div className="slide-controls" aria-label={t("Choose product media")}>
@@ -382,10 +412,10 @@ function ScentSelector({
 
 function ObjectShowcase({
   product,
-  onOpen,
+  onAdd,
 }: {
   product: Product;
-  onOpen: (p: Product, scent: string) => void;
+  onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
   const [selectedScent, setSelectedScent] = useState(
@@ -440,9 +470,9 @@ function ObjectShowcase({
         <button
           className="solid-button object-buy-button object-explanation-button"
           type="button"
-          onClick={() => onOpen(product, selectedScent)}
+          onClick={() => onAdd(product, selectedScent, 1)}
           data-testid={`button-open-object-${product.id}`}
-        >{t("Choose ")}{product.name} <ArrowRight size={14} />
+        >{t("Add to cart")} · €{product.price.toFixed(2)} <ArrowRight size={14} />
         </button>
       </div>
     </article>
@@ -451,10 +481,10 @@ function ObjectShowcase({
 
 function RefillShowcase({
   product,
-  onOpen,
+  onAdd,
 }: {
   product: Product;
-  onOpen: (p: Product, scent: string) => void;
+  onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
   const [size, setSize] = useState<"Small" | "Big">("Small");
@@ -522,9 +552,9 @@ function RefillShowcase({
         <button
           className="solid-button object-buy-button refill-buy-button"
           type="button"
-          onClick={() => onOpen(product, selectedVariant)}
+          onClick={() => onAdd(product, selectedVariant, 1)}
           data-testid="button-open-object-refill"
-        >{t("Choose refill ")}<ArrowRight size={14} />
+        >{t("Add to cart")} · €{product.price.toFixed(2)}<ArrowRight size={14} />
         </button>
       </div>
       <div className="object-explanation">
@@ -538,11 +568,11 @@ function RefillShowcase({
 function ScentShowcase({
   product,
   scents,
-  onOpen,
+  onAdd,
 }: {
   product: Product;
   scents: ScentOption[];
-  onOpen: (p: Product, scent: string) => void;
+  onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -641,9 +671,9 @@ function ScentShowcase({
           <button
             className="solid-button object-buy-button scent-buy-button"
             type="button"
-            onClick={() => onOpen(product, `Big / ${selected.name}`)}
+            onClick={() => onAdd(product, `Big / ${selected.name}`, 1)}
             data-testid={`button-open-scent-${selected.name.toLowerCase().replace(" ", "-")}`}
-          >{t("Choose ")}{selected.name} <ArrowRight size={14} />
+          >{t("Add to cart")} · €{product.price.toFixed(2)} <ArrowRight size={14} />
           </button>
         </div>
         <div className="object-explanation">
@@ -685,6 +715,8 @@ function CareImageSlideshow() {
           className={`care-image-slide ${index === activeIndex ? "active" : ""}`}
           src={image.src}
           alt={image.alt}
+          loading="lazy"
+          decoding="async"
           aria-hidden={index !== activeIndex}
         />
       ))}
@@ -885,29 +917,32 @@ function Header({
   );
 }
 
-function Hero({ onExplore }: { onExplore: () => void }) {
-  const { t, locale } = useLanguage();
-  const [videoReady, setVideoReady] = useState(false);
+function Hero({
+  onExplore,
+  product,
+}: {
+  onExplore: () => void;
+  product?: Product;
+}) {
+  const { t } = useLanguage();
+  const heroImage = product?.images?.find((path) => !isVideoPath(path));
 
   return (
     <section className="hero">
-      <video
-        className={`hero-video ${videoReady ? "is-ready" : ""}`}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        onCanPlay={() => setVideoReady(true)}
-        aria-hidden="true"
-      >
-        <source src="/videos/hero.mp4" type="video/mp4" />
-      </video>
+      {heroImage && (
+        <img
+          className="hero-product-image"
+          src={heroImage}
+          alt={`${product?.name} refillable concrete candle`}
+          width={1600}
+          height={1000}
+          fetchPriority="high"
+        />
+      )}
       <div className="hero-copy">
         <span className="eyebrow">{t("Concrete candle collection / 01—25")}</span>
-        <h1>{t("Objects")}<br />
-          <em>{t("With a Glow")}</em>
-        </h1>
+        <h1 className="hero-keyword">{t("Refillable concrete candles")}</h1>
+        <p className="hero-brand-line">{t("Objects")}<br /><em>{t("With a Glow")}</em></p>
         <p className="hero-note">{t("Architectural vessels cast in concrete. Fragrances made to stay with you long after the flame goes out.")}</p>
         <button
           className="outline-button"
@@ -924,11 +959,11 @@ function Hero({ onExplore }: { onExplore: () => void }) {
 function Collection({
   products,
   scents,
-  onOpen,
+  onAdd,
 }: {
   products: Product[];
   scents: ScentOption[];
-  onOpen: (p: Product, scent: string) => void;
+  onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
   const [filter, setFilter] = useState<"All" | ProductCollection>("All");
@@ -948,6 +983,11 @@ function Collection({
           <h2 className="section-title">{t("Shop collection")}</h2>
         </div>
         <p className="section-intro">{t("A small family of concrete forms. Each one is designed to be lived with, then lit again.")}</p>
+      </div>
+      <ProductCardGrid products={products} onAdd={onAdd} />
+      <div className="collection-story-heading">
+        <span>{t("The forms / 02")}</span>
+        <p>{t("Explore each form in more detail.")}</p>
       </div>
       <div className="filter-bar">
         {(
@@ -981,13 +1021,13 @@ function Collection({
             product.id === "refill" ? (
               <RefillShowcase
                 product={product}
-                onOpen={onOpen}
+                onAdd={onAdd}
                 key={product.id}
               />
             ) : (
               <ObjectShowcase
                 product={product}
-                onOpen={onOpen}
+                onAdd={onAdd}
                 key={product.id}
               />
             ),
@@ -997,7 +1037,7 @@ function Collection({
           <ScentShowcase
             product={refillProduct}
             scents={scents}
-            onOpen={onOpen}
+            onAdd={onAdd}
           />
         )}
       </div>
@@ -1017,6 +1057,7 @@ function Footer() {
             <a href="/#collection">{t("The Forms")}</a>
             <a href="/#scents">{t("Signature Scents")}</a>
             <Link href="/about">{t("About")}</Link>
+            <Link href="/faq">{t("FAQ")}</Link>
             <Link href="/care">{t("Candle Care")}</Link>
           </div>
         </div>
@@ -1506,6 +1547,25 @@ function AboutPage() {
           </div>
         </div>
       </section>
+      <section className="editorial-section about-facts">
+        <div className="editorial-section-label">{t("02 / Made with intention")}</div>
+        <div className="editorial-section-content">
+          <div className="section-kicker">{t("Berlin / Grasse")}</div>
+          <h2>{t("From the atelier to the atmosphere.")}</h2>
+          <div className="about-facts-grid">
+            <article>
+              <span>01</span>
+              <h3>{t("Berlin atelier")}</h3>
+              <p>{t("Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures.")}</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>{t("Fragrance from Grasse")}</h3>
+              <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
+            </article>
+          </div>
+        </div>
+      </section>
       <section className="editorial-closing about-closing">
         <div className="about-closing-main">
           <div className="section-kicker">{t("The refill ritual / 02")}</div>
@@ -1696,19 +1756,27 @@ function ProductModal({
 function CartDrawer({
   open,
   lines,
+  refillProduct,
   onClose,
   onChange,
+  onAdd,
 }: {
   open: boolean;
   lines: CartLine[];
+  refillProduct?: Product;
   onClose: () => void;
   onChange: (id: string, scent: string, delta: number) => void;
+  onAdd: (product: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
   const total = lines.reduce(
     (sum, line) => sum + line.product.price * line.quantity,
     0,
   );
+  const shippingProgress = freeShippingProgress(total);
+  const alreadyHasRefill = lines.some((line) => line.product.id === "refill");
+  const refillScent =
+    refillProduct?.scentOptions?.[0]?.name ?? refillProduct?.scents[0] ?? "";
   return (
     <>
       <div className={`overlay ${open ? "open" : ""}`} onClick={onClose} />
@@ -1788,6 +1856,48 @@ function CartDrawer({
         </div>
         {lines.length > 0 && (
           <div className="drawer-foot">
+            <div className="cart-shipping-progress" data-testid="cart-shipping-progress">
+              <div className="cart-shipping-progress__copy">
+                {shippingProgress.reached
+                  ? t("You have unlocked free shipping.")
+                  : `${t("Add ")}€${shippingProgress.remaining.toFixed(2)}${t(" for free shipping.")}`}
+              </div>
+              <div
+                className="cart-shipping-progress__track"
+                role="progressbar"
+                aria-label={t("Free shipping progress")}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(shippingProgress.percent)}
+              >
+                <span style={{ width: `${shippingProgress.percent}%` }} />
+              </div>
+            </div>
+            {refillProduct && !alreadyHasRefill && (
+              <div className="cart-refill-suggestion" data-testid="cart-refill-suggestion">
+                {refillProduct.images?.[0] && (
+                  <CatalogMedia
+                    src={refillProduct.images[0]}
+                    controls={false}
+                    alt={`${refillProduct.name} wax refill`}
+                    loading="lazy"
+                  />
+                )}
+                <div>
+                  <span>{t("Complete the ritual")}</span>
+                  <strong>{t("Add a small refill (190g)")}</strong>
+                  <small>€{refillProduct.price.toFixed(2)}</small>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onAdd(refillProduct, `Small / ${refillScent}`, 1)}
+                  aria-label={`${t("Add")} ${refillProduct.name}`}
+                  data-testid="button-cart-add-refill"
+                >
+                  <Plus size={15} aria-hidden="true" />
+                </button>
+              </div>
+            )}
             <div className="total-line">
               <span>{t("Subtotal")}</span>
               <strong data-testid="text-cart-total">€{total}</strong>
@@ -1861,7 +1971,7 @@ function CheckoutPage() {
   const hasAddress = Boolean(
     form.address.trim() && form.postalCode.trim() && form.city.trim(),
   );
-  const shipping = hasAddress ? 8 : 0;
+  const shipping = hasAddress ? shippingForSubtotal(subtotal) : 0;
   const total = subtotal + shipping;
   const updateField = (field: keyof CheckoutForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -2330,7 +2440,11 @@ function CheckoutPage() {
                 <div className="checkout-review-block">
                   <h2>{t("Shipping")}</h2>
                   <p>{t("Standard delivery")}</p>
-                  <p>{t("3–5 working days · €")}{shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>
+                    {shipping === 0
+                      ? t("Free shipping")
+                      : `${t("3–5 working days · €")}${shipping.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </p>
                 </div>
                 <div className="checkout-review-block">
                   <h2>{t("Payment")}</h2>
@@ -2525,6 +2639,25 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
   } | null>(null);
   const [cart, setCart] = useState<CartLine[]>(readStoredCart);
   const [subscribed, setSubscribed] = useState(false);
+  const handledDirectAdd = useRef(false);
+  const addToCart = useCallback(
+    (product: Product, scent: string, quantity: number) => {
+      setCart((current) => {
+        const found = current.find(
+          (line) => line.product.id === product.id && line.scent === scent,
+        );
+        if (found)
+          return current.map((line) =>
+            line === found
+              ? { ...line, quantity: line.quantity + quantity }
+              : line,
+          );
+        return [...current, { product, scent, quantity }];
+      });
+      setCartOpen(true);
+    },
+    [],
+  );
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
@@ -2534,15 +2667,42 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
   }, [isLoading, productPage, locale, t]);
   useEffect(() => {
     if (isLoading || productSlug) return;
-    const requestedId = new URLSearchParams(window.location.search).get("product");
+    const params = new URLSearchParams(window.location.search);
+    const requestedId = params.get("product");
     if (!requestedId) return;
     const requestedProduct = products.find((product) => product.id === requestedId);
     if (!requestedProduct) return;
+    if (params.get("add") === "1") {
+      if (handledDirectAdd.current) return;
+      handledDirectAdd.current = true;
+      const requestedScent = params.get("scent");
+      const choices = requestedProduct.scentOptions?.map((scent) => scent.name) ??
+        requestedProduct.scents;
+      const scent =
+        requestedScent && choices.includes(requestedScent)
+          ? requestedScent
+          : choices[0] ?? "";
+      const requestedSize = params.get("size");
+      const size = requestedSize === "Big" ? "Big" : "Small";
+      const variant =
+        requestedProduct.id === "refill" ? `${size} / ${scent}` : scent;
+      addToCart(requestedProduct, variant, 1);
+      const cleanUrl = new URL(window.location.href);
+      ["add", "product", "scent", "size"].forEach((key) =>
+        cleanUrl.searchParams.delete(key),
+      );
+      window.history.replaceState(
+        {},
+        "",
+        `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`,
+      );
+      return;
+    }
     setSelected({
       product: requestedProduct,
       scent: requestedProduct.scentOptions?.[0]?.name ?? requestedProduct.scents[0] ?? "",
     });
-  }, [isLoading, productSlug, products]);
+  }, [addToCart, isLoading, productSlug, products]);
   if (isLoading)
     return (
       <div className="store-shell">
@@ -2550,21 +2710,6 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
       </div>
     );
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
-  const addToCart = (product: Product, scent: string, quantity: number) => {
-    setCart((current) => {
-      const found = current.find(
-        (line) => line.product.id === product.id && line.scent === scent,
-      );
-      if (found)
-        return current.map((line) =>
-          line === found
-            ? { ...line, quantity: line.quantity + quantity }
-            : line,
-        );
-      return [...current, { product, scent, quantity }];
-    });
-    setCartOpen(true);
-  };
   const changeCart = (id: string, scent: string, delta: number) =>
     setCart((current) =>
       current.flatMap((line) =>
@@ -2575,8 +2720,6 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
           : [line],
       ),
     );
-  const openProduct = (product: Product, scent: string) =>
-    setSelected({ product, scent });
   return (
     <div className="store-shell">
       <Header
@@ -2601,6 +2744,7 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
       ) : (
         <main>
           <Hero
+            product={products.find((item) => item.id === "elephant") ?? products.find((item) => item.id === "boite") ?? products[0]}
             onExplore={() =>
               document
                 .getElementById("collection")
@@ -2624,7 +2768,11 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
               <p>{t("One beautiful object, many lives.")}</p>
             </div>
           </section>
-          <Collection products={products} scents={scents} onOpen={openProduct} />
+          <Collection
+            products={products}
+            scents={scents}
+            onAdd={addToCart}
+          />
           <section className="newsletter" id="newsletter">
             <h2>{t("Notes from the studio.")}</h2>
             {subscribed ? (
@@ -2661,8 +2809,10 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
       <CartDrawer
         open={cartOpen}
         lines={cart}
+        refillProduct={products.find((product) => product.id === "refill")}
         onClose={() => setCartOpen(false)}
         onChange={changeCart}
+        onAdd={addToCart}
       />
     </div>
   );
@@ -3297,6 +3447,7 @@ function Router() {
         <Route path="/admin/catalog" component={AdminCatalogPage} />
         <Route path="/care" component={CarePage} />
         <Route path="/about" component={AboutPage} />
+        <Route path="/faq" component={FaqPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/privacy-policy" component={PrivacyPolicyPage} />
         <Route path="/shipping-policy" component={ShippingPolicyPage} />

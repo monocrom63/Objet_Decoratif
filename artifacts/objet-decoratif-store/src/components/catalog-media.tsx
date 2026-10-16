@@ -9,7 +9,9 @@ export function CatalogMedia({
   controls = true,
   autoPlay = false,
   loop = false,
+  loading = "lazy",
   style,
+  fetchPriority,
   "aria-hidden": ariaHidden,
 }: {
   src?: string;
@@ -19,7 +21,9 @@ export function CatalogMedia({
   controls?: boolean;
   autoPlay?: boolean;
   loop?: boolean;
+  loading?: "eager" | "lazy";
   style?: CSSProperties;
+  fetchPriority?: "high" | "low" | "auto";
   "aria-hidden"?: boolean;
 }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -42,6 +46,8 @@ export function CatalogMedia({
         alt={alt}
         className={className}
         style={style}
+        loading={loading}
+        fetchPriority={fetchPriority}
         aria-hidden={ariaHidden}
       />
     );

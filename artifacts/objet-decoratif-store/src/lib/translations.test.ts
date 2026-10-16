@@ -18,6 +18,16 @@ test("German price disclosures include VAT, shipping, and the existing delivery 
   assert.equal(translate("Delivery time: 3–5 working days", "DE"), "Lieferzeit: 3–5 Werktage");
 });
 
+test("German product discovery and FAQ copy include the newly visible SEO content", () => {
+  assert.equal(translate("Refillable concrete candles", "DE"), "Nachfüllbare Betonkerzen");
+  assert.equal(translate("How does the refill system work?", "DE"), "Wie funktioniert das Refill-System?");
+  assert.equal(translate("Which refill sizes are available?", "DE"), "Welche Refill-Größen gibt es?");
+  const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
+  assert.match(html, /"@type": "Organization"/);
+  assert.match(html, /info@objetdecorativ\.art/);
+  assert.doesNotMatch(html, /maximum-scale=1/);
+});
+
 test("checkout retains its pre-payment-provider order actions", () => {
   assert.equal(translate("Place order", "DE"), "Bestellung aufgeben");
   assert.equal(translate("Place order as guest", "DE"), "Als Gast bestellen");

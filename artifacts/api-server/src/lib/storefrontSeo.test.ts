@@ -7,6 +7,7 @@ import {
   renderProductSeoHtml,
   renderSitemapXml,
   type SeoProduct,
+  type SeoScent,
 } from "./storefrontSeo.ts";
 
 const product: SeoProduct = {
@@ -21,6 +22,15 @@ const product: SeoProduct = {
   imagePaths: ["/images/products/barrique-01.webp", "/uploads/wax.mp4"],
   updatedAt: new Date("2026-10-01T12:00:00.000Z"),
 };
+
+const scents: SeoScent[] = [
+  {
+    id: "the",
+    name: "Thé",
+    notes: "Bergamot / Mate tea / Green tea / Clove",
+    description: "Rose, lavandin and tea leaves.",
+  },
+];
 
 test("product URLs use a stable, encoded product id", () => {
   assert.equal(
@@ -38,11 +48,16 @@ test("product metadata descriptions are unique source data and stay within searc
 });
 
 test("product page sends absolute image URLs and price/availability schema in the raw HTML", () => {
-  const html = renderProductSeoHtml(product, [], '<script src="/app.js"></script>');
+  const html = renderProductSeoHtml(product, scents, '<script src="/app.js"></script>');
   assert.match(html, /<h1 id="od-product-title">Barrique<\/h1>/);
   assert.match(html, /property="og:type" content="product"/);
   assert.match(html, /https:\/\/objet-decoratif-storefront\.replit\.app\/images\/products\/barrique-01\.webp/);
   assert.match(html, /"priceCurrency":"EUR","price":"68\.00","availability":"https:\/\/schema\.org\/InStock"/);
+  assert.match(html, /"@type":"Organization","name":"Objet Décoratif"/);
+  assert.match(html, /concrete candle vessel — Compact, soft and perfectly balanced/);
+  assert.match(html, /<form class="od-product-page__buy-form" action="\/" method="get">/);
+  assert.match(html, /name="scent" value="Thé" checked required/);
+  assert.match(html, /Add to cart · €68\.00/);
   assert.match(html, /Prices include VAT; shipping extra/);
   assert.match(html, /href="\/shipping-policy">Shipping costs &amp; delivery/);
   assert.match(html, /Delivery time: 3–5 working days/);

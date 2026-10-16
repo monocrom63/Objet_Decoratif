@@ -116,6 +116,13 @@ function productJsonLd(
         },
       },
       {
+        "@type": "Organization",
+        name: "Objet Décoratif",
+        url: `${SITE_ORIGIN}/`,
+        email: "info@objetdecorativ.art",
+        sameAs: ["https://www.instagram.com/objet_decoratif/"],
+      },
+      {
         "@type": "BreadcrumbList",
         itemListElement: [
           {
@@ -143,7 +150,7 @@ function renderMedia(product: SeoProduct, origin: string): string {
       if (isVideoMedia(path)) {
         return `<video class="od-product-page__image${index === 0 ? " is-active" : ""}" ${index === 0 ? "autoplay muted playsinline" : ""} controls preload="metadata" aria-label="${escapeHtml(`${product.name} video ${index + 1}`)}"><source src="${mediaUrl}"></video>`;
       }
-      return `<img class="od-product-page__image${index === 0 ? " is-active" : ""}" src="${mediaUrl}" alt="${escapeHtml(`${product.name} — view ${index + 1}`)}" ${index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} />`;
+      return `<img class="od-product-page__image${index === 0 ? " is-active" : ""}" src="${mediaUrl}" alt="${escapeHtml(`${product.name} concrete candle vessel — ${product.description} — view ${index + 1}`)}" width="1536" height="2048" ${index === 0 ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'} />`;
     })
     .join("");
 }
@@ -165,16 +172,19 @@ export function renderProductSeoHtml(
     productJsonLd(product, canonicalUrl, images),
   );
   const scentMarkup = scents.length
-    ? `<section aria-labelledby="product-scent-heading"><h2 id="product-scent-heading">Choose the atmosphere</h2><ul>${scents
+    ? `<fieldset class="od-product-page__scent-options"><legend>Choose the atmosphere</legend><div class="od-product-page__scent-list">${scents
         .map(
-          (scent) =>
-            `<li><strong>${escapeHtml(scent.name)}</strong><span> — ${escapeHtml(scent.notes)}</span><p>${escapeHtml(scent.description)}</p></li>`,
+          (scent, index) =>
+            `<label class="od-product-page__scent-option${index === 0 ? " is-selected" : ""}"><input type="radio" name="scent" value="${escapeHtml(scent.name)}"${index === 0 ? " checked" : ""} required /><span class="od-product-page__scent-mark" aria-hidden="true"></span><span class="od-product-page__scent-copy"><strong>${escapeHtml(scent.name)}</strong><small>${escapeHtml(scent.notes)}</small></span><span class="od-product-page__scent-number">${String(index + 1).padStart(2, "0")}</span></label>`,
         )
-        .join("")}</ul></section>`
+        .join("")}</div></fieldset>`
     : "";
   const mediaMarkup = renderMedia(product, origin);
   const price = (product.priceCents / 100).toFixed(2);
-  const encodedProductId = encodeURIComponent(product.id);
+  const refillSizeMarkup =
+    product.id === "refill"
+      ? `<label class="od-product-page__refill-size"><span>Size</span><select name="size" aria-label="Refill size"><option value="Small">Small (190 g)</option><option value="Big">Big (245 g)</option></select></label>`
+      : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -229,8 +239,14 @@ export function renderProductSeoHtml(
                 <span class="price-disclosure__delivery">Delivery time: 3–5 working days</span>
               </p>
               <p class="od-product-page__description">${escapeHtml(product.description)}</p>
-              ${scentMarkup}
-              <a class="od-product-page__buy" href="/?product=${encodedProductId}#collection"><span>Add to cart</span> →</a>
+              <form class="od-product-page__buy-form" action="/" method="get">
+                <input type="hidden" name="add" value="1" />
+                <input type="hidden" name="product" value="${escapeHtml(product.id)}" />
+                ${scentMarkup}
+                ${refillSizeMarkup}
+                <button class="od-product-page__buy" type="submit"><span>Add to cart · €${price}</span> →</button>
+              </form>
+              <div class="od-product-page__trust"><span>Standard delivery · 3–5 working days</span><a href="/returns">Return terms</a></div>
               <div class="od-product-page__about">
                 <span>About the object</span>
                 <p>${escapeHtml(product.explanation)}</p>

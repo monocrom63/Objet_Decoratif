@@ -258,6 +258,12 @@
   box-shadow: inset 0 0 0 3px var(--od-paper);
 }
 
+.od-product-page__scent-option input:checked + .od-product-page__scent-mark {
+  border-color: var(--od-accent);
+  background: var(--od-accent);
+  box-shadow: inset 0 0 0 3px var(--od-paper);
+}
+
 .od-product-page__scent-option:focus-within .od-product-page__scent-mark {
   outline: 2px solid var(--od-accent);
   outline-offset: 3px;
@@ -313,12 +319,54 @@
   text-align: left;
   text-transform: uppercase;
   transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+  cursor: pointer;
 }
 
 .od-product-page__buy:hover {
   transform: translateY(-2px);
   border-color: var(--od-accent);
   background: var(--od-accent);
+}
+
+.od-product-page__trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 7px 14px;
+  margin-top: 12px;
+  color: #777369;
+  font: 9px/1.5 var(--od-mono);
+}
+
+.od-product-page__trust a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.od-product-page__buy-form {
+  display: grid;
+}
+
+.od-product-page__refill-size {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px;
+  color: var(--od-ink);
+  font: 10px var(--od-mono);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.od-product-page__refill-size select {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--od-line);
+  background: transparent;
+  color: var(--od-ink);
+  font: 12px var(--od-mono);
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .od-product-page__about {

@@ -117,6 +117,7 @@ router.get("/sitemap.xml", async (_req, res): Promise<void> => {
   const staticPaths = [
     "/",
     "/about",
+    "/faq",
     "/care",
     "/contact",
     "/shipping-policy",
