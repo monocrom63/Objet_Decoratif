@@ -1254,6 +1254,21 @@ a {
   }
 }
 
+@media (min-width: 981px) {
+  .object-showcase:not(.scent-showcase):not(.refill-showcase) {
+    grid-template-rows: minmax(calc(clamp(500px, 36vw, 520px) + 24px), auto) auto;
+  }
+
+  .object-showcase:not(.scent-showcase):not(.refill-showcase) > .object-details {
+    height: auto;
+    min-height: calc(clamp(500px, 36vw, 520px) + 24px);
+  }
+
+  .object-showcase:not(.scent-showcase):not(.refill-showcase) .object-actions {
+    flex: 0 0 auto;
+  }
+}
+
 .ritual {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
