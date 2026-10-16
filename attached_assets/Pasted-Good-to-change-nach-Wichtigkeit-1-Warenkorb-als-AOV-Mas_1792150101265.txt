@@ -1,0 +1,22 @@
+Good to change (nach Wichtigkeit)
+
+1. *Warenkorb als AOV-Maschine nutzen.* Eine Form kostet 65 €, ein Refill 38 €, zusammen 103 €, also knapp über der Versandkostenfrei-Schwelle von 100 €. Ein Fortschrittsbalken („Noch 35 € bis versandkostenfrei“) und ein Refill-Cross-Sell im Warenkorb wären der einfachste Umsatzhebel im ganzen Shop. Noch besser: ein Bundle „Form + Refill“ mit kleinem Preisvorteil.
+
+2. *Hero ohne Produkt.* Der Hero zeigt nur einen Farbverlauf. Zeig dort ein Produktfoto (Elephant oder Boite sind die stärksten Motive) und bau ein Keyword in die H1, z. B. „Nachfüllbare Betonkerzen aus Berlin“. Der CTA „Kollektion entdecken“ sollte direkt zum Shop führen.
+
+3. *Weniger Klicks bis zum Kauf.* Heute zeigt der Duft-Karussell mit Pfeilen immer nur einen Duft, dann kommt „Choose Barrique“, dann das Modal mit erneuter Duftwahl, dann „Add to cart“. Besser: die vier Duft-Chips direkt am Produkt, und der Button heißt „In den Warenkorb – 65 €“.
+
+4. *Startseite ist sehr lang.* Sieben vollbreite Produktblöcke hintereinander sind viel Scrollen. Oben ein kompaktes Produkt-Grid, unten die Story-Blöcke, und alles verlinkt auf die Produktseiten.
+
+5. *Weihnachtsgeschäft vorbereiten.* Kerzen sind ein klassisches Geschenk, und das Q4-Fenster öffnet sich jetzt. Ergänze Geschenkverpackung, Grußkarte, einen „Bis 20.12. bestellt = vor Weihnachten da“-Hinweis und Geschenk-Sets.
+
+6. *GEO-Content aufbauen.* Eine FAQ (Wie funktioniert das Refill? Welche Größe passt in welche Form? Brenndauer? Wachs?) mit FAQPage-Schema, dazu Organization-Schema. Auf der About-Seite fehlen Gründername, Atelier und Grasse-Partner. Solche konkreten Fakten sind das, was LLMs zitieren. Im Moment gibt es dort nur Haltungs-Prosa.
+
+7. *Trust-Elemente am Kaufbutton.* Zum Beispiel „Handgegossen in Berlin · Versand in 2–4 Tagen · 14 Tage Rückgabe“ direkt unter Add-to-Cart.
+
+8. *Newsletter ohne Anreiz.* „Notes from the studio“ ohne Gegenleistung sammelt kaum Adressen. Biete 10 % oder eine Duftprobe an.
+
+9. *Technik-Feinschliff:*
+   - Die Duftbilder sind je ca. 250–275 KB groß und werden ohne Lazy Loading geladen.
+   - Alt-Texte wie „Barrique view 1“ besser durch beschreibende ersetzen, z. B. „Barrique Betonkerze, sandfarben, mit Relief-Logo“.
+   - maximum-scale=1 blockiert Zoom auf dem Handy, das ist ein Barrierefreiheits-Problem.
