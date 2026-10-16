@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { UpdateScentBody } from "@workspace/api-zod";
 import {
   byteRange,
   catalogUploadExtension,
   isManagedCatalogUpload,
 } from "./catalogMediaPolicy.ts";
 import { unreferencedManagedImagePaths } from "./catalogImageCleanupPolicy.ts";
+
+test("scent updates accept explicit null values to remove either media field", () => {
+  assert.equal(UpdateScentBody.safeParse({ imagePath: null }).success, true);
+  assert.equal(
+    UpdateScentBody.safeParse({ showcaseMediaPath: null }).success,
+    true,
+  );
+});
 
 test("video formats and limits are explicit; legacy image uploads remain supported", () => {
   assert.equal(catalogUploadExtension("video/mp4", 100 * 1024 * 1024), ".mp4");

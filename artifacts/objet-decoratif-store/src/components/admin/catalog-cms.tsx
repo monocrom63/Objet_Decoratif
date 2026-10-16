@@ -344,8 +344,50 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
     formState: { errors },
     watch,
     setValue,
+    getValues,
     handleSubmit,
   } = form;
+
+  const [removingMedia, setRemovingMedia] = useState(false);
+  const removeScentMedia = async (
+    field: "imagePath" | "showcaseMediaPath",
+  ) => {
+    const mediaPath = getValues(field);
+    if (!mediaPath || removingMedia) return;
+    if (!window.confirm(t("Remove this media from the scent? The change is saved immediately."))) {
+      return;
+    }
+
+    if (!scent) {
+      setValue(field, null, { shouldDirty: true, shouldValidate: true });
+      return;
+    }
+
+    setRemovingMedia(true);
+    try {
+      const data =
+        field === "imagePath"
+          ? { imagePath: null }
+          : { showcaseMediaPath: null };
+      await updateScent.mutateAsync({ id: scent.id, data });
+      setValue(field, null, { shouldDirty: true, shouldValidate: true });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["/api/admin/catalog/scents"],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["/api/catalog"] }),
+      ]);
+      toast({ title: t("Scent media removed") });
+    } catch (error) {
+      toast({
+        title: t("Failed to remove scent media"),
+        description: String(error),
+        variant: "destructive",
+      });
+    } finally {
+      setRemovingMedia(false);
+    }
+  };
 
   return (
     <form id="scent-form" onSubmit={handleSubmit(onSubmit)} className="mt-8">
@@ -409,7 +451,8 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
         <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <SingleImageUploader
           value={watch("imagePath")}
-          onChange={(path) => setValue("imagePath", path)}
+          onChange={(path) => setValue("imagePath", path, { shouldDirty: true, shouldValidate: true })}
+          onRemove={() => removeScentMedia("imagePath")}
           onUploadingChange={setProductUploading}
         />
         {errors.imagePath && (
@@ -423,6 +466,7 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
         <SingleImageUploader
           value={watch("showcaseMediaPath")}
           onChange={(path) => setValue("showcaseMediaPath", path, { shouldDirty: true })}
+          onRemove={() => removeScentMedia("showcaseMediaPath")}
           onUploadingChange={setShowcaseUploading}
         />
         {errors.showcaseMediaPath && (

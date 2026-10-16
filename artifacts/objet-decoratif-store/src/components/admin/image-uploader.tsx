@@ -189,15 +189,18 @@ export function SingleImageUploader({
   value,
   onChange,
   onUploadingChange,
+  onRemove,
 }: {
   value: string | null | undefined;
   onChange: (path: string | null) => void;
   onUploadingChange?: (uploading: boolean) => void;
+  onRemove?: () => void | Promise<void>;
 }) {
   const requestUrl = useRequestUploadUrl();
   const discardUpload = useDiscardUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<UploadState | null>(null);
+  const [removing, setRemoving] = useState(false);
   useEffect(() => {
     onUploadingChange?.(!!uploading && !uploading.error);
   }, [uploading, onUploadingChange]);
@@ -246,6 +249,21 @@ export function SingleImageUploader({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleRemove = async () => {
+    if (removing) return;
+    if (!onRemove) {
+      onChange(null);
+      return;
+    }
+
+    setRemoving(true);
+    try {
+      await onRemove();
+    } finally {
+      setRemoving(false);
+    }
+  };
+
   return (
     <div>
       {value && !uploading ? (
@@ -262,9 +280,18 @@ export function SingleImageUploader({
             <button
               type="button"
               className="admin-text-btn"
-              onClick={() => onChange(null)}
+              onClick={handleRemove}
+              disabled={removing}
             >
-              <X size={12} /> Remove
+              {removing ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" /> Removing…
+                </>
+              ) : (
+                <>
+                  <X size={12} /> Remove
+                </>
+              )}
             </button>
           </div>
         </div>
