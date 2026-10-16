@@ -38,3 +38,9 @@ Media navigation arrows should always sit at the bottom right, for both images a
 **Why:** The shop owner explicitly requested this consistent position after the scent videos were changed to control-free loops.
 
 **How to apply:** Do not move scent or gallery navigation arrows to the top for video playback. Keep them visible above the media.
+
+Catalog media fields can differ between the development and production databases; clearing a field in development does not clear the live CMS record.
+
+**Why:** The same scent had a fallback image in development while production still referenced a missing MP4.
+
+**How to apply:** Before claiming a live media deletion is complete, verify the production catalog separately. Use the authenticated production CMS/API to update live records; do not assume publishing code synchronizes catalog data.
