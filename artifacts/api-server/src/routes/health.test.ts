@@ -7,13 +7,18 @@ import {
   recordCatalogUploadCleanupFailure,
   recordCatalogUploadCleanupSuccess,
   resetCatalogUploadCleanupHealth,
+  runCatalogUploadCleanupWithHealth,
 } from "../lib/catalogImageCleanupHealth.ts";
 import healthRouter from "./health.ts";
 
 test.beforeEach(() => resetCatalogUploadCleanupHealth());
 
 interface HealthResponseBody {
+  status: "ok" | "degraded";
   catalogUploadCleanup: {
+    status: "ok" | "degraded";
+    consecutiveFailures: number;
+    lastFailureMessage: string | null;
     latestCounts: {
       scanned: number;
       retained: number;
@@ -83,5 +88,51 @@ test("repeated cleanup failures return 503 with the latest counts", async () => 
       retained: 7,
       deleted: 1,
     });
+  });
+});
+
+test("real cleanup runs trigger the health alert and clear it after recovery", async () => {
+  const failure = new Error("storage unavailable");
+  const counts = { scanned: 8, retained: 7, deleted: 1 };
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await assert.rejects(
+      runCatalogUploadCleanupWithHealth(
+        async () => {
+          throw failure;
+        },
+        new Date(Date.UTC(2026, 9, 16, 12, 0, attempt)),
+      ),
+      failure,
+    );
+  }
+
+  await withHealthRoute(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/healthz`);
+    const body = (await response.json()) as HealthResponseBody;
+
+    assert.equal(response.status, 503);
+    assert.equal(body.status, "degraded");
+    assert.equal(body.catalogUploadCleanup.status, "degraded");
+    assert.equal(body.catalogUploadCleanup.consecutiveFailures, 3);
+    assert.equal(body.catalogUploadCleanup.lastFailureMessage, failure.message);
+  });
+
+  const result = await runCatalogUploadCleanupWithHealth(
+    async () => counts,
+    new Date(Date.UTC(2026, 9, 16, 12, 1)),
+  );
+  assert.deepEqual(result, counts);
+
+  await withHealthRoute(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/healthz`);
+    const body = (await response.json()) as HealthResponseBody;
+
+    assert.equal(response.status, 200);
+    assert.equal(body.status, "ok");
+    assert.equal(body.catalogUploadCleanup.status, "ok");
+    assert.equal(body.catalogUploadCleanup.consecutiveFailures, 0);
+    assert.equal(body.catalogUploadCleanup.lastFailureMessage, null);
+    assert.deepEqual(body.catalogUploadCleanup.latestCounts, counts);
   });
 });

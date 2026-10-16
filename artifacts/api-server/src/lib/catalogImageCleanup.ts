@@ -4,8 +4,8 @@ import { logger } from "./logger";
 import { ObjectStorageService } from "./objectStorage";
 import {
   CLEANUP_FAILURE_ALERT_THRESHOLD,
-  recordCatalogUploadCleanupFailure,
-  recordCatalogUploadCleanupSuccess,
+  getCatalogUploadCleanupHealth,
+  runCatalogUploadCleanupWithHealth,
 } from "./catalogImageCleanupHealth";
 import {
   abandonedCatalogUploads,
@@ -147,9 +147,15 @@ async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadClea
     deleted,
   };
 
-  recordCatalogUploadCleanupSuccess(result);
-  logger.info(result, "Catalog upload cleanup completed");
   return result;
+}
+
+async function runAbandonedCatalogUploadCleanup(): Promise<CatalogUploadCleanupResult> {
+  return runCatalogUploadCleanupWithHealth(async () => {
+    const result = await performAbandonedCatalogUploadCleanup();
+    logger.info(result, "Catalog upload cleanup completed");
+    return result;
+  });
 }
 
 export function cleanupAbandonedCatalogUploads(): Promise<CatalogUploadCleanupResult> {
@@ -157,7 +163,7 @@ export function cleanupAbandonedCatalogUploads(): Promise<CatalogUploadCleanupRe
     return cleanupInFlight;
   }
 
-  cleanupInFlight = performAbandonedCatalogUploadCleanup().finally(() => {
+  cleanupInFlight = runAbandonedCatalogUploadCleanup().finally(() => {
     cleanupInFlight = null;
   });
   return cleanupInFlight;
@@ -178,7 +184,7 @@ export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout {
   const intervalMs = cleanupIntervalMs();
   const runCleanup = () => {
     void cleanupAbandonedCatalogUploads().catch((error: unknown) => {
-      const health = recordCatalogUploadCleanupFailure(error);
+      const health = getCatalogUploadCleanupHealth();
       logger.error(
         {
           err: error,

@@ -25,6 +25,7 @@ import type {
   Catalog,
   HealthStatus,
   Order,
+  OrderCreationResult,
   OrderInput,
   OrderStatusUpdate,
   Product,
@@ -287,7 +288,7 @@ export const getCreateOrderUrl = () => {
   return `/api/orders`
 }
 
-export const createOrder = async (orderInput: OrderInput, options?: Parameters<typeof customFetch>[1]): Promise<Order> => {
+export const createOrder = async (orderInput: OrderInput, options?: Parameters<typeof customFetch>[1]): Promise<OrderCreationResult> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -303,7 +304,7 @@ export const createOrder = async (orderInput: OrderInput, options?: Parameters<t
     }
     return headers;
   };
-return customFetch<Order>(getCreateOrderUrl(),
+return customFetch<OrderCreationResult>(getCreateOrderUrl(),
   {
     ...options,
     method: 'POST',

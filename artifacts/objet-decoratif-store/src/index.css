@@ -3878,14 +3878,28 @@ a {
     display: block;
   }
   .scent-slideshow {
-    grid-template-columns: minmax(120px, 0.8fr) 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: 14px;
-    min-height: 220px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 0;
+  }
+  .scent-slide-image-wrap {
+    align-self: stretch;
+    width: 100%;
+    max-width: 420px;
   }
   .scent-slide-image-wrap,
   .scent-slide-image,
   .scent-slide-swatch {
     min-height: 0;
+  }
+  .scent-slide-copy {
+    width: 100%;
+    max-width: 100%;
   }
   .scent-slide-copy strong {
     font-size: 24px;

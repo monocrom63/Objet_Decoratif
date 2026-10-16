@@ -60,7 +60,7 @@ paths:
           description: Order created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Order" }
+              schema: { $ref: "#/components/schemas/OrderCreationResult" }
         "400": { description: Invalid order }
         "401": { description: Not authenticated }
   /admin/orders:
@@ -297,6 +297,7 @@ components:
       required: [email, phone, firstName, lastName, address, postalCode, city, country, paymentMethod, items]
       properties:
         guest: { type: boolean, default: false, description: "Place an order without creating or linking a user account." }
+        language: { type: string, enum: [EN, DE], default: EN, description: "Language for the order confirmation email." }
         email: { type: string, format: email, maxLength: 254 }
         phone: { type: string, minLength: 6, maxLength: 40 }
         firstName: { type: string }
@@ -347,6 +348,12 @@ components:
         items:
           type: array
           items: { $ref: "#/components/schemas/OrderItem" }
+    OrderCreationResult:
+      type: object
+      required: [order, confirmationEmailStatus]
+      properties:
+        order: { $ref: "#/components/schemas/Order" }
+        confirmationEmailStatus: { type: string, enum: [sent, failed, not_applicable] }
     Scent:
       type: object
       required: [id, name, notes, description, imagePath, active, published, sortOrder]

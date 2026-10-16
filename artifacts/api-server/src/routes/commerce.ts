@@ -17,6 +17,7 @@ import {
 import { configuredAdminEmails, isVerifiedConfiguredAdmin, initialStoreRole } from "../lib/storeAdminAccess.ts";
 import { createGuestOrderLimiter } from "../lib/guestOrderLimit.ts";
 import { shippingCentsForSubtotal } from "../lib/commercePricing.ts";
+import { OrderConfirmationEmailError, sendOrderConfirmationEmail } from "../lib/orderConfirmationEmail.ts";
 
 const router: IRouter = Router();
 const allowGuestOrder = createGuestOrderLimiter();
@@ -139,7 +140,31 @@ router.post("/orders", async (req, res): Promise<void> => {
     totalCents: subtotalCents + shippingCents,
     items,
   }).returning();
-  res.status(201).json(CreateOrderResponse.parse(orderResponse(order)));
+  const responseOrder = orderResponse(order);
+  let confirmationEmailStatus: "sent" | "failed" | "not_applicable" = "not_applicable";
+  if (!user) {
+    confirmationEmailStatus = "failed";
+    try {
+      await sendOrderConfirmationEmail({
+        orderNumber: responseOrder.orderNumber,
+        email: responseOrder.customerEmail,
+        customerName: responseOrder.customerName,
+        address: responseOrder.address,
+        language: parsed.data.language ?? "EN",
+        subtotal: responseOrder.subtotal,
+        shipping: responseOrder.shipping,
+        total: responseOrder.total,
+        items: responseOrder.items,
+      });
+      confirmationEmailStatus = "sent";
+    } catch (error) {
+      req.log.error({
+        orderNumber: responseOrder.orderNumber,
+        providerStatus: error instanceof OrderConfirmationEmailError ? error.providerStatus : undefined,
+      }, "Guest order was saved but its confirmation email could not be sent");
+    }
+  }
+  res.status(201).json(CreateOrderResponse.parse({ order: responseOrder, confirmationEmailStatus }));
 });
 
 router.get("/admin/orders", async (req, res): Promise<void> => {

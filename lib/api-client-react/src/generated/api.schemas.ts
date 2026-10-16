@@ -81,6 +81,17 @@ export interface OrderItemInput {
   unitPrice: number;
 }
 
+/**
+ * Language for the order confirmation email.
+ */
+export type OrderInputLanguage = typeof OrderInputLanguage[keyof typeof OrderInputLanguage];
+
+
+export const OrderInputLanguage = {
+  EN: 'EN',
+  DE: 'DE',
+} as const;
+
 export type OrderInputPaymentMethod = typeof OrderInputPaymentMethod[keyof typeof OrderInputPaymentMethod];
 
 
@@ -93,6 +104,8 @@ export const OrderInputPaymentMethod = {
 export interface OrderInput {
   /** Place an order without creating or linking a user account. */
   guest?: boolean;
+  /** Language for the order confirmation email. */
+  language?: OrderInputLanguage;
   /** @maxLength 254 */
   email: string;
   /**
@@ -167,6 +180,20 @@ export interface Order {
   total: number;
   createdAt: string;
   items: OrderItem[];
+}
+
+export type OrderCreationResultConfirmationEmailStatus = typeof OrderCreationResultConfirmationEmailStatus[keyof typeof OrderCreationResultConfirmationEmailStatus];
+
+
+export const OrderCreationResultConfirmationEmailStatus = {
+  sent: 'sent',
+  failed: 'failed',
+  not_applicable: 'not_applicable',
+} as const;
+
+export interface OrderCreationResult {
+  order: Order;
+  confirmationEmailStatus: OrderCreationResultConfirmationEmailStatus;
 }
 
 export interface Scent {

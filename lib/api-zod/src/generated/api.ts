@@ -71,6 +71,7 @@ export const ListMyOrdersResponse = zod.array(ListMyOrdersResponseItem)
 
 
 export const createOrderBodyGuestDefault = false;
+export const createOrderBodyLanguageDefault = `EN`;
 export const createOrderBodyEmailMax = 254;
 
 export const createOrderBodyPhoneMin = 6;
@@ -86,6 +87,7 @@ export const createOrderBodyItemsMax = 100;
 
 export const CreateOrderBody = zod.object({
   "guest": zod.boolean().default(createOrderBodyGuestDefault).describe('Place an order without creating or linking a user account.'),
+  "language": zod.enum(['EN', 'DE']).default(createOrderBodyLanguageDefault).describe('Language for the order confirmation email.'),
   "email": zod.string().email().max(createOrderBodyEmailMax),
   "phone": zod.string().min(createOrderBodyPhoneMin).max(createOrderBodyPhoneMax),
   "firstName": zod.string(),
@@ -108,11 +110,12 @@ export const CreateOrderBody = zod.object({
 })
 
 
-export const createOrderResponseItemsItemOneUnitPriceMin = 0;
+export const createOrderResponseOrderItemsItemOneUnitPriceMin = 0;
 
 
 
 export const CreateOrderResponse = zod.object({
+  "order": zod.object({
   "isGuest": zod.boolean(),
   "id": zod.number().int(),
   "orderNumber": zod.string(),
@@ -131,11 +134,13 @@ export const CreateOrderResponse = zod.object({
   "name": zod.string(),
   "scent": zod.string(),
   "quantity": zod.number().int().min(1),
-  "unitPrice": zod.number().min(createOrderResponseItemsItemOneUnitPriceMin)
+  "unitPrice": zod.number().min(createOrderResponseOrderItemsItemOneUnitPriceMin)
 }).and(zod.object({
   "id": zod.number().int(),
   "lineTotal": zod.number()
 })))
+}),
+  "confirmationEmailStatus": zod.enum(['sent', 'failed', 'not_applicable'])
 })
 
 

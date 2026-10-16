@@ -6,3 +6,4 @@
 - [Store brand typography](store-brand-typography.md) — The menu wordmark must visibly match the hero typography, not just share its font-family declaration.
 - [Store navigation](store-navigation.md) — Owner requested rollover submenus that overlay page content; retain tap and keyboard access.
 - [Guest checkout ownership](guest-checkout-ownership.md) — Guest orders create no account or role and must not be silently attached to accounts by email.
+- [Responsive store layout](responsive-store-layout.md) — Keep mobile-only layout and spacing fixes isolated from desktop styling unless the owner requests otherwise.

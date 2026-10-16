@@ -5,12 +5,15 @@
  * Objet Décoratif orders and account API
  * OpenAPI spec version: 0.2.0
  */
+import type { OrderInputLanguage } from './orderInputLanguage';
 import type { OrderInputPaymentMethod } from './orderInputPaymentMethod';
 import type { OrderItemInput } from './orderItemInput';
 
 export interface OrderInput {
   /** Place an order without creating or linking a user account. */
   guest?: boolean;
+  /** Language for the order confirmation email. */
+  language?: OrderInputLanguage;
   /** @maxLength 254 */
   email: string;
   /**

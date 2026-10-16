@@ -41,6 +41,20 @@ export function recordCatalogUploadCleanupSuccess(
   return getCatalogUploadCleanupHealth();
 }
 
+export async function runCatalogUploadCleanupWithHealth(
+  cleanup: () => Promise<CatalogUploadCleanupResult>,
+  occurredAt = new Date(),
+): Promise<CatalogUploadCleanupResult> {
+  try {
+    const result = await cleanup();
+    recordCatalogUploadCleanupSuccess(result, occurredAt);
+    return result;
+  } catch (error) {
+    recordCatalogUploadCleanupFailure(error, occurredAt);
+    throw error;
+  }
+}
+
 export function recordCatalogUploadCleanupFailure(
   error: unknown,
   occurredAt = new Date(),

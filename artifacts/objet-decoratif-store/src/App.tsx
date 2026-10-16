@@ -1958,7 +1958,7 @@ const emptyCheckoutForm: CheckoutForm = {
 };
 
 function CheckoutPage() {
-  const { t, locale } = useLanguage();
+  const { t, locale, language } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>(readStoredCart);
   const [paymentMethod, setPaymentMethod] = useState<
@@ -1968,6 +1968,7 @@ function CheckoutPage() {
   const [submitted, setSubmitted] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState("");
   const [placedAsGuest, setPlacedAsGuest] = useState(false);
+  const [confirmationEmailStatus, setConfirmationEmailStatus] = useState<"sent" | "failed" | "not_applicable">("not_applicable");
   const createOrder = useCreateOrder();
   const subtotal = lines.reduce(
     (sum, line) => sum + line.product.price * line.quantity,
@@ -2008,9 +2009,10 @@ function CheckoutPage() {
   const placeOrder = async () => {
     if (!isLoaded || createOrder.isPending || lines.length === 0) return;
     try {
-      const order = await createOrder.mutateAsync({
+      const result = await createOrder.mutateAsync({
         data: {
           guest: !isSignedIn,
+          language,
           email: form.email,
           phone: form.phone,
           firstName: form.firstName,
@@ -2035,8 +2037,9 @@ function CheckoutPage() {
           })),
         },
       });
-      setPlacedOrderNumber(order.orderNumber);
-      setPlacedAsGuest(order.isGuest);
+      setPlacedOrderNumber(result.order.orderNumber);
+      setPlacedAsGuest(result.order.isGuest);
+      setConfirmationEmailStatus(result.confirmationEmailStatus);
       setLines([]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -2061,6 +2064,15 @@ function CheckoutPage() {
           {placedAsGuest ? (
             <>
               <p>{t("Your guest order was received without creating an account. Please keep your order number for any questions.")}</p>
+              {confirmationEmailStatus === "sent" ? (
+                <p role="status">{t("A confirmation email has been sent to")} <strong>{form.email}</strong>.</p>
+              ) : (
+                <p role="alert">
+                  {t("Your order is saved, but we could not send the confirmation email. Please contact")}{" "}
+                  <a href="mailto:info@objetdecorativ.art">info@objetdecorativ.art</a>{" "}
+                  {t("and include your order number.")}
+                </p>
+              )}
               <Link href="/" className="solid-button">{t("Return to store ")}<ArrowRight size={14} />
               </Link>
             </>
