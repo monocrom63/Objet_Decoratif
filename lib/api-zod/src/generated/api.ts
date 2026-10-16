@@ -96,7 +96,7 @@ export const CreateOrderBody = zod.object({
   "postalCode": zod.string(),
   "city": zod.string(),
   "country": zod.string(),
-  "paymentMethod": zod.enum(['card', 'paypal', 'klarna']),
+  "paymentMethod": zod.enum(['card', 'paypal', 'klarna', 'manual']),
   "cardLastFour": zod.string().regex(createOrderBodyCardLastFourRegExp).nullish(),
   "items": zod.array(zod.object({
   "productId": zod.string(),

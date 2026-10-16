@@ -88,6 +88,7 @@ export const OrderInputPaymentMethod = {
   card: 'card',
   paypal: 'paypal',
   klarna: 'klarna',
+  manual: 'manual',
 } as const;
 
 export interface OrderInput {

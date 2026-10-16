@@ -1819,10 +1819,6 @@ type CheckoutForm = {
   postalCode: string;
   city: string;
   phone: string;
-  cardNumber: string;
-  expiration: string;
-  securityCode: string;
-  cardName: string;
 };
 
 const emptyCheckoutForm: CheckoutForm = {
@@ -1836,19 +1832,12 @@ const emptyCheckoutForm: CheckoutForm = {
   postalCode: "",
   city: "",
   phone: "",
-  cardNumber: "",
-  expiration: "",
-  securityCode: "",
-  cardName: "",
 };
 
 function CheckoutPage() {
   const { t, locale } = useLanguage();
   const { isLoaded, isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>(readStoredCart);
-  const [paymentMethod, setPaymentMethod] = useState<
-    "card" | "paypal" | "klarna"
-  >("card");
   const [form, setForm] = useState<CheckoutForm>(emptyCheckoutForm);
   const [submitted, setSubmitted] = useState(false);
   const [placedOrderNumber, setPlacedOrderNumber] = useState("");
@@ -1906,11 +1895,7 @@ function CheckoutPage() {
           postalCode: form.postalCode,
           city: form.city,
           country: form.country,
-          paymentMethod,
-          cardLastFour:
-            paymentMethod === "card"
-              ? form.cardNumber.replace(/\s/g, "").slice(-4)
-              : null,
+          paymentMethod: "manual",
           items: lines.map((line) => ({
             productId: line.product.id,
             name: line.product.name,
@@ -1942,7 +1927,7 @@ function CheckoutPage() {
         <main className="checkout-empty-state">
           <span className="section-kicker">{t("Order received")}</span>
           <h1>{t("Thank you.")}</h1>
-          <p>{t("Your order ")}<strong>{placedOrderNumber}</strong>{t(" is saved. No payment has been charged yet.")}</p>
+          <p>{t("Your order ")}<strong>{placedOrderNumber}</strong>{t(" is binding and saved. The shop team will request payment separately; no payment was collected in checkout.")}</p>
           {placedAsGuest ? (
             <>
               <p>{t("Your guest order was received without creating an account. Please keep your order number for any questions.")}</p>
@@ -1991,19 +1976,6 @@ function CheckoutPage() {
         >
           {!submitted && (
             <>
-              <section className="checkout-section checkout-express">
-                <span className="checkout-overline">{t("Express checkout")}</span>
-                <div className="express-buttons">
-                  <button type="button" className="express-button shop-pay">{t("shop")}</button>
-                  <button type="button" className="express-button paypal-pay">{t("PayPal")}</button>
-                  <button type="button" className="express-button gpay">
-                    <span className="gpay-mark">{t("G")}</span>{t(" Pay")}</button>
-                </div>
-                <div className="checkout-or">
-                  <span>{t("OR")}</span>
-                </div>
-              </section>
-
               <section className="checkout-section">
                 <h2>{t("Contact")}</h2>
                 <Show when="signed-out">
@@ -2165,106 +2137,10 @@ function CheckoutPage() {
               </section>
 
               <section className="checkout-section checkout-payment">
-                <h2>{t("Payment")}</h2>
-                <p className="payment-note">{t("All transactions are secure and encrypted.")}</p>
-                <div className="payment-methods">
-                  <div
-                    className={`payment-method ${paymentMethod === "card" ? "selected" : ""}`}
-                  >
-                    <button
-                      type="button"
-                      className="payment-method-toggle"
-                      onClick={() => setPaymentMethod("card")}
-                    >
-                      <span className="payment-radio" />
-                      <strong>{t("Credit card")}</strong>
-                      <span className="card-brands">
-                        <b>{t("VISA")}</b>
-                        <b className="mastercard">●●</b>
-                        <b className="amex">{t("MC")}</b>
-                        <b>+2</b>
-                      </span>
-                    </button>
-                    {paymentMethod === "card" && (
-                      <div className="card-fields">
-                        <label className="checkout-field">
-                          <span className="sr-only">{t("Card number")}</span>
-                          <input
-                            required
-                            value={form.cardNumber}
-                            onChange={(event) =>
-                              updateField("cardNumber", event.target.value)
-                            }
-                            placeholder={t("Card number")}
-                            autoComplete="cc-number"
-                          />
-                          <span className="field-lock">▢</span>
-                        </label>
-                        <div className="checkout-field-grid">
-                          <label className="checkout-field">
-                            <span className="sr-only">{t("Expiration date")}</span>
-                            <input
-                              required
-                              value={form.expiration}
-                              onChange={(event) =>
-                                updateField("expiration", event.target.value)
-                              }
-                              placeholder={t("Expiration date (MM / YY)")}
-                              autoComplete="cc-exp"
-                            />
-                          </label>
-                          <label className="checkout-field">
-                            <span className="sr-only">{t("Security code")}</span>
-                            <input
-                              required
-                              value={form.securityCode}
-                              onChange={(event) =>
-                                updateField("securityCode", event.target.value)
-                              }
-                              placeholder={t("Security code")}
-                              autoComplete="cc-csc"
-                            />
-                            <span className="field-help">?</span>
-                          </label>
-                        </div>
-                        <label className="checkout-field">
-                          <span className="sr-only">{t("Name on card")}</span>
-                          <input
-                            required
-                            value={form.cardName}
-                            onChange={(event) =>
-                              updateField("cardName", event.target.value)
-                            }
-                            placeholder={t("Name on card")}
-                            autoComplete="cc-name"
-                          />
-                        </label>
-                        <label className="checkout-checkbox billing-checkbox">
-                          <input type="checkbox" defaultChecked />{t(" ")}
-                          <span>{t("Use shipping address as billing address")}</span>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className={`payment-method payment-method-option ${paymentMethod === "paypal" ? "selected" : ""}`}
-                    onClick={() => setPaymentMethod("paypal")}
-                  >
-                    <span className="payment-radio" />
-                    <strong>{t("PayPal")}</strong>
-                    <b className="paypal-logo">{t("PayPal")}</b>
-                  </button>
-                  <button
-                    type="button"
-                    className={`payment-method payment-method-option ${paymentMethod === "klarna" ? "selected" : ""}`}
-                    onClick={() => setPaymentMethod("klarna")}
-                  >
-                    <span className="payment-radio" />
-                    <strong>{t("Klarna")}</strong>
-                    <b className="klarna-logo">{t("Klarna")}</b>
-                  </button>
-                </div>
+                <h2>{t("Payment requested separately")}</h2>
+                <p className="payment-note">
+                  {t("The order is binding. The shop team will request payment separately after the order; no payment is collected in checkout.")}
+                </p>
               </section>
 
               <button className="checkout-review-button" type="submit">{t("Review order")}</button>
@@ -2333,14 +2209,7 @@ function CheckoutPage() {
                 </div>
                 <div className="checkout-review-block">
                   <h2>{t("Payment")}</h2>
-                  <p>
-                    {paymentMethod === "card"
-                      ? `Credit card ending in ${form.cardNumber.replace(/\s/g, "").slice(-4)}`
-                      : paymentMethod === "paypal"
-                        ? t("PayPal")
-                        : t("Klarna")}
-                  </p>
-                  {paymentMethod === "card" && <p>{form.cardName}</p>}
+                  <p>{t("Payment requested separately")}</p>
                 </div>
               </div>
 
@@ -2361,8 +2230,8 @@ function CheckoutPage() {
               <PriceDisclosure className="price-disclosure--checkout" />
 
               <div className="checkout-review-notice" role="status">
-                <strong>{t("No payment will be charged.")}</strong>
-                <span>{t("Your order will be saved for the shop team")}{isSignedIn ? t(" and your account") : t("")}{t(". Payment and SMS are not connected.")}</span>
+                <strong>{t("Binding order")}</strong>
+                <span>{t("The order is binding. The shop team will request payment separately after the order; no payment is collected in checkout.")}</span>
               </div>
                 <button
                   className="checkout-review-button"
@@ -2375,9 +2244,7 @@ function CheckoutPage() {
                     ? t("Loading checkout…")
                     : createOrder.isPending
                       ? t("Saving order…")
-                      : isSignedIn
-                        ? t("Place order")
-                        : t("Place order as guest")}
+                      : t("Place order with payment obligation")}
                 </button>
               {createOrder.isError && (
                 <p className="checkout-order-error">{t("The order could not be saved. Please try again.")}</p>
@@ -2889,7 +2756,9 @@ function OrderDetailDrawer({
                 className="order-detail-text"
                 style={{ textTransform: "capitalize" }}
               >
-                {order.paymentMethod}
+                {order.paymentMethod === "manual"
+                  ? t("Payment requested separately")
+                  : order.paymentMethod}
               </p>
             </div>
 

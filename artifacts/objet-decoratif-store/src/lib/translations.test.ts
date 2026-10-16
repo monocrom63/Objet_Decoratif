@@ -18,6 +18,17 @@ test("German price disclosures include VAT, shipping, and the existing delivery 
   assert.equal(translate("Delivery time: 3–5 working days", "DE"), "Lieferzeit: 3–5 Werktage");
 });
 
+test("manual-payment checkout uses the German payment-obligation button", () => {
+  assert.equal(
+    translate("Place order with payment obligation", "DE"),
+    "Zahlungspflichtig bestellen",
+  );
+  const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+  assert.match(app, /paymentMethod:\s*"manual"/);
+  assert.match(app, /t\("Place order with payment obligation"\)/);
+  assert.ok(!app.includes('autoComplete="cc-number"'));
+});
+
 test("inline spacing survives translation", () => {
   assert.equal(translate("Choose ", "DE"), "Auswählen: ");
   assert.equal(translate(" and your account", "DE"), " und dein Konto");
