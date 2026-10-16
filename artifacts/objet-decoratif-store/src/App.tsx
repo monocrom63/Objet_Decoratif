@@ -930,6 +930,7 @@ function Hero({
   product?: Product;
 }) {
   const { t } = useLanguage();
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
   const heroImage = product?.images?.find((path) => !isVideoPath(path));
 
   return (
@@ -944,6 +945,18 @@ function Hero({
           fetchPriority="high"
         />
       )}
+      <video
+        className={`hero-video ${heroVideoReady ? "is-ready" : ""}`}
+        src={`${import.meta.env.BASE_URL}hero-video.mp4`}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        tabIndex={-1}
+        onCanPlay={() => setHeroVideoReady(true)}
+      />
       <div className="hero-copy">
         <span className="eyebrow">{t("Concrete candle collection / 01—25")}</span>
         <h1 className="hero-keyword">{t("Refillable concrete candles")}</h1>
