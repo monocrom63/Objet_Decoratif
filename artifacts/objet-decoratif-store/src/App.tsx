@@ -32,6 +32,7 @@ import {
 import { ErrorBoundary } from "@/components/error-boundary";
 import { LogoutButton } from "@/components/logout-button";
 import { CatalogMedia } from "@/components/catalog-media";
+import { ProductDetailPage } from "@/components/product-detail-page";
 import { HeaderNavMenu } from "@/components/header-nav-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
@@ -61,6 +62,124 @@ import { demoOrders, demoUsers } from "@/components/admin/demo-data";
 import { useGetCatalog } from "@workspace/api-client-react";
 
 type CartLine = { product: Product; scent: string; quantity: number };
+
+const publicStoreOrigin = "https://objet-decoratif-storefront.replit.app";
+const homeDescription =
+  "Sculptural concrete candle vessels, considered fragrances and refillable forms, made for a quieter everyday ritual.";
+
+function updateMetaTag(
+  attribute: "name" | "property",
+  key: string,
+  content: string | null,
+) {
+  let element = document.head.querySelector<HTMLMetaElement>(
+    `meta[${attribute}="${key}"]`,
+  );
+  if (content === null) {
+    element?.remove();
+    return;
+  }
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute(attribute, key);
+    document.head.appendChild(element);
+  }
+  element.content = content;
+}
+
+function updateCanonical(href: string) {
+  let element = document.head.querySelector<HTMLLinkElement>(
+    'link[rel="canonical"]',
+  );
+  if (!element) {
+    element = document.createElement("link");
+    element.rel = "canonical";
+    document.head.appendChild(element);
+  }
+  element.href = href;
+}
+
+function updateStorePageSeo(
+  product: Product | undefined,
+  locale: string,
+  t: (text: string) => string,
+) {
+  const isGerman = locale === "de-DE";
+  const isRefill = /refill/i.test(`${product?.id ?? ""} ${product?.category ?? ""}`);
+  const title = product
+    ? isGerman
+      ? isRefill
+        ? `${product.name} – Duftwachs-Refill | Objet Décoratif`
+        : `${product.name} – Nachfüllbare Betonkerze | Objet Décoratif`
+      : isRefill
+        ? `${product.name} – Candle Wax Refill | Objet Décoratif`
+        : `${product.name} – Refillable Concrete Candle | Objet Décoratif`
+    : "Objet Décoratif — Refillable Concrete Candle Vessels";
+  const rawDescription = product
+    ? `${product.name}: ${t(product.description)} ${t(product.explanation)}`
+    : homeDescription;
+  const description =
+    rawDescription.length > 160
+      ? `${rawDescription.slice(0, 157).trimEnd()}…`
+      : rawDescription;
+  const canonicalUrl = product
+    ? `${publicStoreOrigin}/produkte/${encodeURIComponent(product.id)}`
+    : `${publicStoreOrigin}/`;
+
+  document.title = title;
+  updateMetaTag("name", "description", description);
+  updateMetaTag("name", "robots", "index, follow");
+  updateMetaTag("property", "og:site_name", "Objet Décoratif");
+  updateMetaTag("property", "og:type", product ? "product" : "website");
+  updateMetaTag("property", "og:title", title);
+  updateMetaTag("property", "og:description", description);
+  updateMetaTag("property", "og:url", canonicalUrl);
+  updateMetaTag("name", "twitter:card", "summary_large_image");
+  updateMetaTag("name", "twitter:title", title);
+  updateMetaTag("name", "twitter:description", description);
+  updateCanonical(canonicalUrl);
+
+  const image = product?.images?.find((path) => !isVideoPath(path));
+  const absoluteImage = image ? new URL(image, publicStoreOrigin).toString() : null;
+  updateMetaTag("property", "og:image", absoluteImage);
+  updateMetaTag("property", "og:image:alt", image ? `${product?.name} concrete candle` : null);
+  updateMetaTag("name", "twitter:image", absoluteImage);
+
+  let structuredData = document.head.querySelector<HTMLScriptElement>(
+    "#product-structured-data",
+  );
+  if (!product) {
+    structuredData?.remove();
+    return;
+  }
+  if (!structuredData) {
+    structuredData = document.createElement("script");
+    structuredData.id = "product-structured-data";
+    structuredData.type = "application/ld+json";
+    document.head.appendChild(structuredData);
+  }
+  const images = (product.images ?? [])
+    .filter((path) => !isVideoPath(path))
+    .map((path) => new URL(path, publicStoreOrigin).toString());
+  structuredData.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: `${t(product.description)} ${t(product.explanation)}`,
+    sku: product.id,
+    category: product.category,
+    ...(images.length ? { image: images } : {}),
+    brand: { "@type": "Brand", name: "Objet Décoratif" },
+    offers: {
+      "@type": "Offer",
+      url: canonicalUrl,
+      priceCurrency: "EUR",
+      price: product.price.toFixed(2),
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  });
+}
 
 const imagePath = (fileName: string) =>
   `${import.meta.env.BASE_URL}images/products/${fileName}`;
@@ -291,7 +410,14 @@ function ObjectShowcase({
         <div className="section-kicker">{product.collection}{t(" collection")}</div>
         <div className="object-title-row">
           <div>
-            <h3>{product.name}</h3>
+            <h3>
+              <Link
+                className="object-detail-title"
+                href={`/produkte/${encodeURIComponent(product.id)}`}
+              >
+                {product.name}
+              </Link>
+            </h3>
             <p>{t(product.description)}</p>
           </div>
           <span className="object-price">€{product.price}</span>
@@ -2377,9 +2503,12 @@ function CheckoutPage() {
   );
 }
 
-function Store() {
+function Store({ productSlug }: { productSlug?: string } = {}) {
   const { t, locale } = useLanguage();
   const { products, scents, isLoading } = useCatalogFrontend();
+  const productPage = productSlug
+    ? products.find((product) => product.id === productSlug)
+    : undefined;
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [selected, setSelected] = useState<{
@@ -2391,6 +2520,21 @@ function Store() {
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
+  useEffect(() => {
+    if (isLoading) return;
+    updateStorePageSeo(productPage, locale, t);
+  }, [isLoading, productPage, locale, t]);
+  useEffect(() => {
+    if (isLoading || productSlug) return;
+    const requestedId = new URLSearchParams(window.location.search).get("product");
+    if (!requestedId) return;
+    const requestedProduct = products.find((product) => product.id === requestedId);
+    if (!requestedProduct) return;
+    setSelected({
+      product: requestedProduct,
+      scent: requestedProduct.scentOptions?.[0]?.name ?? requestedProduct.scents[0] ?? "",
+    });
+  }, [isLoading, productSlug, products]);
   if (isLoading)
     return (
       <div className="store-shell">
@@ -2437,57 +2581,68 @@ function Store() {
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
       />
-      <main>
-        <Hero
-          onExplore={() =>
-            document
-              .getElementById("collection")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-        />
-        <section className="intro-strip">
-          <div className="intro-item">
-            <span className="intro-number">{t("01 / Form")}</span>
-            <h2>{t("Cast in concrete.")}<br />{t("Built to last.")}</h2>
-            <p>{t("Quiet architecture for the everyday.")}</p>
-          </div>
-          <div className="intro-item">
-            <span className="intro-number">{t("02 / Scent")}</span>
-            <h2>{t("Four fragrances.")}</h2>
-            <p>{t("Endlessly renewable, never overpowering.")}</p>
-          </div>
-          <div className="intro-item">
-            <span className="intro-number">{t("03 / Ritual")}</span>
-            <h2>{t("Burn. Refill.")}<br />{t("Repeat.")}</h2>
-            <p>{t("One beautiful object, many lives.")}</p>
-          </div>
-        </section>
-        <Collection products={products} scents={scents} onOpen={openProduct} />
-        <section className="newsletter" id="newsletter">
-          <h2>{t("Notes from the studio.")}</h2>
-          {subscribed ? (
-            <span className="success-note">{t("You’re on the list. See you soon.")}</span>
-          ) : (
-            <form
-              className="newsletter-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setSubscribed(true);
-              }}
-            >
-              <input
-                type="email"
-                required
-                placeholder={t("Your email address")}
-                aria-label={t("Your email address")}
-                data-testid="input-newsletter"
-              />
-              <button type="submit" data-testid="button-subscribe">{t("Subscribe ")}<ArrowRight size={13} />
-              </button>
-            </form>
-          )}
-        </section>
-      </main>
+      {productSlug ? (
+        productPage ? (
+          <ProductDetailPage
+            product={productPage}
+            onBuy={(product, scent) => addToCart(product, scent, 1)}
+          />
+        ) : (
+          <NotFound />
+        )
+      ) : (
+        <main>
+          <Hero
+            onExplore={() =>
+              document
+                .getElementById("collection")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          />
+          <section className="intro-strip">
+            <div className="intro-item">
+              <span className="intro-number">{t("01 / Form")}</span>
+              <h2>{t("Cast in concrete.")}<br />{t("Built to last.")}</h2>
+              <p>{t("Quiet architecture for the everyday.")}</p>
+            </div>
+            <div className="intro-item">
+              <span className="intro-number">{t("02 / Scent")}</span>
+              <h2>{t("Four fragrances.")}</h2>
+              <p>{t("Endlessly renewable, never overpowering.")}</p>
+            </div>
+            <div className="intro-item">
+              <span className="intro-number">{t("03 / Ritual")}</span>
+              <h2>{t("Burn. Refill.")}<br />{t("Repeat.")}</h2>
+              <p>{t("One beautiful object, many lives.")}</p>
+            </div>
+          </section>
+          <Collection products={products} scents={scents} onOpen={openProduct} />
+          <section className="newsletter" id="newsletter">
+            <h2>{t("Notes from the studio.")}</h2>
+            {subscribed ? (
+              <span className="success-note">{t("You’re on the list. See you soon.")}</span>
+            ) : (
+              <form
+                className="newsletter-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  setSubscribed(true);
+                }}
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder={t("Your email address")}
+                  aria-label={t("Your email address")}
+                  data-testid="input-newsletter"
+                />
+                <button type="submit" data-testid="button-subscribe">{t("Subscribe ")}<ArrowRight size={13} />
+                </button>
+              </form>
+            )}
+          </section>
+        </main>
+      )}
       <Footer />
       <ProductModal
         product={selected?.product ?? null}
@@ -3118,7 +3273,12 @@ function Router() {
   return (
     <ErrorBoundary>
       <Switch>
-        <Route path="/" component={Store} />
+        <Route path="/produkte/:slug">
+          {(params) => <Store productSlug={params.slug} />}
+        </Route>
+        <Route path="/">
+          {() => <Store />}
+        </Route>
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/sign-in/*?">{() => <AuthPage mode="sign-in" />}</Route>
         <Route path="/sign-up/*?">{() => <AuthPage mode="sign-up" />}</Route>

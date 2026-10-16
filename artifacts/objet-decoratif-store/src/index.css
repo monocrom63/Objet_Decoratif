@@ -4339,3 +4339,14 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.object-detail-title {
+  color: inherit;
+  text-decoration: none;
+}
+
+.object-detail-title:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--saffron);
+  text-underline-offset: 0.12em;
+}

@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://objet-decoratif-storefront.replit.app/sitemap.xml
