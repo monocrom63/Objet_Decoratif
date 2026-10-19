@@ -1,4 +1,4 @@
-Objet Décoratif
+#Objet Décoratif
 A design-led online store for sculptural candle vessels and fragrances.
 
 Objet Décoratif brings together architectural forms, considered materials, and scent. The storefront presents candle-vessel collections with fragrance options and refill-oriented product storytelling.
