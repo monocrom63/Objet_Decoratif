@@ -1268,13 +1268,14 @@ a {
   }
 
   .object-showcase:not(.scent-showcase):not(.refill-showcase) .scent-slideshow {
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, min(40%, 195px)) minmax(0, 1fr);
     align-items: end;
   }
 
   .object-showcase:not(.scent-showcase):not(.refill-showcase) .scent-slide-image-wrap {
     align-self: end;
     width: 100%;
+    max-height: 260px;
   }
 
   .object-showcase:not(.scent-showcase):not(.refill-showcase) .scent-slide-copy {
