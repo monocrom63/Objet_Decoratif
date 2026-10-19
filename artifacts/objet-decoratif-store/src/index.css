@@ -4594,6 +4594,14 @@ a {
   max-width: 200px;
   aspect-ratio: 4/3;
 }
+[data-testid="scent-product-media-upload"] .admin-image-preview.single {
+  aspect-ratio: 3 / 4;
+}
+[data-testid="scent-product-media-upload"] .admin-image-preview img,
+[data-testid="scent-product-media-upload"] .admin-image-preview video {
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+}
 .admin-image-preview img,
 .admin-image-preview video {
   width: 100%;

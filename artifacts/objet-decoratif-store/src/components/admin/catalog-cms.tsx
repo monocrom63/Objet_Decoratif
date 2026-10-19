@@ -445,9 +445,9 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
         </label>
       </div>
 
-      <div className="admin-form-group mt-6">
-        <label>{t("Product scent media · portrait")}</label>
-        <p className="text-xs text-[#777369] mb-3">{t("Shown in the product's scent selector. Separate from the landscape Scents section.")}</p>
+      <div className="admin-form-group mt-6" data-testid="scent-product-media-upload">
+        <label>{t("Product scent media · beside product · portrait 3:4")}</label>
+        <p className="text-xs text-[#777369] mb-3">{t("Upload a separate portrait image for the scent slideshow beside the product. Recommended image size: 1200 × 1600 px (3:4). This file is not reused in the Scents section.")}</p>
         <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <SingleImageUploader
           value={watch("imagePath")}
@@ -461,7 +461,7 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
       </div>
       <div className="admin-form-group mt-6" data-testid="scent-showcase-media-upload">
         <label>{t("Scents section media · landscape 16:9")}</label>
-        <p className="text-xs text-[#777369] mb-3">{t("Upload a separate landscape video or image for Signature Scents. Videos loop automatically without player controls. Portrait videos are not reused here.")}</p>
+        <p className="text-xs text-[#777369] mb-3">{t("Upload a separate landscape image or video for the Scents section. Recommended image size: 1920 × 1080 px (16:9). This file is not reused beside the product. Videos loop automatically without player controls.")}</p>
         <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP ≤ 10 MB · MP4, WebM ≤ 100 MB</p>
         <SingleImageUploader
           value={watch("showcaseMediaPath")}
