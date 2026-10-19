@@ -1524,6 +1524,8 @@ function AboutPage() {
   const { t, locale } = useLanguage();
   const aboutPortraitSrc = `${import.meta.env.BASE_URL}images/about/thorsten-garage.webp`;
   const aboutPortraitAlt = t("Black-and-white portrait of a seated man holding a candle vessel.");
+  const grasseImageSrc = `${import.meta.env.BASE_URL}images/about/grasse-sign.webp`;
+  const grasseImageAlt = t("Black-and-white photograph of a Grasse town sign.");
   return (
     <EditorialPageFrame>
       <section className="editorial-hero about-hero">
@@ -1580,7 +1582,7 @@ function AboutPage() {
         <div className="editorial-section-label">{t("02 / Made with intention")}</div>
         <div className="about-portrait-layout">
           <figure className="about-portrait-image">
-            <img src={aboutPortraitSrc} alt={aboutPortraitAlt} loading="lazy" />
+            <img src={grasseImageSrc} alt={grasseImageAlt} loading="lazy" />
           </figure>
           <div className="editorial-section-content">
             <div className="section-kicker">{t("Berlin / Grasse")}</div>

@@ -2,6 +2,7 @@ import { catalogGerman } from "./catalog-translations.ts";
 // Original English copy is the translation key. Brand and product names stay unchanged.
 export const german: Record<string, string> = {
   "Black-and-white portrait of a seated man holding a candle vessel.": "Schwarz-Weiß-Porträt eines sitzenden Mannes mit einem Kerzengefäß.",
+  "Black-and-white photograph of a Grasse town sign.": "Schwarz-Weiß-Foto des Ortsschilds von Grasse.",
   "Product scent media · beside product · portrait 3:4": "Duft-Medium neben dem Produkt · Hochformat 3:4",
   "Upload a separate portrait image for the scent slideshow beside the product. Recommended image size: 1200 × 1600 px (3:4). This file is not reused in the Scents section.": "Eigenständiges Hochformat-Bild für die Duft-Slideshow neben dem Produkt hochladen. Empfohlene Bildgröße: 1200 × 1600 px (3:4). Diese Datei wird nicht im Scents-Bereich wiederverwendet.",
   "Scents section media · landscape 16:9": "Medium im Scents-Bereich · Querformat 16:9",
