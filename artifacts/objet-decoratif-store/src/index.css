@@ -980,7 +980,7 @@ a {
   aspect-ratio: 3 / 4;
   min-height: 0;
   overflow: hidden;
-  background: transparent;
+  background: #d7d0c3;
 }
 .scent-slide-image,
 .scent-slide-swatch {
@@ -990,18 +990,16 @@ a {
   width: 100%;
   height: 100%;
   min-height: 0;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   opacity: 0;
-  transform: scale(1.06);
-  transition:
-    opacity 0.9s ease-in-out,
-    transform 1.25s ease-in-out;
+  transform: none;
+  transition: opacity 0.9s ease-in-out;
 }
 .scent-slide-image.active,
 .scent-slide-swatch.active {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
 }
 .scent-slide-swatch {
   background: linear-gradient(135deg, #9a9f8d, #d6c9b5);
@@ -1277,7 +1275,6 @@ a {
   .object-showcase:not(.scent-showcase):not(.refill-showcase) .scent-slide-image-wrap {
     align-self: end;
     width: 100%;
-    max-height: 260px;
   }
 
   .object-showcase:not(.scent-showcase):not(.refill-showcase) .scent-slide-copy {
