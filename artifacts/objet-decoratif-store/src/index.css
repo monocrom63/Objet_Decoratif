@@ -2073,11 +2073,16 @@ a {
 .about-story {
   background: var(--bone);
 }
+.editorial-section.about-story,
+.editorial-section.about-facts {
+  grid-template-columns: 160px minmax(0, 1fr);
+  column-gap: clamp(24px, 3vw, 44px);
+}
 .about-portrait-layout {
   grid-column: 2;
   display: flex;
   align-items: stretch;
-  gap: clamp(24px, 4vw, 64px);
+  gap: clamp(20px, 2.5vw, 36px);
   min-width: 0;
   width: 100%;
   max-width: 100%;
@@ -2133,6 +2138,12 @@ a {
   width: calc(100% + 10vw);
   margin-left: -5vw;
   padding: 0 5vw;
+}
+@media (min-width: 761px) and (max-width: 980px) {
+  .about-intro-copy,
+  .about-facts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .about-principles > div {
   min-height: 230px;
