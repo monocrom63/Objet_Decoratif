@@ -1522,6 +1522,8 @@ function CarePage() {
 
 function AboutPage() {
   const { t, locale } = useLanguage();
+  const aboutPortraitSrc = `${import.meta.env.BASE_URL}images/about/thorsten-garage.webp`;
+  const aboutPortraitAlt = t("Black-and-white portrait of a seated man holding a candle vessel.");
   return (
     <EditorialPageFrame>
       <section className="editorial-hero about-hero">
@@ -1539,12 +1541,21 @@ function AboutPage() {
       </section>
       <section className="editorial-section about-story" id="about-story">
         <div className="editorial-section-label">{t("01 / Our approach")}</div>
-        <div className="editorial-section-content">
-          <div className="section-kicker">{t("Curated with intention")}</div>
-          <h2>{t("We do not simply inhabit spaces. We fill them with meaning.")}</h2>
-          <div className="about-intro-copy">
-            <p>{t("Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.")}</p>
-            <p>{t("Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.")}</p>
+        <div className="about-portrait-layout">
+          <figure className="about-portrait-image">
+            <img
+              src={aboutPortraitSrc}
+              alt={aboutPortraitAlt}
+              loading="lazy"
+            />
+          </figure>
+          <div className="editorial-section-content">
+            <div className="section-kicker">{t("Curated with intention")}</div>
+            <h2>{t("We do not simply inhabit spaces. We fill them with meaning.")}</h2>
+            <div className="about-intro-copy">
+              <p>{t("Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.")}</p>
+              <p>{t("Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.")}</p>
+            </div>
           </div>
         </div>
         <div className="about-principles">
@@ -1567,20 +1578,25 @@ function AboutPage() {
       </section>
       <section className="editorial-section about-facts">
         <div className="editorial-section-label">{t("02 / Made with intention")}</div>
-        <div className="editorial-section-content">
-          <div className="section-kicker">{t("Berlin / Grasse")}</div>
-          <h2>{t("From the atelier to the atmosphere.")}</h2>
-          <div className="about-facts-grid">
-            <article>
-              <span>01</span>
-              <h3>{t("Berlin atelier")}</h3>
-              <p>{t("Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures.")}</p>
-            </article>
-            <article>
-              <span>02</span>
-              <h3>{t("Fragrance from Grasse")}</h3>
-              <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
-            </article>
+        <div className="about-portrait-layout">
+          <figure className="about-portrait-image">
+            <img src={aboutPortraitSrc} alt={aboutPortraitAlt} loading="lazy" />
+          </figure>
+          <div className="editorial-section-content">
+            <div className="section-kicker">{t("Berlin / Grasse")}</div>
+            <h2>{t("From the atelier to the atmosphere.")}</h2>
+            <div className="about-facts-grid">
+              <article>
+                <span>01</span>
+                <h3>{t("Berlin atelier")}</h3>
+                <p>{t("Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures.")}</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>{t("Fragrance from Grasse")}</h3>
+                <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
+              </article>
+            </div>
           </div>
         </div>
       </section>
