@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { UpdateScentBody } from "@workspace/api-zod";
+import { UpdateProductBody, UpdateScentBody } from "@workspace/api-zod";
 import {
   byteRange,
   catalogUploadExtension,
@@ -14,6 +14,19 @@ test("scent updates accept explicit null values to remove either media field", (
     UpdateScentBody.safeParse({ showcaseMediaPath: null }).success,
     true,
   );
+});
+
+test("text-only catalog edits may omit existing media paths", () => {
+  const product = UpdateProductBody.safeParse({ name: "Barrique Studio" });
+  const scent = UpdateScentBody.safeParse({ description: "Updated copy" });
+
+  assert.equal(product.success, true);
+  assert.equal(scent.success, true);
+  if (product.success) assert.equal("imagePaths" in product.data, false);
+  if (scent.success) {
+    assert.equal("imagePath" in scent.data, false);
+    assert.equal("showcaseMediaPath" in scent.data, false);
+  }
 });
 
 test("video formats and limits are explicit; legacy image uploads remain supported", () => {

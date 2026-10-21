@@ -1,10 +1,8 @@
 /**
- * Upload cleanup is destructive and catalog databases can differ by environment
- * while sharing the same App Storage namespace. Keep it opt-in until storage is
- * isolated or cleanup can account for references from every environment.
+ * Catalog uploads are durable CMS content and storage may be shared by
+ * development and production. Automatic deletion stays disabled even if an old
+ * deployment still defines the legacy opt-in variable.
  */
-export function isCatalogUploadCleanupEnabled(
-  value = process.env.CATALOG_UPLOAD_CLEANUP_ENABLED,
-): boolean {
-  return value === "true";
+export function isCatalogUploadCleanupEnabled(): boolean {
+  return false;
 }

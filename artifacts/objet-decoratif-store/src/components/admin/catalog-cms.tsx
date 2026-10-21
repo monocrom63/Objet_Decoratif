@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { MultiImageUploader, SingleImageUploader } from "./image-uploader";
 import { useLanguage } from "@/lib/language";
+import { omitUnchangedMediaFields } from "@/lib/catalog-form-payload";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -94,6 +95,8 @@ function ProductForm({
         },
   });
 
+  const { dirtyFields } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     if (uploading) return;
     try {
@@ -104,7 +107,13 @@ function ProductForm({
       };
 
       if (product) {
-        await updateProduct.mutateAsync({ id: product.id, data });
+        await updateProduct.mutateAsync({
+          id: product.id,
+          data: omitUnchangedMediaFields(
+            data,
+            dirtyFields.imagePaths ? [] : ["imagePaths"],
+          ),
+        });
         toast({ title: "Product updated successfully" });
       } else {
         await createProduct.mutateAsync({ data });
@@ -272,7 +281,9 @@ function ProductForm({
         <p className="text-xs text-[#777369] mb-3">PNG, JPEG, WebP up to 10 MB · MP4, WebM up to 100 MB</p>
         <MultiImageUploader
           value={watch("imagePaths") || []}
-          onChange={(paths) => setValue("imagePaths", paths)}
+          onChange={(paths) =>
+            setValue("imagePaths", paths, { shouldDirty: true })
+          }
           onUploadingChange={onUploadingChange}
         />
         {errors.imagePaths && (
@@ -315,11 +326,21 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
     },
   });
 
+  const { dirtyFields } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof scentSchema>) => {
     if (uploading || productUploading || showcaseUploading) return;
     try {
       if (scent) {
-        await updateScent.mutateAsync({ id: scent.id, data: values });
+        const unchangedMediaFields: Array<keyof typeof values> = [];
+        if (!dirtyFields.imagePath) unchangedMediaFields.push("imagePath");
+        if (!dirtyFields.showcaseMediaPath) {
+          unchangedMediaFields.push("showcaseMediaPath");
+        }
+        await updateScent.mutateAsync({
+          id: scent.id,
+          data: omitUnchangedMediaFields(values, unchangedMediaFields),
+        });
         toast({ title: "Scent updated successfully" });
       } else {
         await createScent.mutateAsync({ data: values });

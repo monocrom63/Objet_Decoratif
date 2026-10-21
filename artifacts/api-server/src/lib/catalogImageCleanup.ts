@@ -196,7 +196,7 @@ function cleanupIntervalMs(): number {
 export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout | null {
   if (!isCatalogUploadCleanupEnabled()) {
     logger.warn(
-      "Catalog upload cleanup is disabled; set CATALOG_UPLOAD_CLEANUP_ENABLED=true only when this storage namespace is isolated",
+      "Automatic catalog upload cleanup is disabled to preserve CMS media",
     );
     return null;
   }

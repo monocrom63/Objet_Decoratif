@@ -50,3 +50,9 @@ Development and production catalogs can contain different upload references whil
 **Why:** App Storage deletions are irreversible, and one environment's database cannot safely establish that an upload is unused by another environment.
 
 **How to apply:** Keep upload cleanup disabled by default. Enable it only after verifying storage isolation or implementing cross-environment reference checks; inspect both development and production media paths before restoring cleanup.
+
+Catalog image and video paths are persistent CMS content. Text-only edits must omit unchanged media fields, and automatic upload deletion stays disabled; deployments must never reseed or replace a non-empty catalog.
+
+**Why:** The owner has restored the live catalog through the CMS and needs those paths to survive future edits and deployments without re-uploading the content.
+
+**How to apply:** Preserve PATCH semantics for product and scent media, send media fields only for intentional changes, and keep catalog initialization restricted to an empty catalog.
