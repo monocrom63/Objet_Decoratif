@@ -51,6 +51,7 @@ function ProductCard({
           {image ? (
             <CatalogMedia
               src={image}
+              fallbackSrc={product.fallbackImages?.[0]}
               alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
               controls={false}
               loading="lazy"

@@ -3,6 +3,7 @@ import {
   Product as ApiProduct,
   Scent as ApiScent,
 } from "@workspace/api-client-react";
+import { productFallbackFiles, scentFallbackFiles } from "./catalog-fallbacks.ts";
 
 export type ProductCollection = string;
 
@@ -13,6 +14,7 @@ export type ScentOption = {
   description: string;
   image?: string;
   showcaseMedia?: string;
+  fallbackImage?: string;
 };
 
 export type FrontendProduct = {
@@ -27,8 +29,15 @@ export type FrontendProduct = {
   tag?: string;
   scents: string[];
   images?: string[];
+  fallbackImages?: string[];
   scentOptions?: ScentOption[];
 };
+
+function localProductImages(productId: string): string[] {
+  return (productFallbackFiles[productId] ?? []).map((file) =>
+    resolveImagePath(`images/products/${file}`),
+  ).filter((path): path is string => !!path);
+}
 
 export function resolveImagePath(
   path: string | null | undefined,
@@ -65,6 +74,9 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         description: s.description,
         image: resolveImagePath(s.imagePath),
         showcaseMedia: resolveImagePath(s.showcaseMediaPath),
+        fallbackImage: scentFallbackFiles[s.id]
+          ? resolveImagePath(`images/products/${scentFallbackFiles[s.id]}`)
+          : undefined,
       };
       scentMap.set(s.id, option);
       return option;
@@ -92,6 +104,7 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         images: p.imagePaths
           .map(resolveImagePath)
           .filter((p): p is string => !!p),
+        fallbackImages: localProductImages(p.id),
         scentOptions: pScents,
       };
     });

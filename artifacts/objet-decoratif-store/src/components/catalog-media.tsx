@@ -12,9 +12,13 @@ export function CatalogMedia({
   loading = "lazy",
   style,
   fetchPriority,
+  width,
+  height,
+  fallbackSrc,
   "aria-hidden": ariaHidden,
 }: {
   src?: string;
+  fallbackSrc?: string;
   alt?: string;
   className?: string;
   active?: boolean;
@@ -24,11 +28,17 @@ export function CatalogMedia({
   loading?: "eager" | "lazy";
   style?: CSSProperties;
   fetchPriority?: "high" | "low" | "auto";
+  width?: number;
+  height?: number;
   "aria-hidden"?: boolean;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [src]);
+  const [fallbackFailed, setFallbackFailed] = useState(false);
+  useEffect(() => {
+    setFailed(false);
+    setFallbackFailed(false);
+  }, [src, fallbackSrc]);
   useEffect(() => {
     if (!active) video.current?.pause();
     else if (autoPlay) {
@@ -37,18 +47,54 @@ export function CatalogMedia({
     }
   }, [active, src, autoPlay]);
   if (!src) {
+    if (fallbackSrc) {
+      return (
+        <img
+          src={fallbackSrc}
+          alt={alt}
+          className={className}
+          style={style}
+          loading={loading}
+          fetchPriority={fetchPriority}
+          width={width}
+          height={height}
+          aria-hidden={ariaHidden}
+        />
+      );
+    }
     return <span className={className} style={style} role="img" aria-label={alt} aria-hidden={ariaHidden} />;
   }
   if (!isVideoPath(src)) {
+    if (failed && fallbackFailed) {
+      return (
+        <span
+          className={className}
+          style={style}
+          role="img"
+          aria-label={alt}
+          aria-hidden={ariaHidden}
+        />
+      );
+    }
     return (
       <img
-        src={src}
+        src={failed ? fallbackSrc : src}
         alt={alt}
         className={className}
         style={style}
         loading={loading}
         fetchPriority={fetchPriority}
+        width={width}
+        height={height}
         aria-hidden={ariaHidden}
+        onError={
+          fallbackSrc
+            ? () => {
+                if (failed) setFallbackFailed(true);
+                else setFailed(true);
+              }
+            : undefined
+        }
       />
     );
   }

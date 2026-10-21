@@ -65,6 +65,7 @@ export function ProductDetailPage({
                     key={`${image}-${index}`}
                     className={`od-product-page__image${index === activeImage ? " is-active" : ""}`}
                     src={image}
+                    fallbackSrc={product.fallbackImages?.[index] ?? product.fallbackImages?.[0]}
                     active={index === activeImage}
                     controls
                     alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
@@ -109,6 +110,7 @@ export function ProductDetailPage({
                     >
                       <CatalogMedia
                         src={image}
+                        fallbackSrc={product.fallbackImages?.[index] ?? product.fallbackImages?.[0]}
                         active={false}
                         controls={false}
                         alt=""

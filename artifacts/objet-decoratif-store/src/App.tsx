@@ -295,6 +295,7 @@ function ObjectSlideshow({ product }: { product: Product }) {
           key={image}
           className={`object-photo ${index === activeIndex ? "active" : ""}`}
           src={image}
+          fallbackSrc={product.fallbackImages?.[index] ?? product.fallbackImages?.[0]}
           active={index === activeIndex}
           alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
           loading={index === activeIndex ? "eager" : "lazy"}
@@ -365,6 +366,7 @@ function ScentSelector({
                   key={option.name}
                   className={`scent-slide-image ${index === selectedIndex ? "active" : ""}`}
                   src={option.image}
+                  fallbackSrc={option.fallbackImage}
                   active={index === selectedIndex}
                   controls={false}
                   autoPlay
@@ -617,6 +619,7 @@ function ScentShowcase({
                 key={option.name}
                 className={`object-photo ${index === activeIndex ? "active" : ""}`}
                 src={scentShowcaseSource(option)}
+                fallbackSrc={option.fallbackImage}
                 active={index === activeIndex}
                 controls={false}
                 autoPlay
@@ -936,9 +939,10 @@ function Hero({
   return (
     <section className="hero">
       {heroImage && (
-        <img
+        <CatalogMedia
           className="hero-product-image"
           src={heroImage}
+          fallbackSrc={product?.fallbackImages?.[0]}
           alt={`${product?.name} refillable concrete candle`}
           width={1600}
           height={1000}
@@ -1713,6 +1717,7 @@ function ProductModal({
           <CatalogMedia
             className="modal-product-image"
             src={product.images[0]}
+            fallbackSrc={product.fallbackImages?.[0]}
             alt={`${product.name} product view`}
           />
         ) : (
@@ -1849,6 +1854,7 @@ function CartDrawer({
                   {line.product.images?.[0] ? (
                     <CatalogMedia
                       src={line.product.images[0]}
+                      fallbackSrc={line.product.fallbackImages?.[0]}
                       controls={false}
                       alt={`${line.product.name} product view`}
                     />
@@ -1914,6 +1920,7 @@ function CartDrawer({
                 {refillProduct.images?.[0] && (
                   <CatalogMedia
                     src={refillProduct.images[0]}
+                    fallbackSrc={refillProduct.fallbackImages?.[0]}
                     controls={false}
                     alt={`${refillProduct.name} wax refill`}
                     loading="lazy"
@@ -2591,6 +2598,7 @@ function CheckoutPage() {
                     {line.product.images?.[0] ? (
                       <CatalogMedia
                         src={line.product.images[0]}
+                        fallbackSrc={line.product.fallbackImages?.[0]}
                         controls={false}
                         alt={`${line.product.name} product view`}
                       />
