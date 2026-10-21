@@ -44,3 +44,9 @@ Catalog media fields can differ between the development and production databases
 **Why:** The same scent had a fallback image in development while production still referenced a missing MP4.
 
 **How to apply:** Before claiming a live media deletion is complete, verify the production catalog separately. Use the authenticated production CMS/API to update live records; do not assume publishing code synchronizes catalog data.
+
+Development and production catalogs can contain different upload references while using an overlapping App Storage namespace. A development cleanup run removed 42 uploads while the live catalog's uploaded images were returning 404; treat per-environment garbage collection as unsafe unless storage is isolated or every environment's references are included.
+
+**Why:** App Storage deletions are irreversible, and one environment's database cannot safely establish that an upload is unused by another environment.
+
+**How to apply:** Keep upload cleanup disabled by default. Enable it only after verifying storage isolation or implementing cross-environment reference checks; inspect both development and production media paths before restoring cleanup.

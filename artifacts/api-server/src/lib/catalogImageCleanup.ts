@@ -12,6 +12,7 @@ import {
   referencedCatalogImagePaths as collectReferencedCatalogImagePaths,
   unreferencedManagedImagePaths,
 } from "./catalogImageCleanupPolicy";
+import { isCatalogUploadCleanupEnabled } from "./catalogUploadCleanupGuard.ts";
 
 const storage = new ObjectStorageService();
 const DEFAULT_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
@@ -52,6 +53,8 @@ export async function isCatalogImageReferenced(
 export async function deleteUnreferencedCatalogImages(
   candidatePaths: Iterable<string>,
 ): Promise<string[]> {
+  if (!isCatalogUploadCleanupEnabled()) return [];
+
   const referenced = await referencedCatalogImagePaths();
   const candidates = unreferencedManagedImagePaths(candidatePaths, referenced);
   if (candidates.length === 0) return [];
@@ -121,6 +124,8 @@ async function runQueuedCatalogImageCleanup(): Promise<void> {
 export function enqueueCatalogImageCleanup(
   candidatePaths: Iterable<string>,
 ): void {
+  if (!isCatalogUploadCleanupEnabled()) return;
+
   for (const path of candidatePaths) {
     pendingCatalogImageCleanupPaths.add(path);
   }
@@ -130,6 +135,10 @@ export function enqueueCatalogImageCleanup(
 }
 
 async function performAbandonedCatalogUploadCleanup(): Promise<CatalogUploadCleanupResult> {
+  if (!isCatalogUploadCleanupEnabled()) {
+    return { scanned: 0, retained: 0, deleted: 0 };
+  }
+
   const now = Date.now();
   const [uploads, referenced] = await Promise.all([
     storage.listManagedUploads(),
@@ -159,6 +168,10 @@ async function runAbandonedCatalogUploadCleanup(): Promise<CatalogUploadCleanupR
 }
 
 export function cleanupAbandonedCatalogUploads(): Promise<CatalogUploadCleanupResult> {
+  if (!isCatalogUploadCleanupEnabled()) {
+    return Promise.resolve({ scanned: 0, retained: 0, deleted: 0 });
+  }
+
   if (cleanupInFlight) {
     return cleanupInFlight;
   }
@@ -180,7 +193,14 @@ function cleanupIntervalMs(): number {
   return DEFAULT_CLEANUP_INTERVAL_MS;
 }
 
-export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout {
+export function startCatalogUploadCleanupSchedule(): NodeJS.Timeout | null {
+  if (!isCatalogUploadCleanupEnabled()) {
+    logger.warn(
+      "Catalog upload cleanup is disabled; set CATALOG_UPLOAD_CLEANUP_ENABLED=true only when this storage namespace is isolated",
+    );
+    return null;
+  }
+
   const intervalMs = cleanupIntervalMs();
   const runCleanup = () => {
     void cleanupAbandonedCatalogUploads().catch((error: unknown) => {
