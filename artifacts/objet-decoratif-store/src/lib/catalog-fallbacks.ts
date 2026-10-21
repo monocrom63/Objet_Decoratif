@@ -46,3 +46,12 @@ export const scentFallbackFiles: Record<string, string> = {
   tropicale: "tropicale-scent.webp",
   "cedar-salad": "cedar-salad-scent.webp",
 };
+
+export function additionalRecoveredProductFiles(
+  productId: string,
+  existingImageCount: number,
+): string[] {
+  return (productFallbackFiles[productId] ?? [])
+    .filter((file) => file.startsWith("recovered/"))
+    .slice(existingImageCount);
+}

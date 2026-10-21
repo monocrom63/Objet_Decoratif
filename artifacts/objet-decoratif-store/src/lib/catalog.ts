@@ -3,7 +3,11 @@ import {
   Product as ApiProduct,
   Scent as ApiScent,
 } from "@workspace/api-client-react";
-import { productFallbackFiles, scentFallbackFiles } from "./catalog-fallbacks.ts";
+import {
+  additionalRecoveredProductFiles,
+  productFallbackFiles,
+  scentFallbackFiles,
+} from "./catalog-fallbacks.ts";
 
 export type ProductCollection = string;
 
@@ -90,6 +94,16 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         .map((id) => scentMap.get(id))
         .filter((s): s is ScentOption => !!s);
 
+      const images = p.imagePaths
+        .map(resolveImagePath)
+        .filter((path): path is string => !!path);
+      const recoveredExtras = additionalRecoveredProductFiles(
+        p.id,
+        images.length,
+      )
+        .map((file) => resolveImagePath(`images/products/${file}`))
+        .filter((path): path is string => !!path);
+
       return {
         id: p.id,
         name: p.name,
@@ -101,9 +115,7 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         art: `art-${p.id}`,
         tag: p.tag || undefined,
         scents: pScents.map((s) => s.name),
-        images: p.imagePaths
-          .map(resolveImagePath)
-          .filter((p): p is string => !!p),
+        images: [...images, ...recoveredExtras],
         fallbackImages: localProductImages(p.id),
         scentOptions: pScents,
       };
