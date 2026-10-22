@@ -10,6 +10,9 @@ test("DE changes shop and checkout copy; EN retains the exact original headline"
   assert.equal(translate("Place order as guest", "DE"), "Als Gast bestellen");
   assert.equal(translate("With a Glow", "EN"), "With a Glow");
   assert.equal(translate("Products", "EN"), "Products");
+  const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+  assert.match(app, /<h1 className="hero-keyword">Objects<br \/><em>With a Glow<\/em><\/h1>/);
+  assert.doesNotMatch(app, /<h1 className="hero-keyword">\{t\("Refillable concrete candles"\)\}<\/h1>/);
 });
 
 test("German price disclosures include VAT, shipping, and the existing delivery estimate", () => {

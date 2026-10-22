@@ -963,8 +963,7 @@ function Hero({
       />
       <div className="hero-copy">
         <span className="eyebrow">{t("Concrete candle collection / 01—25")}</span>
-        <h1 className="hero-keyword">{t("Refillable concrete candles")}</h1>
-        <p className="hero-brand-line">{t("Objects")}<br /><em>{t("With a Glow")}</em></p>
+        <h1 className="hero-keyword">Objects<br /><em>With a Glow</em></h1>
         <p className="hero-note">{t("Architectural vessels cast in concrete. Fragrances made to stay with you long after the flame goes out.")}</p>
         <button
           className="outline-button"
