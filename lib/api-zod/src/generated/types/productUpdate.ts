@@ -11,7 +11,11 @@ export interface ProductUpdate {
   collection?: string;
   category?: string;
   description?: string;
+  /** @nullable */
+  descriptionDe?: string | null;
   explanation?: string;
+  /** @nullable */
+  explanationDe?: string | null;
   /** @minimum 0 */
   priceCents?: number;
   /** @nullable */

@@ -5,6 +5,7 @@ import { CatalogMedia } from "@/components/catalog-media";
 import { PriceDisclosure } from "@/components/price-disclosure";
 import { isVideoPath } from "@/lib/media";
 import { useLanguage } from "@/lib/language";
+import { localizedProductDescription } from "@/lib/product-copy";
 import type { FrontendProduct } from "@/lib/catalog";
 
 export function ProductCardGrid({
@@ -30,7 +31,7 @@ function ProductCard({
   product: FrontendProduct;
   onAdd: (product: FrontendProduct, scent: string, quantity: number) => void;
 }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const scents = product.scentOptions ?? [];
   const [selectedScent, setSelectedScent] = useState(scents[0]?.name ?? product.scents[0] ?? "");
   const [selectedSize, setSelectedSize] = useState<"Small" | "Big">("Small");
@@ -52,7 +53,7 @@ function ProductCard({
             <CatalogMedia
               src={image}
               fallbackSrc={product.fallbackImages?.[0]}
-              alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
+              alt={`${product.name} concrete candle vessel — ${localizedProductDescription(product, locale, t)}`}
               controls={false}
               loading="lazy"
             />
@@ -74,7 +75,7 @@ function ProductCard({
           </div>
           <strong>€{product.price.toFixed(2)}</strong>
         </div>
-        <p className="product-card__description">{t(product.description)}</p>
+        <p className="product-card__description">{localizedProductDescription(product, locale, t)}</p>
         <PriceDisclosure className="price-disclosure--catalog" />
         {product.id === "refill" && (
           <div className="product-card__sizes" role="group" aria-label={t("Refill size")}>

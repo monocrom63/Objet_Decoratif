@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { UpdateProductBody, UpdateScentBody } from "@workspace/api-zod";
+import {
+  CreateProductBody,
+  UpdateProductBody,
+  UpdateScentBody,
+} from "@workspace/api-zod";
 import {
   byteRange,
   catalogUploadExtension,
@@ -27,6 +31,34 @@ test("text-only catalog edits may omit existing media paths", () => {
     assert.equal("imagePath" in scent.data, false);
     assert.equal("showcaseMediaPath" in scent.data, false);
   }
+});
+
+test("product create and update accept separate German copy fields", () => {
+  const germanCopy = {
+    descriptionDe: "Kompakt und ausgewogen",
+    explanationDe: "Eine lange Produktbeschreibung auf Deutsch.",
+  };
+  const create = CreateProductBody.safeParse({
+    id: "barrique-new",
+    name: "Barrique New",
+    collection: "Barrique",
+    category: "Candle",
+    description: "Compact and balanced",
+    explanation: "A long product description in English.",
+    ...germanCopy,
+    priceCents: 6500,
+    imagePaths: [],
+    scentIds: [],
+  });
+  const update = UpdateProductBody.safeParse(germanCopy);
+  const clear = UpdateProductBody.safeParse({
+    descriptionDe: null,
+    explanationDe: null,
+  });
+
+  assert.equal(create.success, true);
+  assert.equal(update.success, true);
+  assert.equal(clear.success, true);
 });
 
 test("video formats and limits are explicit; legacy image uploads remain supported", () => {

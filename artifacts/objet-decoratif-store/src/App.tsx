@@ -41,6 +41,10 @@ import { PriceDisclosure } from "@/components/price-disclosure";
 import { HeaderNavMenu } from "@/components/header-nav-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { isVideoPath } from "@/lib/media";
+import {
+  localizedProductDescription,
+  localizedProductExplanation,
+} from "@/lib/product-copy";
 import { useLanguage } from "@/lib/language";
 import { CONTACT_EMAIL } from "@/lib/store-config";
 import { freeShippingProgress, shippingForSubtotal } from "@/lib/commerce-pricing";
@@ -124,7 +128,7 @@ function updateStorePageSeo(
       ? "Nachfüllbare Betonkerzen | Objet Décoratif"
       : "Refillable Concrete Candles | Objet Décoratif";
   const rawDescription = product
-    ? `${product.name}: ${t(product.description)} ${t(product.explanation)}`
+    ? `${product.name}: ${localizedProductDescription(product, locale, t)} ${localizedProductExplanation(product, locale, t)}`
     : isGerman
       ? "Skulpturale Betonkerzen mit ausgewählten Düften und austauschbarem Wachs-Refill. Entdecke die Formen von Objet Décoratif."
       : homeDescription;
@@ -185,7 +189,7 @@ function updateStorePageSeo(
       {
         "@type": "Product",
         name: product.name,
-        description: `${t(product.description)} ${t(product.explanation)}`,
+        description: `${localizedProductDescription(product, locale, t)} ${localizedProductExplanation(product, locale, t)}`,
         sku: product.id,
         category: product.category,
         ...(images.length ? { image: images } : {}),
@@ -297,7 +301,7 @@ function ObjectSlideshow({ product }: { product: Product }) {
           src={image}
           fallbackSrc={product.fallbackImages?.[index] ?? product.fallbackImages?.[0]}
           active={index === activeIndex}
-          alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
+          alt={`${product.name} concrete candle vessel — ${localizedProductDescription(product, locale, t)}`}
           loading={index === activeIndex ? "eager" : "lazy"}
         />
       ))}
@@ -462,7 +466,7 @@ function ObjectShowcase({
                 {product.name}
               </Link>
             </h3>
-            <p>{t(product.description)}</p>
+            <p>{localizedProductDescription(product, locale, t)}</p>
           </div>
           <span className="object-price">€{product.price}</span>
         </div>
@@ -479,7 +483,7 @@ function ObjectShowcase({
       <div className="object-explanation object-explanation-with-action">
         <div className="object-explanation-copy">
           <span className="object-explanation-label">{t("About the object")}</span>
-          <p>{t(product.explanation)}</p>
+          <p>{localizedProductExplanation(product, locale, t)}</p>
         </div>
       </div>
     </article>
@@ -566,7 +570,7 @@ function RefillShowcase({
       </div>
       <div className="object-explanation">
         <span className="object-explanation-label">{t("About the refill")}</span>
-        <p>{t(product.explanation)}</p>
+        <p>{localizedProductExplanation(product, locale, t)}</p>
       </div>
     </article>
   );
@@ -1660,7 +1664,7 @@ function SearchPanel({
           <span>
             {
               products.filter((p) =>
-                `${p.name} ${p.description} ${t(p.description)}`
+                `${p.name} ${p.description} ${p.descriptionDe ?? ""} ${t(p.description)}`
                   .toLowerCase()
                   .includes(query.toLowerCase()),
               ).length
@@ -1738,7 +1742,7 @@ function ProductModal({
           </button>
           <div className="section-kicker">{product.collection}{t(" collection")}</div>
           <h2>{product.name}</h2>
-          <p className="modal-subtitle">{t(product.description)}</p>
+          <p className="modal-subtitle">{localizedProductDescription(product, locale, t)}</p>
           <div className="modal-price">€{product.price}{t(" EUR")}</div>
           <PriceDisclosure className="price-disclosure--modal" />
           <span className="option-label">

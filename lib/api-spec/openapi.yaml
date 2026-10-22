@@ -400,7 +400,9 @@ components:
         collection: { type: string }
         category: { type: string }
         description: { type: string }
+        descriptionDe: { type: ["string", "null"] }
         explanation: { type: string }
+        explanationDe: { type: ["string", "null"] }
         priceCents: { type: integer, minimum: 0 }
         tag: { type: ["string", "null"] }
         active: { type: boolean }
@@ -417,7 +419,9 @@ components:
         collection: { type: string }
         category: { type: string }
         description: { type: string }
+        descriptionDe: { type: ["string", "null"] }
         explanation: { type: string }
+        explanationDe: { type: ["string", "null"] }
         priceCents: { type: integer, minimum: 0 }
         tag: { type: ["string", "null"] }
         active: { type: boolean }
@@ -432,7 +436,9 @@ components:
         collection: { type: string }
         category: { type: string }
         description: { type: string }
+        descriptionDe: { type: ["string", "null"] }
         explanation: { type: string }
+        explanationDe: { type: ["string", "null"] }
         priceCents: { type: integer, minimum: 0 }
         tag: { type: ["string", "null"] }
         active: { type: boolean }

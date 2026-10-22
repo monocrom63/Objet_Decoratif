@@ -27,7 +27,9 @@ export type FrontendProduct = {
   collection: ProductCollection;
   category: string;
   description: string;
+  descriptionDe?: string | null;
   explanation: string;
+  explanationDe?: string | null;
   price: number; // in euros
   art: string; // derived from id/slug
   tag?: string;
@@ -110,7 +112,9 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         collection: p.collection,
         category: p.category,
         description: p.description,
+        descriptionDe: p.descriptionDe,
         explanation: p.explanation,
+        explanationDe: p.explanationDe,
         price: p.priceCents / 100,
         art: `art-${p.id}`,
         tag: p.tag || undefined,

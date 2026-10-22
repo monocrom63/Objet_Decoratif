@@ -30,7 +30,9 @@ const productSchema = z.object({
   collection: z.string().min(1, "Collection is required"),
   category: z.string().min(1, "Category is required"),
   description: z.string().min(1, "Description is required"),
+  descriptionDe: z.string().optional(),
   explanation: z.string().min(1, "Explanation is required"),
+  explanationDe: z.string().optional(),
   priceEuros: z.coerce.number().min(0),
   tag: z.string().optional(),
   active: z.boolean().default(true),
@@ -75,6 +77,8 @@ function ProductForm({
     defaultValues: product
       ? {
           ...product,
+            descriptionDe: product.descriptionDe ?? "",
+            explanationDe: product.explanationDe ?? "",
           priceEuros: product.priceCents / 100,
           tag: product.tag || "",
         }
@@ -84,7 +88,9 @@ function ProductForm({
           collection: "",
           category: "",
           description: "",
+          descriptionDe: "",
           explanation: "",
+          explanationDe: "",
           priceEuros: 0,
           tag: "",
           active: true,
@@ -104,6 +110,8 @@ function ProductForm({
         ...values,
         priceCents: Math.round(values.priceEuros * 100),
         tag: values.tag || null,
+        descriptionDe: values.descriptionDe ?? null,
+        explanationDe: values.explanationDe ?? null,
       };
 
       if (product) {
@@ -201,6 +209,14 @@ function ProductForm({
           <span className="error">{errors.description.message}</span>
         )}
       </div>
+      <div className="admin-form-group">
+        <label>Short Description (DE)</label>
+        <textarea
+          className="admin-textarea"
+          style={{ minHeight: "80px" }}
+          {...register("descriptionDe")}
+        />
+      </div>
 
       <div className="admin-form-group">
         <label>Explanation (Long)</label>
@@ -208,6 +224,10 @@ function ProductForm({
         {errors.explanation && (
           <span className="error">{errors.explanation.message}</span>
         )}
+      </div>
+      <div className="admin-form-group">
+        <label>Explanation (Long) (DE)</label>
+        <textarea className="admin-textarea" {...register("explanationDe")} />
       </div>
 
       <div className="admin-form-row">

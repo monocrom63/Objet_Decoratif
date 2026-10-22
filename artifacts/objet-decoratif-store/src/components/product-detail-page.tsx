@@ -4,6 +4,10 @@ import { Link } from "wouter";
 import { CatalogMedia } from "@/components/catalog-media";
 import { PriceDisclosure } from "@/components/price-disclosure";
 import { useLanguage } from "@/lib/language";
+import {
+  localizedProductDescription,
+  localizedProductExplanation,
+} from "@/lib/product-copy";
 import type { FrontendProduct } from "@/lib/catalog";
 import "./product-detail-page.css";
 
@@ -16,7 +20,7 @@ export function ProductDetailPage({
   product,
   onBuy,
 }: ProductDetailPageProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const images = product.images ?? [];
   const scents = product.scentOptions ?? [];
   const [activeImage, setActiveImage] = useState(0);
@@ -68,7 +72,7 @@ export function ProductDetailPage({
                     fallbackSrc={product.fallbackImages?.[index] ?? product.fallbackImages?.[0]}
                     active={index === activeImage}
                     controls
-                    alt={`${product.name} concrete candle vessel — ${t(product.description)}`}
+                    alt={`${product.name} concrete candle vessel — ${localizedProductDescription(product, locale, t)}`}
                     loading={index === activeImage ? "eager" : "lazy"}
                     aria-hidden={index !== activeImage}
                   />
@@ -137,7 +141,7 @@ export function ProductDetailPage({
             </span>
           </div>
           <PriceDisclosure className="price-disclosure--product" />
-          <p className="od-product-page__description">{t(product.description)}</p>
+          <p className="od-product-page__description">{localizedProductDescription(product, locale, t)}</p>
 
           {product.id === "refill" && (
             <fieldset className="od-product-page__scent-options">
@@ -216,7 +220,7 @@ export function ProductDetailPage({
 
           <div className="od-product-page__about">
             <span>{t("About the object")}</span>
-            <p>{t(product.explanation)}</p>
+            <p>{localizedProductExplanation(product, locale, t)}</p>
           </div>
         </section>
       </div>
