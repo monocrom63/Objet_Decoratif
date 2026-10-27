@@ -22,6 +22,13 @@ export function localizedScentNotes(
   return localizedText(scent.notes, scent.notesDe, locale, translate);
 }
 
+export function formatScentNotes(notes: string): string {
+  return notes.replace(
+    /\s+(?=(?:heart|base)\s+notes?\s*:)/gi,
+    "\n",
+  );
+}
+
 export function localizedScentDescription(
   scent: ScentOption,
   locale: string,

@@ -1057,6 +1057,7 @@ a {
   letter-spacing: 0.06em;
   line-height: 1.5;
   text-transform: uppercase;
+  white-space: pre-line;
 }
 .scent-slide-copy p {
   max-width: 280px;

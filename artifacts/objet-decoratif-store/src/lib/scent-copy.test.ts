@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  formatScentNotes,
   localizedScentDescription,
   localizedScentNotes,
 } from "./scent-copy.ts";
@@ -48,5 +49,15 @@ test("keeps the English source copy in the English shop", () => {
   assert.equal(
     localizedScentNotes(scent, "en-GB", translate),
     `translated:${scent.notes}`,
+  );
+});
+
+test("shows head, heart, and base note groups on separate lines", () => {
+  const notes =
+    "Head note: Bergamot / Mate-Tea / Tea Leaves / Clove Heart note: Rose / Lavandin / Greentea accord\nBase note: Patchouli / Cedar / Woody Amber";
+
+  assert.equal(
+    formatScentNotes(notes),
+    "Head note: Bergamot / Mate-Tea / Tea Leaves / Clove\nHeart note: Rose / Lavandin / Greentea accord\nBase note: Patchouli / Cedar / Woody Amber",
   );
 });

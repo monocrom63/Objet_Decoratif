@@ -46,6 +46,7 @@ import {
   localizedProductExplanation,
 } from "@/lib/product-copy";
 import {
+  formatScentNotes,
   localizedScentDescription,
   localizedScentNotes,
 } from "@/lib/scent-copy";
@@ -413,7 +414,9 @@ function ScentSelector({
             <span className="scent-slide-number">{t("Scent / ")}{String(selectedIndex + 1).padStart(2, "0")}
             </span>
             <strong>{selected.name}</strong>
-            <small>{localizedScentNotes(selected, locale, t)}</small>
+            <small>
+              {formatScentNotes(localizedScentNotes(selected, locale, t))}
+            </small>
             <p>{localizedScentDescription(selected, locale, t)}</p>
             <button
               className="solid-button object-buy-button scent-slide-buy-button"
