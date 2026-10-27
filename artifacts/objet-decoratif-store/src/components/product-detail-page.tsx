@@ -60,6 +60,7 @@ export function ProductDetailPage({
       </div>
 
       <div className="od-product-page__layout">
+        <div className="od-product-page__visual-column">
         <section
           className="od-product-page__gallery"
           aria-label={t("Product images")}
@@ -135,6 +136,11 @@ export function ProductDetailPage({
             </div>
           )}
         </section>
+          <div className="od-product-page__about">
+            <span>{t("About the object")}</span>
+            <p>{localizedProductExplanation(product, locale, t)}</p>
+          </div>
+        </div>
 
         <section className="od-product-page__details" aria-labelledby="od-product-title">
           <p className="od-product-page__eyebrow">{t(product.collection)} / {t(product.category)}</p>
@@ -224,11 +230,6 @@ export function ProductDetailPage({
           <div className="od-product-page__trust" data-testid="product-trust-details">
             <span>{t("Standard delivery · 3–5 working days")}</span>
             <Link href="/returns">{t("Return terms")}</Link>
-          </div>
-
-          <div className="od-product-page__about">
-            <span>{t("About the object")}</span>
-            <p>{localizedProductExplanation(product, locale, t)}</p>
           </div>
         </section>
       </div>

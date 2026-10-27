@@ -223,9 +223,15 @@ export function renderProductSeoHtml(
             <span class="od-product-page__index">${escapeHtml(product.collection)} / ${escapeHtml(product.category)}</span>
           </div>
           <div class="od-product-page__layout">
+            <div class="od-product-page__visual-column">
             <section class="od-product-page__gallery" aria-label="${escapeHtml(`${product.name} product images`)}">
               <div class="od-product-page__media">${mediaMarkup || `<div class="od-product-page__media od-product-page__media--empty"><span>${escapeHtml(product.name)}</span></div>`}</div>
             </section>
+            <div class="od-product-page__about">
+              <span>About the object</span>
+              <p>${escapeHtml(product.explanation)}</p>
+            </div>
+            </div>
             <section class="od-product-page__details" aria-labelledby="od-product-title">
               <p class="od-product-page__eyebrow">${escapeHtml(product.collection)} / ${escapeHtml(product.category)}</p>
               <div class="od-product-page__heading">
@@ -247,10 +253,6 @@ export function renderProductSeoHtml(
                 <button class="od-product-page__buy" type="submit"><span>Add to cart · €${price}</span> →</button>
               </form>
               <div class="od-product-page__trust"><span>Standard delivery · 3–5 working days</span><a href="/returns">Return terms</a></div>
-              <div class="od-product-page__about">
-                <span>About the object</span>
-                <p>${escapeHtml(product.explanation)}</p>
-              </div>
             </section>
           </div>
         </main>

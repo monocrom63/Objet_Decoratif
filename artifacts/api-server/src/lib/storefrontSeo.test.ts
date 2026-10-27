@@ -68,6 +68,37 @@ test("product page sends absolute image URLs and price/availability schema in th
   assert.doesNotMatch(structuredData, /uploads\/wax\.mp4/);
 });
 
+test("product descriptions preserve line breaks and the long copy follows the gallery", () => {
+  const multilineProduct = {
+    ...product,
+    description: "First short-description line.\nSecond short-description line.",
+    explanation: "First long-description line.\nSecond long-description line.",
+  };
+  const html = renderProductSeoHtml(
+    multilineProduct,
+    scents,
+    '<script src="/app.js"></script>',
+  );
+  const galleryEnd = html.indexOf("</section>", html.indexOf('class="od-product-page__gallery"'));
+  const aboutBlock = html.indexOf('<div class="od-product-page__about">');
+  const detailsBlock = html.indexOf('class="od-product-page__details"');
+
+  assert.ok(galleryEnd >= 0);
+  assert.ok(aboutBlock > galleryEnd && aboutBlock < detailsBlock);
+  assert.match(
+    html,
+    /<div class="od-product-page__visual-column">[\s\S]*?<div class="od-product-page__about">[\s\S]*?<\/div>\s*<\/div>\s*<section class="od-product-page__details"/,
+  );
+  assert.match(
+    html,
+    /class="od-product-page__description">First short-description line\.\nSecond short-description line\.<\/p>/,
+  );
+  assert.match(
+    html,
+    /class="od-product-page__about">[\s\S]*?<p>First long-description line\.\nSecond long-description line\.<\/p>/,
+  );
+});
+
 test("managed object image paths use the public storage URL", () => {
   assert.equal(
     absoluteMediaUrl("/objects/uploads/product.webp"),
