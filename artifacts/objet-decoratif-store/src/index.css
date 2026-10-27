@@ -1189,7 +1189,8 @@ a {
   text-transform: uppercase;
 }
 .object-explanation p {
-  max-width: 480px;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
   color: #65635b;
   font-size: 15px;
