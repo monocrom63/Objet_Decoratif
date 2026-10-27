@@ -1060,7 +1060,8 @@ a {
   white-space: pre-line;
 }
 .scent-slide-copy p {
-  max-width: 280px;
+  width: 100%;
+  max-width: none;
   margin: 18px 0 0;
   color: #6f6c63;
   font-size: 12px;
@@ -4853,6 +4854,17 @@ a {
   color: #777369;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+.admin-scent-row > div:nth-child(2) {
+  min-width: 0;
+}
+.admin-scent-notes {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: var(--ink);
+  line-height: 1.45;
+  white-space: pre-line;
 }
 .admin-row-actions {
   display: flex;

@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MultiImageUploader, SingleImageUploader } from "./image-uploader";
 import { useLanguage } from "@/lib/language";
 import { omitUnchangedMediaFields } from "@/lib/catalog-form-payload";
+import { formatScentNotes } from "@/lib/scent-copy";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -802,11 +803,8 @@ export function CatalogCms() {
                     <small>{s.id}</small>
                   </div>
                   <div>
-                    <span
-                      style={{ color: "var(--ink)", maxWidth: "300px" }}
-                      className="truncate"
-                    >
-                      {s.notes}
+                    <span className="admin-scent-notes">
+                      {formatScentNotes(s.notes)}
                     </span>
                   </div>
                   <div>
