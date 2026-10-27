@@ -427,16 +427,16 @@ function ScentSelector({
             <p className="scent-slide-description">
               {localizedScentDescription(selected, locale, t)}
             </p>
-            <button
-              className="solid-button object-buy-button scent-slide-buy-button"
-              type="button"
-              onClick={onAdd}
-              data-testid={`button-open-object-${product.id}`}
-            >
-              {t("Add to cart")} · €{product.price.toFixed(2)}{" "}
-              <ArrowRight size={14} />
-            </button>
           </div>
+          <button
+            className="solid-button object-buy-button scent-slide-buy-button"
+            type="button"
+            onClick={onAdd}
+            data-testid={`button-open-object-${product.id}`}
+          >
+            {t("Add to cart")} · €{product.price.toFixed(2)}{" "}
+            <ArrowRight size={14} />
+          </button>
         </div>
       )}
     </div>
