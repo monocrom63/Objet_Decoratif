@@ -415,9 +415,18 @@ function ScentSelector({
             </span>
             <strong>{selected.name}</strong>
             <small>
-              {formatScentNotes(localizedScentNotes(selected, locale, t))}
+              {formatScentNotes(
+                localizedScentNotes(selected, locale, t),
+              ).split("\n").map((line, index) => (
+                <span key={`${selected.name}-note-${index}`}>
+                  {index > 0 && <br />}
+                  {line}
+                </span>
+              ))}
             </small>
-            <p>{localizedScentDescription(selected, locale, t)}</p>
+            <p className="scent-slide-description">
+              {localizedScentDescription(selected, locale, t)}
+            </p>
             <button
               className="solid-button object-buy-button scent-slide-buy-button"
               type="button"
