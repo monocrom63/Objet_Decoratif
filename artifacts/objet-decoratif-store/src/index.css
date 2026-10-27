@@ -1200,6 +1200,13 @@ a {
   grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
   column-gap: clamp(36px, 7vw, 110px);
 }
+.refill-showcase > .object-explanation {
+  display: block;
+}
+.refill-showcase > .object-explanation .object-explanation-label {
+  display: block;
+  margin-bottom: 20px;
+}
 .object-explanation-copy {
   display: grid;
   grid-template-columns: minmax(170px, 0.35fr) 1fr;
