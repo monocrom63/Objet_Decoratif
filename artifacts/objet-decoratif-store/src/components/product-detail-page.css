@@ -302,7 +302,7 @@
 }
 
 .od-product-page__scent-description {
-  max-width: 420px;
+  max-width: none;
   min-height: 40px;
   margin: 14px 0 0 26px;
   color: #6f6c63;
