@@ -45,6 +45,10 @@ import {
   localizedProductDescription,
   localizedProductExplanation,
 } from "@/lib/product-copy";
+import {
+  localizedScentDescription,
+  localizedScentNotes,
+} from "@/lib/scent-copy";
 import { useLanguage } from "@/lib/language";
 import { CONTACT_EMAIL } from "@/lib/store-config";
 import { freeShippingProgress, shippingForSubtotal } from "@/lib/commerce-pricing";
@@ -409,8 +413,8 @@ function ScentSelector({
             <span className="scent-slide-number">{t("Scent / ")}{String(selectedIndex + 1).padStart(2, "0")}
             </span>
             <strong>{selected.name}</strong>
-            <small>{t(selected.notes)}</small>
-            <p>{t(selected.description)}</p>
+            <small>{localizedScentNotes(selected, locale, t)}</small>
+            <p>{localizedScentDescription(selected, locale, t)}</p>
             <button
               className="solid-button object-buy-button scent-slide-buy-button"
               type="button"
@@ -676,9 +680,9 @@ function ScentShowcase({
           <PriceDisclosure className="price-disclosure--catalog" />
           <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
             <span className="scent-showcase-label">{t("The atmosphere")}</span>
-            <p>{t(selected.description)}</p>
+            <p>{localizedScentDescription(selected, locale, t)}</p>
             <span className="scent-showcase-label">{t("Scent notes")}</span>
-            <p>{t(selected.notes)}</p>
+            <p>{localizedScentNotes(selected, locale, t)}</p>
           </div>
           <button
             className="solid-button object-buy-button scent-buy-button"

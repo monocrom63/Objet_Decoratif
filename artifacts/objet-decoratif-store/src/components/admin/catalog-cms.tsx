@@ -46,7 +46,9 @@ const scentSchema = z.object({
   id: z.string().min(1, "ID is required"),
   name: z.string().min(1, "Name is required"),
   notes: z.string().min(1, "Notes is required"),
+  notesDe: z.string().optional(),
   description: z.string().min(1, "Description is required"),
+  descriptionDe: z.string().optional(),
   imagePath: z.string().nullable().optional(),
   showcaseMediaPath: z.string().nullable().optional(),
   active: z.boolean().default(true),
@@ -333,17 +335,25 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
 
   const form = useForm<z.infer<typeof scentSchema>>({
     resolver: zodResolver(scentSchema),
-    defaultValues: scent || {
-      id: "",
-      name: "",
-      notes: "",
-      description: "",
-      imagePath: null,
-      showcaseMediaPath: null,
-      active: true,
-      published: true,
-      sortOrder: 0,
-    },
+    defaultValues: scent
+      ? {
+          ...scent,
+          notesDe: scent.notesDe ?? "",
+          descriptionDe: scent.descriptionDe ?? "",
+        }
+      : {
+          id: "",
+          name: "",
+          notes: "",
+          notesDe: "",
+          description: "",
+          descriptionDe: "",
+          imagePath: null,
+          showcaseMediaPath: null,
+          active: true,
+          published: true,
+          sortOrder: 0,
+        },
   });
 
   const { dirtyFields } = form.formState;
@@ -450,17 +460,27 @@ function ScentForm({ scent, onClose, uploading, onUploadingChange }: {
       </div>
 
       <div className="admin-form-group">
-        <label>Notes</label>
-        <input className="admin-input" {...register("notes")} />
+        <label>Notes (EN)</label>
+        <textarea className="admin-textarea" {...register("notes")} />
         {errors.notes && <span className="error">{errors.notes.message}</span>}
       </div>
 
       <div className="admin-form-group">
-        <label>Description</label>
+        <label>Notes (DE)</label>
+        <textarea className="admin-textarea" {...register("notesDe")} />
+      </div>
+
+      <div className="admin-form-group">
+        <label>Description (EN)</label>
         <textarea className="admin-textarea" {...register("description")} />
         {errors.description && (
           <span className="error">{errors.description.message}</span>
         )}
+      </div>
+
+      <div className="admin-form-group">
+        <label>Description (DE)</label>
+        <textarea className="admin-textarea" {...register("descriptionDe")} />
       </div>
 
       <div className="admin-form-group">

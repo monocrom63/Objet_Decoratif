@@ -15,7 +15,9 @@ export type ScentOption = {
   id: string;
   name: string;
   notes: string;
+  notesDe?: string | null;
   description: string;
+  descriptionDe?: string | null;
   image?: string;
   showcaseMedia?: string;
   fallbackImage?: string;
@@ -77,7 +79,9 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         id: s.id,
         name: s.name,
         notes: s.notes,
+        notesDe: s.notesDe,
         description: s.description,
+        descriptionDe: s.descriptionDe,
         image: resolveImagePath(s.imagePath),
         showcaseMedia: resolveImagePath(s.showcaseMediaPath),
         fallbackImage: scentFallbackFiles[s.id]

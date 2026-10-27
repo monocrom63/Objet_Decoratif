@@ -8,6 +8,10 @@ import {
   localizedProductDescription,
   localizedProductExplanation,
 } from "@/lib/product-copy";
+import {
+  localizedScentDescription,
+  localizedScentNotes,
+} from "@/lib/scent-copy";
 import type { FrontendProduct } from "@/lib/catalog";
 import "./product-detail-page.css";
 
@@ -183,7 +187,7 @@ export function ProductDetailPage({
                     <span className="od-product-page__scent-mark" aria-hidden="true" />
                     <span className="od-product-page__scent-copy">
                       <strong>{scent.name}</strong>
-                      <small>{t(scent.notes)}</small>
+                      <small>{localizedScentNotes(scent, locale, t)}</small>
                     </span>
                     <span className="od-product-page__scent-number">{String(index + 1).padStart(2, "0")}</span>
                   </label>
@@ -191,7 +195,11 @@ export function ProductDetailPage({
               </div>
               {scents.find((scent) => scent.name === selectedScent)?.description && (
                 <p className="od-product-page__scent-description">
-                  {t(scents.find((scent) => scent.name === selectedScent)!.description)}
+                  {localizedScentDescription(
+                    scents.find((scent) => scent.name === selectedScent)!,
+                    locale,
+                    t,
+                  )}
                 </p>
               )}
             </fieldset>

@@ -2,7 +2,7 @@
 - [Node source-test imports](node-source-test-imports.md) — Source tests use Node type stripping, so runtime TypeScript imports need explicit extensions and type-only barrels.
 - [Catalog initialization](catalog-initialization.md) — Restore an empty catalog through explicit admin action, never by overwriting the live database or reseeding on startup.
 - [Catalog media compatibility](catalog-media-compatibility.md) — Preserve legacy media and never clean shared uploads using only one environment's catalog references.
-- [Product copy preservation](product-copy-preservation.md) — Keep administrator-entered German product copy exact; never replace it with an automatic translation.
+- [Catalog copy preservation](product-copy-preservation.md) — Keep administrator-entered German product and scent text exact; never replace it with translation.
 - [Clerk testing sessions](clerk-testing-session.md) — A programmatic client session may lack a usable API cookie; verify same-origin Bearer auth before changing app authentication.
 - [Store brand typography](store-brand-typography.md) — The menu wordmark must visibly match the hero typography, not just share its font-family declaration.
 - [Store navigation](store-navigation.md) — Owner requested rollover submenus that overlay page content; retain tap and keyboard access.

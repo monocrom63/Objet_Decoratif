@@ -288,6 +288,7 @@
   letter-spacing: 0.06em;
   text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: pre-line;
 }
 
 .od-product-page__scent-number {
@@ -302,6 +303,7 @@
   color: #6f6c63;
   font-size: 12px;
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .od-product-page__buy {

@@ -11,7 +11,11 @@ export interface ScentInput {
   id: string;
   name: string;
   notes: string;
+  /** @nullable */
+  notesDe?: string | null;
   description: string;
+  /** @nullable */
+  descriptionDe?: string | null;
   /** @nullable */
   imagePath?: string | null;
   /** @nullable */
