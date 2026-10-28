@@ -166,6 +166,7 @@ export const german: Record<string, string> = {
   "Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.": "Skulpturale Gefäße, die über die erste Flamme hinaus bestehen: Objekte zum Behalten, Wiederbefüllen und Wiederentdecken.",
   "Scents from Grasse": "Düfte aus Grasse",
   "Our candle perfumes are developed with specialists in Grasse and selected to complement every form.": "Unsere Kerzendüfte werden mit Spezialisten in Grasse entwickelt und passend zu jeder Form ausgewählt.",
+  "Grasse is considered the perfume capital of the world. This small town in the south of France, in Provence near the French Riviera, has been closely associated with the art of perfumery for centuries. Its significance lies in the combination of an ideal climate, precious fragrance ingredients, and an exceptional tradition of fragrance composition.": "Grasse gilt als Welthauptstadt des Parfüms. Die kleine Stadt im Süden Frankreichs, in der Provence nahe der französischen Riviera, ist seit Jahrhunderten eng mit der Kunst der Parfümerie verbunden. Ihre Bedeutung beruht auf dem Zusammenspiel eines idealen Klimas, kostbarer Duftrohstoffe und einer außergewöhnlichen Tradition der Duftkomposition.",
   "The refill ritual / 02": "Das Refill-Ritual / 02",
   "Keep the object.": "Behalte das Objekt.",
   "Change the atmosphere.": "Verändere die Atmosphäre.",

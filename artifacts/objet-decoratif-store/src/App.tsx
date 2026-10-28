@@ -1619,7 +1619,7 @@ function AboutPage() {
               <article>
                 <span>02</span>
                 <h3>{t("Fragrance from Grasse")}</h3>
-                <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
+                <p>{t("Grasse is considered the perfume capital of the world. This small town in the south of France, in Provence near the French Riviera, has been closely associated with the art of perfumery for centuries. Its significance lies in the combination of an ideal climate, precious fragrance ingredients, and an exceptional tradition of fragrance composition.")}</p>
               </article>
             </div>
           </div>
