@@ -117,10 +117,6 @@ function ProductCard({
           {t("Add to cart")} · €{product.price.toFixed(2)}
           <ArrowRight size={14} aria-hidden="true" />
         </button>
-        <div className="product-card__trust">
-          <span>{t("Standard delivery · 3–5 working days")}</span>
-          <Link href="/returns">{t("Return terms")}</Link>
-        </div>
       </div>
     </article>
   );
