@@ -10,7 +10,10 @@ export function PriceDisclosure({ className = "" }: { className?: string }) {
       <span aria-hidden="true">·</span>
       <Link href="/shipping-policy">{t("Shipping costs & delivery")}</Link>
       <span className="price-disclosure__delivery">
-        {t("Delivery time: 3–5 working days")}
+        {t("Ready for dispatch: 3-5 working days.")}
+      </span>
+      <span className="price-disclosure__delivery">
+        {t("Free shipping on orders over €100.")}
       </span>
     </p>
   );

@@ -15,10 +15,25 @@ test("DE changes shop and checkout copy; EN retains the exact original headline"
   assert.doesNotMatch(app, /<h1 className="hero-keyword">\{t\("Refillable concrete candles"\)\}<\/h1>/);
 });
 
-test("German price disclosures include VAT, shipping, and the existing delivery estimate", () => {
+test("price disclosures show dispatch timing and the free-shipping threshold", () => {
   assert.equal(translate("Prices include VAT; shipping extra", "DE"), "inkl. MwSt., zzgl. Versand");
   assert.equal(translate("Shipping costs & delivery", "DE"), "Versandkosten & Lieferzeit");
-  assert.equal(translate("Delivery time: 3–5 working days", "DE"), "Lieferzeit: 3–5 Werktage");
+  assert.equal(
+    translate("Ready for dispatch: 3-5 working days.", "EN"),
+    "Ready for dispatch: 3-5 working days.",
+  );
+  assert.equal(
+    translate("Ready for dispatch: 3-5 working days.", "DE"),
+    "Versandbereit: 3–5 Werktage.",
+  );
+  assert.equal(
+    translate("Free shipping on orders over €100.", "EN"),
+    "Free shipping on orders over €100.",
+  );
+  assert.equal(
+    translate("Free shipping on orders over €100.", "DE"),
+    "Kostenloser Versand bei Bestellungen über 100 €.",
+  );
 });
 
 test("German product discovery and FAQ copy include the newly visible SEO content", () => {
