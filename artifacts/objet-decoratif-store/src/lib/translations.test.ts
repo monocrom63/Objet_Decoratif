@@ -36,6 +36,19 @@ test("price disclosures show dispatch timing and the free-shipping threshold", (
   );
 });
 
+test("German Grasse fragrance copy stays verbatim with its paragraph break", () => {
+  const key =
+    "Grasse is considered the perfume capital of the world. This small town in the south of France, in Provence near the French Riviera, has been closely associated with the art of perfumery for centuries. Its significance lies in the combination of an ideal climate, precious fragrance ingredients, and an exceptional tradition of fragrance composition.";
+  const expected = [
+    "Ursprünglich wurden Düfte in Räumen aus den unterschiedlichsten Gründen genutzt. Einige waren spiritueller Natur, andere zur Überlagerung schlechter, anderer Gerüche oder aus emotionalen Gründen. Heute werden Raumdüfte gezielt eingesetzt, um die Identität eines Ortes zu prägen oder eine Wiedererkennbarkeit. Der Duft als unsichtbare Einrichtung.",
+    "",
+    "Düfte werden mit unterschiedlichen Präferenzen eingesetzt. Als Spektakel: Leicht erkennbar, meist der Quelle (Kerze oder Diffuser] zuzuordnen, \"laut\" oder als olfaktorische Präsenz.",
+  ].join("\n");
+  assert.equal(translate(key, "DE"), expected);
+  const css = readFileSync(new URL("../index.css", import.meta.url), "utf8");
+  assert.match(css, /\.about-facts-grid \.about-fragrance-copy\s*\{\s*white-space:\s*pre-line;/);
+});
+
 test("German product discovery and FAQ copy include the newly visible SEO content", () => {
   assert.equal(translate("Refillable concrete candles", "DE"), "Nachfüllbare Betonkerzen");
   assert.equal(translate("How does the refill system work?", "DE"), "Wie funktioniert das Refill-System?");

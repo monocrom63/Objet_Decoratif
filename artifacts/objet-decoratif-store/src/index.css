@@ -1447,6 +1447,9 @@ a {
   font-size: 12px;
   line-height: 1.6;
 }
+.about-facts-grid .about-fragrance-copy {
+  white-space: pre-line;
+}
 .faq-content {
   max-width: 1000px;
   margin: 0 auto;
