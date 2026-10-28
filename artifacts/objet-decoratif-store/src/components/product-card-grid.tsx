@@ -60,7 +60,6 @@ function ProductCard({
           ) : (
             <span className="product-card__image-fallback">{product.name}</span>
           )}
-          {product.tag && <span className="product-card__tag">{t(product.tag)}</span>}
         </div>
       </Link>
       <div className="product-card__body">

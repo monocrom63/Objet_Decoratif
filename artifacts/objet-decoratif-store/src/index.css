@@ -460,17 +460,6 @@ a {
   color: #6f6b62;
   font: 400 38px var(--hero);
 }
-.product-card__tag {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 7px 9px;
-  background: rgba(245, 241, 232, 0.88);
-  color: var(--ink);
-  font: 9px var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 .product-card__body {
   padding: 17px 0 18px;
 }
