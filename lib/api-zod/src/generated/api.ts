@@ -268,6 +268,41 @@ export const GetCatalogResponse = zod.object({
 })
 
 
+export const GetPageCopyResponseItem = zod.object({
+  "key": zod.string(),
+  "english": zod.string(),
+  "german": zod.string()
+})
+export const GetPageCopyResponse = zod.array(GetPageCopyResponseItem)
+
+
+export const GetAdminPageCopyResponseItem = zod.object({
+  "key": zod.string(),
+  "english": zod.string(),
+  "german": zod.string()
+})
+export const GetAdminPageCopyResponse = zod.array(GetAdminPageCopyResponseItem)
+
+
+export const updateAdminPageCopyBodyItemsItemKeyRegExp = new RegExp('^(about|care)\\.[a-z0-9][a-z0-9.-]*$');
+
+
+export const UpdateAdminPageCopyBody = zod.object({
+  "items": zod.array(zod.object({
+  "key": zod.string().regex(updateAdminPageCopyBodyItemsItemKeyRegExp),
+  "english": zod.string(),
+  "german": zod.string()
+}))
+})
+
+export const UpdateAdminPageCopyResponseItem = zod.object({
+  "key": zod.string(),
+  "english": zod.string(),
+  "german": zod.string()
+})
+export const UpdateAdminPageCopyResponse = zod.array(UpdateAdminPageCopyResponseItem)
+
+
 /**
  * Import the original store catalog only when both catalog tables are empty. Existing records are never replaced.
  */

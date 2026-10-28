@@ -1,10 +1,10 @@
 ---
-name: Catalog copy preservation
-description: Protect administrator-entered German product and scent text from automatic translation or normalization.
+name: CMS copy preservation
+description: Protect administrator-entered German CMS text from automatic translation or normalization.
 ---
 
-English catalog copy and administrator-entered German product or scent copy are separate values. Treat saved German copy as owner-authored content: never translate into it or trim/normalize it during saving or display. Use the existing translation only when the German field is empty.
+English and German CMS copy are separate values. Treat saved German copy as owner-authored content across products, scents, About, and Care: never translate into it or trim/normalize it during saving or display. Use the existing translation only when the German field is empty.
 
-**Why:** The owner explicitly requires entered product text to remain unchanged by translation.
+**Why:** The owner explicitly requires entered German text to remain unchanged by translation, including About and Care copy.
 
-**How to apply:** Persist German product and scent fields exactly as entered, and render them verbatim for German visitors when non-empty. Only fall back to translated English copy when the saved German value is blank.
+**How to apply:** Persist each language field exactly as entered and render German copy verbatim when non-empty. Only fall back to the existing German translation when no saved German value exists.

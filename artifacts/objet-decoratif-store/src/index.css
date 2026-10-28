@@ -1450,6 +1450,9 @@ a {
 .about-facts-grid .about-fragrance-copy {
   white-space: pre-line;
 }
+.page-copy-text {
+  white-space: pre-line;
+}
 .faq-content {
   max-width: 1000px;
   margin: 0 auto;

@@ -321,6 +321,23 @@ export interface Catalog {
   scents: Scent[];
 }
 
+export interface PageCopy {
+  key: string;
+  english: string;
+  german: string;
+}
+
+export interface PageCopyInput {
+  /** @pattern ^(about|care)\.[a-z0-9][a-z0-9.-]*$ */
+  key: string;
+  english: string;
+  german: string;
+}
+
+export interface PageCopyUpdate {
+  items: PageCopyInput[];
+}
+
 export interface UploadUrlRequest {
   /** @minLength 1 */
   name: string;

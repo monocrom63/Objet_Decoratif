@@ -24,6 +24,7 @@ import { omitUnchangedMediaFields } from "@/lib/catalog-form-payload";
 import { formatScentNotes } from "@/lib/scent-copy";
 
 import { useToast } from "@/hooks/use-toast";
+import { PageCopyCms } from "./page-copy-cms";
 
 const productSchema = z.object({
   id: z.string().min(1, "ID is required"),
@@ -845,6 +846,8 @@ export function CatalogCms() {
           </div>
         </div>
       </section>
+
+      <PageCopyCms />
 
       {/* Product Drawer */}
       <div

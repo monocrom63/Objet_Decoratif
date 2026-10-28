@@ -121,6 +121,49 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Catalog" }
+  /page-copy:
+    get:
+      operationId: getPageCopy
+      tags: [site-content]
+      responses:
+        "200":
+          description: Saved About and Care copy overrides
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PageCopy" }
+  /admin/page-copy:
+    get:
+      operationId: getAdminPageCopy
+      tags: [admin]
+      responses:
+        "200":
+          description: Saved About and Care copy overrides
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PageCopy" }
+        "403": { description: Admin access required }
+    patch:
+      operationId: updateAdminPageCopy
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PageCopyUpdate" }
+      responses:
+        "200":
+          description: Saved page copy values
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PageCopy" }
+        "400": { description: Invalid page copy values }
+        "403": { description: Admin access required }
   /admin/catalog/initialize:
     post:
       operationId: initializeCatalog
@@ -458,6 +501,27 @@ components:
       properties:
         products: { type: array, items: { $ref: "#/components/schemas/Product" } }
         scents: { type: array, items: { $ref: "#/components/schemas/Scent" } }
+    PageCopy:
+      type: object
+      required: [key, english, german]
+      properties:
+        key: { type: string }
+        english: { type: string }
+        german: { type: string }
+    PageCopyInput:
+      type: object
+      required: [key, english, german]
+      properties:
+        key: { type: string, pattern: "^(about|care)\\.[a-z0-9][a-z0-9.-]*$" }
+        english: { type: string }
+        german: { type: string }
+    PageCopyUpdate:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/PageCopyInput" }
     UploadUrlRequest:
       type: object
       required: [name, size, contentType]

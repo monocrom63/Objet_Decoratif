@@ -13,6 +13,8 @@ test("DE changes shop and checkout copy; EN retains the exact original headline"
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
   assert.match(app, /<h1 className="hero-keyword">Objects<br \/><em>With a Glow<\/em><\/h1>/);
   assert.doesNotMatch(app, /<h1 className="hero-keyword">\{t\("Refillable concrete candles"\)\}<\/h1>/);
+  assert.match(app, /label="Objet Décoratif"/);
+  assert.doesNotMatch(app, /label=\{t\("OD"\)\}/);
 });
 
 test("price disclosures show dispatch timing and the free-shipping threshold", () => {

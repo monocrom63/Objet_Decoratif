@@ -196,7 +196,7 @@
 .od-product-page__price {
   flex: none;
   padding-top: 10px;
-  font: 12px var(--od-mono);
+  font: 28px var(--od-mono);
   white-space: nowrap;
 }
 

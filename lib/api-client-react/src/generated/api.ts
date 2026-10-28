@@ -28,6 +28,8 @@ import type {
   OrderCreationResult,
   OrderInput,
   OrderStatusUpdate,
+  PageCopy,
+  PageCopyUpdate,
   Product,
   ProductInput,
   ProductUpdate,
@@ -657,6 +659,230 @@ export function useGetCatalog<TData = Awaited<ReturnType<typeof getCatalog>>, TE
 
 
 
+
+export const getGetPageCopyUrl = () => {
+
+
+
+
+  return `/api/page-copy`
+}
+
+export const getPageCopy = async ( options?: Parameters<typeof customFetch>[1]): Promise<PageCopy[]> => {
+
+  return customFetch<PageCopy[]>(getGetPageCopyUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPageCopyQueryKey = () => {
+    return [
+    `/api/page-copy`
+    ] as const;
+    }
+
+
+export const getGetPageCopyQueryOptions = <TData = Awaited<ReturnType<typeof getPageCopy>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPageCopy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPageCopyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPageCopy>>> = ({ signal }) => getPageCopy({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPageCopy>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPageCopyQueryResult = NonNullable<Awaited<ReturnType<typeof getPageCopy>>>
+export type GetPageCopyQueryError = ErrorType<unknown>
+
+
+
+export function useGetPageCopy<TData = Awaited<ReturnType<typeof getPageCopy>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPageCopy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPageCopyQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAdminPageCopyUrl = () => {
+
+
+
+
+  return `/api/admin/page-copy`
+}
+
+export const getAdminPageCopy = async ( options?: Parameters<typeof customFetch>[1]): Promise<PageCopy[]> => {
+
+  return customFetch<PageCopy[]>(getGetAdminPageCopyUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminPageCopyQueryKey = () => {
+    return [
+    `/api/admin/page-copy`
+    ] as const;
+    }
+
+
+export const getGetAdminPageCopyQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPageCopy>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPageCopy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPageCopyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPageCopy>>> = ({ signal }) => getAdminPageCopy({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPageCopy>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminPageCopyQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPageCopy>>>
+export type GetAdminPageCopyQueryError = ErrorType<void>
+
+
+
+export function useGetAdminPageCopy<TData = Awaited<ReturnType<typeof getAdminPageCopy>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPageCopy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminPageCopyQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateAdminPageCopyUrl = () => {
+
+
+
+
+  return `/api/admin/page-copy`
+}
+
+export const updateAdminPageCopy = async (pageCopyUpdate: PageCopyUpdate, options?: Parameters<typeof customFetch>[1]): Promise<PageCopy[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PageCopy[]>(getUpdateAdminPageCopyUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(pageCopyUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminPageCopyMutationKey = () => ['updateAdminPageCopy'] as const;
+
+export const getUpdateAdminPageCopyMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminPageCopy>>, TError,UpdateAdminPageCopyMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminPageCopy>>, TError,UpdateAdminPageCopyMutationVariables, TContext> => {
+
+const mutationKey = getUpdateAdminPageCopyMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminPageCopy>>, UpdateAdminPageCopyMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateAdminPageCopy(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminPageCopyMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminPageCopy>>>
+    export type UpdateAdminPageCopyMutationBody = BodyType<PageCopyUpdate>
+    export type UpdateAdminPageCopyMutationError = ErrorType<void>
+    export type UpdateAdminPageCopyMutationVariables = {data: BodyType<PageCopyUpdate>}
+
+    export const useUpdateAdminPageCopy = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminPageCopy>>, TError,UpdateAdminPageCopyMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminPageCopy>>,
+        TError,
+        UpdateAdminPageCopyMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateAdminPageCopyMutationOptions(options));
+    }
 
 export const getInitializeCatalogUrl = () => {
 

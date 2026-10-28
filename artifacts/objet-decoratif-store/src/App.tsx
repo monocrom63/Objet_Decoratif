@@ -51,6 +51,7 @@ import {
   localizedScentNotes,
 } from "@/lib/scent-copy";
 import { useLanguage } from "@/lib/language";
+import { useSitePageCopy } from "@/lib/site-page-copy";
 import { CONTACT_EMAIL } from "@/lib/store-config";
 import { freeShippingProgress, shippingForSubtotal } from "@/lib/commerce-pricing";
 import { scentShowcaseSource } from "@/lib/scent-media";
@@ -843,7 +844,7 @@ function Header({
             >{t("Scents")}</DropdownMenuItem>
           </HeaderNavMenu>
           <HeaderNavMenu
-            label={t("OD")}
+            label="Objet Décoratif"
             testId="button-od-menu"
             open={openMenu === "od"}
             onOpenChange={(open) => changeMenu("od", open)}
@@ -1388,6 +1389,7 @@ function ContactPage() {
 
 function CarePage() {
   const { t, locale } = useLanguage();
+  const { copy } = useSitePageCopy();
   return (
     <EditorialPageFrame>
       <section className="care-top">
@@ -1410,14 +1412,14 @@ function CarePage() {
           <div className="editorial-hero-copy">
             <div className="section-kicker">{t("Candle care / Objet Décoratif")}</div>
             <span className="eyebrow">{t("A considered flame / Care guide")}</span>
-            <h1>{t("Care for")}<br />
-              <em>{t("the flame.")}</em>
+            <h1>{copy("care.hero.title.first")}<br />
+              <em>{copy("care.hero.title.second")}</em>
             </h1>
-            <p>{t("A few considered habits help every candle burn evenly, keep the vessel clean and let the perfume unfold as intended.")}</p>
+            <p className="page-copy-text">{copy("care.hero.description")}</p>
             <a className="outline-button" href="#care-essentials">{t("View the essentials ")}<ArrowDown size={13} />
             </a>
           </div>
-          <div className="editorial-hero-note">{t("Even burn / Clean vessel / Balanced scent")}</div>
+          <div className="editorial-hero-note page-copy-text">{copy("care.hero.note")}</div>
         </div>
       </section>
       <section
@@ -1428,63 +1430,63 @@ function CarePage() {
           <span>{t("Wax / Wick / Vessel")}</span>
         </div>
         <div className="editorial-section-content">
-          <div className="section-kicker">{t("Care extends the ritual")}</div>
-          <h2>{t("A clean, even burn starts with the wick.")}</h2>
+          <div className="section-kicker">{copy("care.essentials.kicker")}</div>
+          <h2 className="page-copy-text">{copy("care.essentials.heading")}</h2>
           <div className="care-intro-copy">
-            <p>{t("We tested numerous wax and wick combinations. This pairing was selected for a steady burn and balanced scent diffusion. Caring for it well helps the candle perform as intended.")}</p>
-            <p>{t("Let the wax pool become fully liquid on the first burn, keep the wick centered and remove any debris before lighting. Small adjustments make a noticeable difference.")}</p>
+            <p className="page-copy-text">{copy("care.essentials.intro")}</p>
+            <p className="page-copy-text">{copy("care.essentials.instructions")}</p>
           </div>
         </div>
         <div className="care-facts">
           <div>
             <strong>{t("5 mm")}</strong>
-            <span>{t("Wick trim only after the wax has fully set.")}</span>
+              <span className="page-copy-text">{copy("care.facts.wick")}</span>
           </div>
           <div>
             <strong>{t("1½–2 h")}</strong>
-            <span>{t("Recommended burn time for regular-sized candles.")}</span>
+              <span className="page-copy-text">{copy("care.facts.recommended")}</span>
           </div>
           <div>
             <strong>{t("4 h")}</strong>
-            <span>{t("Do not exceed four hours in one burn.")}</span>
+              <span className="page-copy-text">{copy("care.facts.maximum")}</span>
           </div>
           <div>
             <strong>{t("10 mm")}</strong>
-            <span>{t("Stop burning when this amount of wax remains.")}</span>
+              <span className="page-copy-text">{copy("care.facts.finish")}</span>
           </div>
         </div>
       </section>
       <section className="care-split care-steps">
         <div className="care-step-copy">
           <div className="section-kicker">{t("02 / Step by step / Wax / Wick / Vessel")}</div>
-          <h2>{t("How to care")}<br />{t("for your candle.")}</h2>
+          <h2>{copy("care.steps.title.first")}<br />{copy("care.steps.title.second")}</h2>
           <div className="care-step-list">
             <div>
               <span>01</span>
               <div>
-                <h3>{t("The first burn")}</h3>
-                <p>{t("Allow the melt pool to become fully liquid and reach the edges of the refill. This establishes an even burn and helps prevent tunnelling during future use.")}</p>
+                    <h3>{copy("care.steps.first.title")}</h3>
+                    <p className="page-copy-text">{copy("care.steps.first")}</p>
               </div>
             </div>
             <div>
               <span>02</span>
               <div>
-                <h3>{t("Each time you burn")}</h3>
-                <p>{t("Place the candle in a well-ventilated room, away from drafts and fans. Burn regular-sized candles for 1½–2 hours at a time and never longer than four hours.")}</p>
+                    <h3>{copy("care.steps.each.title")}</h3>
+                    <p className="page-copy-text">{copy("care.steps.each")}</p>
               </div>
             </div>
             <div>
               <span>03</span>
               <div>
-                <h3>{t("Care for the wick")}</h3>
-                <p>{t("Keep the wax pool free from wick trimmings, matches and debris. After extinguishing, gently re-center the wick while the wax is still soft. Once fully set, trim it to approximately 5 mm.")}</p>
+                    <h3>{copy("care.steps.wick.title")}</h3>
+                    <p className="page-copy-text">{copy("care.steps.wick")}</p>
               </div>
             </div>
             <div>
               <span>04</span>
               <div>
-                <h3>{t("Extinguish and finish")}</h3>
-                <p>{t("Use the lid or a candle snuffer to extinguish the flame. Let the vessel cool before touching or moving it. Discontinue use when approximately 10 mm of wax remains at the bottom.")}</p>
+                    <h3>{copy("care.steps.finish.title")}</h3>
+                    <p className="page-copy-text">{copy("care.steps.finish")}</p>
               </div>
             </div>
           </div>
@@ -1494,35 +1496,35 @@ function CarePage() {
       <section className="care-split care-safety">
         <div className="care-safety-copy">
           <div className="section-kicker">{t("03 / Safety first")}</div>
-          <h2>{t("Never leave a burning candle unattended.")}</h2>
+          <h2 className="page-copy-text">{copy("care.safety.heading")}</h2>
         </div>
         <div className="care-safety-list">
           <div>
             <span>01</span>
             <div>
-              <h3>{t("Keep a clear space")}</h3>
-              <p>{t("Keep away from children, pets and flammable materials.")}</p>
+                <h3>{copy("care.safety.clear.title")}</h3>
+                <p className="page-copy-text">{copy("care.safety.clear")}</p>
             </div>
           </div>
           <div>
             <span>02</span>
             <div>
-              <h3>{t("Use a stable surface")}</h3>
-              <p>{t("Place on a stable, heat-resistant surface.")}</p>
+                <h3>{copy("care.safety.surface.title")}</h3>
+                <p className="page-copy-text">{copy("care.safety.surface")}</p>
             </div>
           </div>
           <div>
             <span>03</span>
             <div>
-              <h3>{t("Watch the flame")}</h3>
-              <p>{t("Extinguish if the flame becomes unusually high or the wick moves close to the vessel wall.")}</p>
+                <h3>{copy("care.safety.flame.title")}</h3>
+                <p className="page-copy-text">{copy("care.safety.flame")}</p>
             </div>
           </div>
           <div>
             <span>04</span>
             <div>
-              <h3>{t("Let the vessel cool")}</h3>
-              <p>{t("Allow the vessel and wax to cool completely before handling.")}</p>
+                <h3>{copy("care.safety.cool.title")}</h3>
+                <p className="page-copy-text">{copy("care.safety.cool")}</p>
             </div>
           </div>
         </div>
@@ -1531,10 +1533,10 @@ function CarePage() {
         <CareImageSlideshow />
         <div className="care-closing-copy">
           <div className="section-kicker">{t("04 / Continue the ritual / Form / Scent")}</div>
-          <h2>{t("Keep the vessel.")}<br />
-            <em>{t("Renew the scent.")}</em>
+          <h2>{copy("care.closing.title.vessel")}<br />
+            <em>{copy("care.closing.title.scent")}</em>
           </h2>
-          <p>{t("Once the candle is finished and the vessel has cooled completely, continue with a new refill. The object remains; only the atmosphere changes.")}</p>
+          <p className="page-copy-text">{copy("care.closing.description")}</p>
           <a className="solid-button" href="/#collection">{t("Shop refills ")}<ArrowRight size={13} />
           </a>
         </div>
@@ -1545,6 +1547,7 @@ function CarePage() {
 
 function AboutPage() {
   const { t, locale } = useLanguage();
+  const { copy } = useSitePageCopy();
   const aboutPortraitSrc = `${import.meta.env.BASE_URL}images/about/thorsten-garage.webp`;
   const aboutPortraitAlt = t("Black-and-white portrait of a seated man holding a candle vessel.");
   const grasseImageSrc = `${import.meta.env.BASE_URL}images/about/grasse-sign.webp`;
@@ -1555,14 +1558,14 @@ function AboutPage() {
         <div className="editorial-hero-copy">
           <div className="section-kicker">{t("About / Objet Décoratif")}</div>
           <span className="eyebrow">{t("Berlin / Grasse")}</span>
-          <h1>{t("Objects")}<br />
-            <em>{t("with meaning.")}</em>
+          <h1>{copy("about.hero.title.objects")}<br />
+            <em>{copy("about.hero.title.meaning")}</em>
           </h1>
-          <p>{t("A long-standing passion for interiors, transformed into handpicked objects that give a space character, permanence and quiet intention.")}</p>
+          <p className="page-copy-text">{copy("about.hero.description")}</p>
           <a className="outline-button" href="#about-story">{t("Read our approach ")}<ArrowDown size={13} />
           </a>
         </div>
-        <div className="editorial-hero-note">{t("Sculptural objects / Refillable by design")}</div>
+        <div className="editorial-hero-note page-copy-text">{copy("about.hero.note")}</div>
       </section>
       <section className="editorial-section about-story" id="about-story">
         <div className="editorial-section-label">{t("01 / Our approach")}</div>
@@ -1575,29 +1578,29 @@ function AboutPage() {
             />
           </figure>
           <div className="editorial-section-content">
-            <div className="section-kicker">{t("Curated with intention")}</div>
-            <h2>{t("We do not simply inhabit spaces. We fill them with meaning.")}</h2>
+            <div className="section-kicker">{copy("about.story.kicker")}</div>
+            <h2 className="page-copy-text">{copy("about.story.heading")}</h2>
             <div className="about-intro-copy">
-              <p>{t("Objet Décoratif transforms a long-standing passion for interior design and decoration into handpicked, extraordinary objects. It is the result of a conscious decision: not just to inhabit spaces, but to fill them with meaning.")}</p>
-              <p>{t("Our selection follows a simple rule — we curate only what we truly love ourselves. Beautiful things belong together when they share the same care, clarity and intention.")}</p>
+              <p className="page-copy-text">{copy("about.story.intro")}</p>
+              <p className="page-copy-text">{copy("about.story.selection")}</p>
             </div>
           </div>
         </div>
         <div className="about-principles">
           <div>
             <span>01</span>
-            <h3>{t("Curated with intention")}</h3>
-            <p>{t("Only objects we would choose for our own spaces — considered, distinctive and made with care.")}</p>
+            <h3>{copy("about.story.kicker")}</h3>
+            <p className="page-copy-text">{copy("about.principle.curated")}</p>
           </div>
           <div>
             <span>02</span>
-            <h3>{t("Designed to remain")}</h3>
-            <p>{t("Sculptural vessels that continue beyond the first flame: objects to keep, refill and return to.")}</p>
+            <h3>{copy("about.principle.remain.title")}</h3>
+            <p className="page-copy-text">{copy("about.principle.remain")}</p>
           </div>
           <div>
             <span>03</span>
-            <h3>{t("Scents from Grasse")}</h3>
-            <p>{t("Our candle perfumes are developed with specialists in Grasse and selected to complement every form.")}</p>
+            <h3>{copy("about.principle.scents.title")}</h3>
+            <p className="page-copy-text">{copy("about.principle.scents")}</p>
           </div>
         </div>
       </section>
@@ -1608,18 +1611,18 @@ function AboutPage() {
             <img src={grasseImageSrc} alt={grasseImageAlt} loading="lazy" />
           </figure>
           <div className="editorial-section-content">
-            <div className="section-kicker">{t("Berlin / Grasse")}</div>
-            <h2>{t("From the atelier to the atmosphere.")}</h2>
+            <div className="section-kicker">{copy("about.facts.kicker")}</div>
+            <h2>{copy("about.facts.heading")}</h2>
             <div className="about-facts-grid">
               <article>
                 <span>01</span>
-                <h3>{t("Berlin atelier")}</h3>
-                <p>{t("Each refill is hand-poured in our Berlin atelier and precisely tailored to our sculptures.")}</p>
+                <h3>{copy("about.facts.berlin.title")}</h3>
+                <p className="page-copy-text">{copy("about.facts.berlin")}</p>
               </article>
               <article>
                 <span>02</span>
-                <h3>{t("Fragrance from Grasse")}</h3>
-                <p className="about-fragrance-copy">{t("Grasse is considered the perfume capital of the world. This small town in the south of France, in Provence near the French Riviera, has been closely associated with the art of perfumery for centuries. Its significance lies in the combination of an ideal climate, precious fragrance ingredients, and an exceptional tradition of fragrance composition.")}</p>
+                <h3>{copy("about.facts.grasse.title")}</h3>
+                <p className="about-fragrance-copy page-copy-text">{copy("about.facts.grasse")}</p>
               </article>
             </div>
           </div>
@@ -1628,12 +1631,12 @@ function AboutPage() {
       <section className="editorial-closing about-closing">
         <div className="about-closing-main">
           <div className="section-kicker">{t("The refill ritual / 02")}</div>
-          <h2>{t("Keep the object.")}<br />
-            <em>{t("Change the atmosphere.")}</em>
+          <h2>{copy("about.closing.title.object")}<br />
+            <em>{copy("about.closing.title.atmosphere")}</em>
           </h2>
         </div>
         <div className="about-closing-side">
-          <p>{t("Filling spaces with objects that genuinely make you want to have them — that is what we are all about. Not just for ourselves, but for everyone who knows that beauty and care in the details matter.")}</p>
+          <p className="page-copy-text">{copy("about.closing.description")}</p>
           <a className="solid-button" href="/#collection">{t("Explore the forms ")}<ArrowRight size={13} />
           </a>
         </div>

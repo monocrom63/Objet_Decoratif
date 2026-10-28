@@ -19,3 +19,4 @@
 
 export * from "./commerce";
 export * from "./catalog";
+export * from "./page-copy";
