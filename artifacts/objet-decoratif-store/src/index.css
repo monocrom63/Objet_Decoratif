@@ -1697,6 +1697,12 @@ a {
   font-size: 14px;
   line-height: 1.65;
 }
+.about-hero .editorial-hero-copy > p,
+.care-hero .editorial-hero-copy > p {
+  width: 100%;
+  max-width: none;
+  padding-right: 20px;
+}
 .editorial-hero-note {
   position: relative;
   z-index: 1;
