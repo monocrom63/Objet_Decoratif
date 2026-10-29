@@ -1677,9 +1677,14 @@ a {
   z-index: 1;
   max-width: 720px;
 }
-.about-hero .editorial-hero-copy,
 .care-top-copy .editorial-hero-copy {
   flex: 1 1 0;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+.about-page-hero .editorial-hero-copy {
+  flex: 1 1 auto;
   width: 100%;
   max-width: none;
   min-width: 0;
@@ -1704,11 +1709,36 @@ a {
   font-size: 14px;
   line-height: 1.65;
 }
-.about-hero .editorial-hero-copy > p,
+.about-page-hero .editorial-hero-copy > p,
 .care-top-copy .editorial-hero-copy > p {
   width: 100%;
   max-width: none;
   padding-right: 20px;
+}
+.care-top-copy .editorial-hero-copy > p {
+  max-height: min(28vh, 250px);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-color: rgba(245, 241, 232, 0.55) rgba(245, 241, 232, 0.12);
+  scrollbar-width: thin;
+}
+.care-top-copy .editorial-hero-copy > p::-webkit-scrollbar {
+  width: 6px;
+}
+.care-top-copy .editorial-hero-copy > p::-webkit-scrollbar-track {
+  background: rgba(245, 241, 232, 0.12);
+}
+.care-top-copy .editorial-hero-copy > p::-webkit-scrollbar-thumb {
+  background: rgba(245, 241, 232, 0.55);
+}
+.care-top-copy .editorial-hero-copy > p:focus-visible {
+  outline: 1px solid rgba(245, 241, 232, 0.55);
+  outline-offset: 4px;
+}
+.about-page-hero .editorial-hero-note {
+  position: absolute;
+  right: 5vw;
+  bottom: 70px;
 }
 .editorial-hero-note {
   position: relative;
@@ -4130,6 +4160,11 @@ a {
   }
   .editorial-hero-note {
     margin-top: 48px;
+  }
+  .about-page-hero .editorial-hero-note {
+    position: relative;
+    right: auto;
+    bottom: auto;
   }
   .editorial-section {
     display: block;

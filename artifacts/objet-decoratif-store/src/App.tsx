@@ -1415,7 +1415,7 @@ function CarePage() {
             <h1>{copy("care.hero.title.first")}<br />
               <em>{copy("care.hero.title.second")}</em>
             </h1>
-            <p className="page-copy-text">{copy("care.hero.description")}</p>
+            <p className="page-copy-text" tabIndex={0}>{copy("care.hero.description")}</p>
             <a className="outline-button" href="#care-essentials">{t("View the essentials ")}<ArrowDown size={13} />
             </a>
           </div>
@@ -1554,7 +1554,7 @@ function AboutPage() {
   const grasseImageAlt = t("Black-and-white photograph of a Grasse town sign.");
   return (
     <EditorialPageFrame>
-      <section className="editorial-hero about-hero">
+      <section className="editorial-hero about-hero about-page-hero">
         <div className="editorial-hero-copy">
           <div className="section-kicker">{t("About / Objet Décoratif")}</div>
           <span className="eyebrow">{t("Berlin / Grasse")}</span>
