@@ -368,8 +368,8 @@ a {
   display: contents;
 }
 .intro-item {
-  min-height: 210px;
-  padding: 35px 4vw;
+  min-height: 0;
+  padding: 24px 4vw;
   border-right: 1px solid var(--line);
 }
 .intro-track > .intro-item:nth-child(3) {
@@ -377,12 +377,6 @@ a {
 }
 .intro-slide-clone {
   display: none;
-}
-.intro-number {
-  display: block;
-  margin-bottom: 40px;
-  color: var(--saffron);
-  font: 10px var(--mono);
 }
 .intro-item h2 {
   margin: 0 0 10px;
@@ -417,6 +411,10 @@ a {
   margin: 0;
   font: 400 clamp(48px, 6vw, 88px)/0.88 var(--hero);
   letter-spacing: -0.035em;
+}
+#collection .section-title {
+  font: 400 clamp(26px, 3vw, 38px)/1 var(--hero);
+  letter-spacing: normal;
 }
 .section-title em {
   font-style: normal;
@@ -3900,15 +3898,12 @@ a {
     flex: 0 0 100%;
     min-width: 0;
     min-height: auto;
-    padding: 27px 20px 20px;
+    padding: 18px 20px 16px;
     border-right: 0;
     border-bottom: 0;
   }
   .intro-slide-clone {
     display: block;
-  }
-  .intro-number {
-    margin-bottom: 14px;
   }
   .section {
     padding: 75px 20px;
@@ -3919,6 +3914,10 @@ a {
   .section-header {
     display: block;
     margin-bottom: 17.5px;
+  }
+  #collection .section-title {
+    font-size: clamp(22px, 6vw, 30px);
+    line-height: 1;
   }
   .product-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

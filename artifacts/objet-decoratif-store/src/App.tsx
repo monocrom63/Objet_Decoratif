@@ -2741,17 +2741,14 @@ function IntroStrip() {
 
   const slides = [
     {
-      number: t("01 / Form"),
       heading: <>{t("Cast in concrete.")}<br />{t("Built to last.")}</>,
       description: t("Quiet architecture for the everyday."),
     },
     {
-      number: t("02 / Scent"),
       heading: t("Four fragrances."),
       description: t("Endlessly renewable, never overpowering."),
     },
     {
-      number: t("03 / Ritual"),
       heading: <>{t("Burn. Refill.")}<br />{t("Repeat.")}</>,
       description: t("One beautiful object, many lives."),
     },
@@ -2761,7 +2758,7 @@ function IntroStrip() {
   return (
     <section
       className="intro-strip"
-      aria-label={`${t("01 / Form")} · ${t("02 / Scent")} · ${t("03 / Ritual")}`}
+      aria-label={`${t("Cast in concrete.")} · ${t("Four fragrances.")} · ${t("Burn. Refill.")}`}
     >
       <div
         className={`intro-track${isResetting ? " is-resetting" : ""}`}
@@ -2776,12 +2773,11 @@ function IntroStrip() {
           return (
             <div
               className={`intro-item${isLoopClone ? " intro-slide-clone" : ""}`}
-              key={`${slide.number}-${index}`}
+              key={index}
               role="group"
-              aria-label={isLoopClone ? undefined : `${slide.number}, ${index + 1} / ${slides.length}`}
+              aria-label={isLoopClone ? undefined : `${index + 1} / ${slides.length}`}
               aria-hidden={isLoopClone || undefined}
             >
-              <span className="intro-number">{slide.number}</span>
               <h2>{slide.heading}</h2>
               <p>{slide.description}</p>
             </div>
