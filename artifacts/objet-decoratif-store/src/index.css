@@ -383,7 +383,7 @@ a {
   font: 400 clamp(28px, 3vw, 44px)/0.95 var(--hero);
 }
 .intro-item p {
-  max-width: 240px;
+  max-width: 340px;
   margin: 0;
   color: #68665e;
   font-size: 13px;
@@ -413,7 +413,7 @@ a {
   letter-spacing: -0.035em;
 }
 #collection .section-title {
-  font: 400 clamp(26px, 3vw, 38px)/1 var(--hero);
+  font: 400 68px/1 var(--hero);
   letter-spacing: normal;
 }
 .section-title em {
@@ -3902,6 +3902,9 @@ a {
     border-right: 0;
     border-bottom: 0;
   }
+  .intro-item p {
+    max-width: 240px;
+  }
   .intro-slide-clone {
     display: block;
   }
@@ -3916,7 +3919,7 @@ a {
     margin-bottom: 17.5px;
   }
   #collection .section-title {
-    font-size: clamp(22px, 6vw, 30px);
+    font-size: 28px;
     line-height: 1;
   }
   .product-card-grid {
