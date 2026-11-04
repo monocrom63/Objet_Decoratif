@@ -345,6 +345,7 @@ export const german: Record<string, string> = {
   "Choose product media": "Produktansicht wählen",
   "Previous scent": "Vorheriger Duft",
   "Next scent": "Nächster Duft",
+  "About principles": "Grundsätze",
   "Refill size": "Refill-Größe",
   "Refill scent": "Refill-Duft",
   "Signature scent images and videos": "Duftbilder und Videos",

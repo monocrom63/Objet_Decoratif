@@ -1548,10 +1548,60 @@ function CarePage() {
 function AboutPage() {
   const { t, locale } = useLanguage();
   const { copy } = useSitePageCopy();
+  const [activePrincipleSlide, setActivePrincipleSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const aboutPortraitSrc = `${import.meta.env.BASE_URL}images/about/thorsten-garage.webp`;
   const aboutPortraitAlt = t("Black-and-white portrait of a seated man holding a candle vessel.");
   const grasseImageSrc = `${import.meta.env.BASE_URL}images/about/grasse-sign.webp`;
   const grasseImageAlt = t("Black-and-white photograph of a Grasse town sign.");
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 760px)");
+    const updateViewport = () => {
+      const mobile = mobileQuery.matches;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setActivePrincipleSlide(0);
+        setIsResetting(false);
+      }
+    };
+
+    updateViewport();
+    mobileQuery.addEventListener("change", updateViewport);
+    return () => mobileQuery.removeEventListener("change", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const timer = window.setTimeout(() => {
+      if (activePrincipleSlide === 3) {
+        setIsResetting(true);
+        setActivePrincipleSlide(0);
+        window.requestAnimationFrame(() => setIsResetting(false));
+        return;
+      }
+      setActivePrincipleSlide((current) => current + 1);
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [activePrincipleSlide, isMobile]);
+
+  const principles = [
+    {
+      title: copy("about.story.kicker"),
+      description: copy("about.principle.curated"),
+    },
+    {
+      title: copy("about.principle.remain.title"),
+      description: copy("about.principle.remain"),
+    },
+    {
+      title: copy("about.principle.scents.title"),
+      description: copy("about.principle.scents"),
+    },
+  ];
+  const loopPrinciples = [...principles, { ...principles[0], isLoopClone: true }];
+
   return (
     <EditorialPageFrame>
       <section className="editorial-hero about-hero about-page-hero">
@@ -1586,18 +1636,30 @@ function AboutPage() {
             </div>
           </div>
         </div>
-        <div className="about-principles">
-          <div>
-            <h3>{copy("about.story.kicker")}</h3>
-            <p className="page-copy-text">{copy("about.principle.curated")}</p>
-          </div>
-          <div>
-            <h3>{copy("about.principle.remain.title")}</h3>
-            <p className="page-copy-text">{copy("about.principle.remain")}</p>
-          </div>
-          <div>
-            <h3>{copy("about.principle.scents.title")}</h3>
-            <p className="page-copy-text">{copy("about.principle.scents")}</p>
+        <div className="about-principles" role="region" aria-label={t("About principles")}>
+          <div
+            className={`about-principles-track${isResetting ? " is-resetting" : ""}`}
+            style={
+              isMobile
+                ? { transform: `translate3d(-${activePrincipleSlide * 100}%, 0, 0)` }
+                : undefined
+            }
+          >
+            {loopPrinciples.map((principle, index) => {
+              const isLoopClone = index === principles.length;
+              return (
+                <div
+                  className={`about-principle-item${isLoopClone ? " about-principle-clone" : ""}`}
+                  key={index}
+                  role="group"
+                  aria-label={isLoopClone ? undefined : `${index + 1} / ${principles.length}`}
+                  aria-hidden={isLoopClone || undefined}
+                >
+                  <h3>{principle.title}</h3>
+                  <p className="page-copy-text">{principle.description}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
