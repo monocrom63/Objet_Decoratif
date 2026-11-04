@@ -2205,12 +2205,8 @@ a {
   border-right: 0;
   padding-right: 0;
 }
-.about-principles span {
-  color: var(--saffron);
-  font: 10px var(--mono);
-}
 .about-principles h3 {
-  margin: 18px 0 10px;
+  margin: 0 0 10px;
   font: 400 clamp(28px, 3vw, 44px)/0.95 var(--hero);
 }
 .about-principles p {
@@ -4304,7 +4300,7 @@ a {
     border-bottom: 0;
   }
   .about-principles h3 {
-    margin: 12px 0 10px;
+    margin: 0 0 10px;
     font-size: 28px !important;
     line-height: 0.95;
   }

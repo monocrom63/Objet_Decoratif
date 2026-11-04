@@ -1588,17 +1588,14 @@ function AboutPage() {
         </div>
         <div className="about-principles">
           <div>
-            <span>01</span>
             <h3>{copy("about.story.kicker")}</h3>
             <p className="page-copy-text">{copy("about.principle.curated")}</p>
           </div>
           <div>
-            <span>02</span>
             <h3>{copy("about.principle.remain.title")}</h3>
             <p className="page-copy-text">{copy("about.principle.remain")}</p>
           </div>
           <div>
-            <span>03</span>
             <h3>{copy("about.principle.scents.title")}</h3>
             <p className="page-copy-text">{copy("about.principle.scents")}</p>
           </div>
