@@ -2703,6 +2703,95 @@ function CheckoutPage() {
   );
 }
 
+function IntroStrip() {
+  const { t } = useLanguage();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 760px)");
+    const updateViewport = () => {
+      const mobile = mobileQuery.matches;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setActiveSlide(0);
+        setIsResetting(false);
+      }
+    };
+
+    updateViewport();
+    mobileQuery.addEventListener("change", updateViewport);
+    return () => mobileQuery.removeEventListener("change", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const timer = window.setTimeout(() => {
+      if (activeSlide === 3) {
+        setIsResetting(true);
+        setActiveSlide(0);
+        window.requestAnimationFrame(() => setIsResetting(false));
+        return;
+      }
+      setActiveSlide((current) => current + 1);
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [activeSlide, isMobile]);
+
+  const slides = [
+    {
+      number: t("01 / Form"),
+      heading: <>{t("Cast in concrete.")}<br />{t("Built to last.")}</>,
+      description: t("Quiet architecture for the everyday."),
+    },
+    {
+      number: t("02 / Scent"),
+      heading: t("Four fragrances."),
+      description: t("Endlessly renewable, never overpowering."),
+    },
+    {
+      number: t("03 / Ritual"),
+      heading: <>{t("Burn. Refill.")}<br />{t("Repeat.")}</>,
+      description: t("One beautiful object, many lives."),
+    },
+  ];
+  const loopSlides = [...slides, { ...slides[0], isLoopClone: true }];
+
+  return (
+    <section
+      className="intro-strip"
+      aria-label={`${t("01 / Form")} · ${t("02 / Scent")} · ${t("03 / Ritual")}`}
+    >
+      <div
+        className={`intro-track${isResetting ? " is-resetting" : ""}`}
+        style={
+          isMobile
+            ? { transform: `translate3d(-${activeSlide * 100}%, 0, 0)` }
+            : undefined
+        }
+      >
+        {loopSlides.map((slide, index) => {
+          const isLoopClone = index === slides.length;
+          return (
+            <div
+              className={`intro-item${isLoopClone ? " intro-slide-clone" : ""}`}
+              key={`${slide.number}-${index}`}
+              role="group"
+              aria-label={isLoopClone ? undefined : `${slide.number}, ${index + 1} / ${slides.length}`}
+              aria-hidden={isLoopClone || undefined}
+            >
+              <span className="intro-number">{slide.number}</span>
+              <h2>{slide.heading}</h2>
+              <p>{slide.description}</p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function Store({ productSlug }: { productSlug?: string } = {}) {
   const { t, locale } = useLanguage();
   const { products, scents, isLoading } = useCatalogFrontend();
@@ -2829,23 +2918,7 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
                 ?.scrollIntoView({ behavior: "smooth" })
             }
           />
-          <section className="intro-strip">
-            <div className="intro-item">
-              <span className="intro-number">{t("01 / Form")}</span>
-              <h2>{t("Cast in concrete.")}<br />{t("Built to last.")}</h2>
-              <p>{t("Quiet architecture for the everyday.")}</p>
-            </div>
-            <div className="intro-item">
-              <span className="intro-number">{t("02 / Scent")}</span>
-              <h2>{t("Four fragrances.")}</h2>
-              <p>{t("Endlessly renewable, never overpowering.")}</p>
-            </div>
-            <div className="intro-item">
-              <span className="intro-number">{t("03 / Ritual")}</span>
-              <h2>{t("Burn. Refill.")}<br />{t("Repeat.")}</h2>
-              <p>{t("One beautiful object, many lives.")}</p>
-            </div>
-          </section>
+          <IntroStrip />
           <Collection
             products={products}
             scents={scents}
