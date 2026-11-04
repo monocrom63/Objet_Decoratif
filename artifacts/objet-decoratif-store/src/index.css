@@ -2122,6 +2122,10 @@ a {
 .about-story {
   background: var(--bone);
 }
+.editorial-section.about-story {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
 .editorial-section.about-story,
 .editorial-section.about-facts {
   grid-template-columns: 160px minmax(0, 1fr);
