@@ -12,7 +12,7 @@ const faqEntries = [
   {
     question: "Which refill sizes are available?",
     answer:
-      "The shop lists a small 190 g refill and a big 245 g refill. If you are unsure which size is right for your vessel, contact us before ordering.",
+      "The shop lists a 100 g refill and a 245 g refill. If you are unsure which size is right for your vessel, contact us before ordering.",
   },
   {
     question: "How long does the 245 g refill burn?",

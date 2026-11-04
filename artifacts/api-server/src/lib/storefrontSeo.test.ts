@@ -99,6 +99,23 @@ test("product descriptions preserve line breaks and the long copy follows the ga
   );
 });
 
+test("refill product page lists both sizes and starts at the 100 g price", () => {
+  const refill = {
+    ...product,
+    id: "refill",
+    name: "Refill",
+    priceCents: 3_800,
+  };
+  const html = renderProductSeoHtml(refill, scents, '<script src="/app.js"></script>');
+  assert.match(html, /"@type":"AggregateOffer","url":"https:\/\/objet-decoratif-storefront\.replit\.app\/produkte\/refill","priceCurrency":"EUR","lowPrice":"30\.00","highPrice":"38\.00","offerCount":2/);
+  assert.match(html, /<option value="100 g" selected>100 g · €30\.00<\/option>/);
+  assert.match(html, /<option value="245 g">245 g · €38\.00<\/option>/);
+  assert.match(html, /class="od-product-page__price">€30\.00<\/span>/);
+  assert.match(html, /Add to cart · €30\.00/);
+  assert.match(html, /size\.addEventListener\("change", updatePrice\)/);
+  assert.match(html, /size\.value === "245 g" \? "38\.00" : "30\.00"/);
+});
+
 test("managed object image paths use the public storage URL", () => {
   assert.equal(
     absoluteMediaUrl("/objects/uploads/product.webp"),

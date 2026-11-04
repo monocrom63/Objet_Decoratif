@@ -7,6 +7,12 @@ import { isVideoPath } from "@/lib/media";
 import { useLanguage } from "@/lib/language";
 import { localizedProductDescription } from "@/lib/product-copy";
 import type { FrontendProduct } from "@/lib/catalog";
+import {
+  priceForProductVariant,
+  REFILL_SIZES,
+  refillVariant,
+  type RefillSize,
+} from "@/lib/refill-pricing";
 
 export function ProductCardGrid({
   products,
@@ -34,11 +40,16 @@ function ProductCard({
   const { t, locale } = useLanguage();
   const scents = product.scentOptions ?? [];
   const [selectedScent, setSelectedScent] = useState(scents[0]?.name ?? product.scents[0] ?? "");
-  const [selectedSize, setSelectedSize] = useState<"Small" | "Big">("Small");
+  const [selectedSize, setSelectedSize] = useState<RefillSize>("100 g");
   const image = product.images?.find((path) => !isVideoPath(path));
+  const selectedPrice = priceForProductVariant(
+    product.id,
+    product.price,
+    selectedSize,
+  );
   const selectedVariant =
     product.id === "refill"
-      ? `${selectedSize} / ${selectedScent}`
+      ? refillVariant(selectedSize, selectedScent)
       : selectedScent;
 
   return (
@@ -72,22 +83,22 @@ function ProductCard({
               </Link>
             </h3>
           </div>
-          <strong>€{product.price.toFixed(2)}</strong>
+          <strong>€{selectedPrice.toFixed(2)}</strong>
         </div>
         <p className="product-card__description">{localizedProductDescription(product, locale, t)}</p>
         <PriceDisclosure className="price-disclosure--catalog" />
         {product.id === "refill" && (
           <div className="product-card__sizes" role="group" aria-label={t("Refill size")}>
-            {(["Small", "Big"] as const).map((size) => (
+            {REFILL_SIZES.map((size) => (
               <button
                 key={size}
                 type="button"
                 className={selectedSize === size ? "is-selected" : ""}
                 onClick={() => setSelectedSize(size)}
                 aria-pressed={selectedSize === size}
-                data-testid={`button-product-card-size-${size.toLowerCase()}`}
+                data-testid={`button-product-card-size-${size.replace(/\s/g, "")}`}
               >
-                {t(size === "Small" ? "Small (190g)" : "Big (245g)")}
+                {size}
               </button>
             ))}
           </div>
@@ -114,7 +125,7 @@ function ProductCard({
           onClick={() => onAdd(product, selectedVariant, 1)}
           data-testid={`button-product-card-add-${product.id}`}
         >
-          {t("Add to cart")} · €{product.price.toFixed(2)}
+          {t("Add to cart")} · €{selectedPrice.toFixed(2)}
           <ArrowRight size={14} aria-hidden="true" />
         </button>
       </div>

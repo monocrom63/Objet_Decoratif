@@ -13,6 +13,12 @@ import {
   localizedScentNotes,
 } from "@/lib/scent-copy";
 import type { FrontendProduct } from "@/lib/catalog";
+import {
+  priceForProductVariant,
+  REFILL_SIZES,
+  refillVariant,
+  type RefillSize,
+} from "@/lib/refill-pricing";
 import "./product-detail-page.css";
 
 type ProductDetailPageProps = {
@@ -29,7 +35,7 @@ export function ProductDetailPage({
   const scents = product.scentOptions ?? [];
   const [activeImage, setActiveImage] = useState(0);
   const [selectedScent, setSelectedScent] = useState(scents[0]?.name ?? "");
-  const [selectedSize, setSelectedSize] = useState<"Small" | "Big">("Small");
+  const [selectedSize, setSelectedSize] = useState<RefillSize>("100 g");
 
   useEffect(() => {
     setActiveImage(0);
@@ -37,8 +43,13 @@ export function ProductDetailPage({
 
   useEffect(() => {
     setSelectedScent(scents[0]?.name ?? "");
-    setSelectedSize("Small");
+    setSelectedSize("100 g");
   }, [product.id, product.scentOptions]);
+  const selectedPrice = priceForProductVariant(
+    product.id,
+    product.price,
+    selectedSize,
+  );
 
   const moveImage = (direction: number) => {
     if (images.length < 2) return;
@@ -147,7 +158,7 @@ export function ProductDetailPage({
           <div className="od-product-page__heading">
             <h1 id="od-product-title">{product.name}</h1>
             <span className="od-product-page__price" data-testid={`text-price-${product.id}`}>
-              €{product.price}
+              €{selectedPrice.toFixed(2)}
             </span>
           </div>
           <PriceDisclosure className="price-disclosure--product" />
@@ -157,16 +168,16 @@ export function ProductDetailPage({
             <fieldset className="od-product-page__scent-options">
               <legend>{t("Refill size")}</legend>
               <div className="product-card__sizes">
-                {(["Small", "Big"] as const).map((size) => (
+                {REFILL_SIZES.map((size) => (
                   <button
                     key={size}
                     type="button"
                     className={selectedSize === size ? "is-selected" : ""}
                     onClick={() => setSelectedSize(size)}
                     aria-pressed={selectedSize === size}
-                    data-testid={`button-product-detail-size-${size.toLowerCase()}`}
+                    data-testid={`button-product-detail-size-${size.replace(/\s/g, "")}`}
                   >
-                    {t(size === "Small" ? "Small (190g)" : "Big (245g)")}
+                    {size}
                   </button>
                 ))}
               </div>
@@ -218,13 +229,13 @@ export function ProductDetailPage({
               onBuy(
                 product,
                 product.id === "refill"
-                  ? `${selectedSize} / ${selectedScent}`
+                  ? refillVariant(selectedSize, selectedScent)
                   : selectedScent,
               )
             }
             data-testid={`button-buy-${product.id}`}
           >
-            <span>{t("Add to cart")} · €{product.price.toFixed(2)}</span>
+            <span>{t("Add to cart")} · €{selectedPrice.toFixed(2)}</span>
             <ArrowRight size={16} aria-hidden="true" />
           </button>
           <div className="od-product-page__trust" data-testid="product-trust-details">

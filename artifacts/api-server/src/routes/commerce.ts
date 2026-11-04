@@ -18,6 +18,7 @@ import { configuredAdminEmails, isVerifiedConfiguredAdmin, initialStoreRole } fr
 import { createGuestOrderLimiter } from "../lib/guestOrderLimit.ts";
 import { shippingCentsForSubtotal } from "../lib/commercePricing.ts";
 import { OrderConfirmationEmailError, sendOrderConfirmationEmail } from "../lib/orderConfirmationEmail.ts";
+import { orderItemPriceCents } from "../lib/refillPricing.ts";
 
 const router: IRouter = Router();
 const allowGuestOrder = createGuestOrderLimiter();
@@ -116,7 +117,19 @@ router.post("/orders", async (req, res): Promise<void> => {
   const items = parsed.data.items.map((item) => {
     const product = catalogProducts.find((entry) => entry.id === item.productId && entry.active && entry.published);
     if (!product) throw new Error(`Unknown or unavailable product: ${item.productId}`);
-    return { productId: item.productId, name: product.name, scent: item.scent, quantity: item.quantity, unitPrice: product.priceCents / 100, lineTotal: product.priceCents * item.quantity / 100 };
+    const unitPriceCents = orderItemPriceCents(
+      product.id,
+      product.priceCents,
+      item.scent,
+    );
+    return {
+      productId: item.productId,
+      name: product.name,
+      scent: item.scent,
+      quantity: item.quantity,
+      unitPrice: unitPriceCents / 100,
+      lineTotal: unitPriceCents * item.quantity / 100,
+    };
   });
   if (parsed.data.guest && !allowGuestOrder(req.ip ?? "unknown", parsed.data.email)) {
     res.setHeader("Retry-After", "900");

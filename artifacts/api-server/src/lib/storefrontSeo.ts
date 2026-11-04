@@ -102,18 +102,33 @@ function productJsonLd(
           "@type": "Brand",
           name: "Objet Décoratif",
         },
-        offers: {
-          "@type": "Offer",
-          url: canonicalUrl,
-          priceCurrency: "EUR",
-          price: (product.priceCents / 100).toFixed(2),
-          availability: "https://schema.org/InStock",
-          itemCondition: "https://schema.org/NewCondition",
-          seller: {
-            "@type": "Organization",
-            name: "Objet Décoratif",
-          },
-        },
+        offers:
+          product.id === "refill"
+            ? {
+                "@type": "AggregateOffer",
+                url: canonicalUrl,
+                priceCurrency: "EUR",
+                lowPrice: "30.00",
+                highPrice: "38.00",
+                offerCount: 2,
+                availability: "https://schema.org/InStock",
+                seller: {
+                  "@type": "Organization",
+                  name: "Objet Décoratif",
+                },
+              }
+            : {
+                "@type": "Offer",
+                url: canonicalUrl,
+                priceCurrency: "EUR",
+                price: (product.priceCents / 100).toFixed(2),
+                availability: "https://schema.org/InStock",
+                itemCondition: "https://schema.org/NewCondition",
+                seller: {
+                  "@type": "Organization",
+                  name: "Objet Décoratif",
+                },
+              },
       },
       {
         "@type": "Organization",
@@ -180,10 +195,31 @@ export function renderProductSeoHtml(
         .join("")}</div></fieldset>`
     : "";
   const mediaMarkup = renderMedia(product, origin);
-  const price = (product.priceCents / 100).toFixed(2);
+  const priceCents = product.id === "refill" ? 3_000 : product.priceCents;
+  const price = (priceCents / 100).toFixed(2);
   const refillSizeMarkup =
     product.id === "refill"
-      ? `<label class="od-product-page__refill-size"><span>Size</span><select name="size" aria-label="Refill size"><option value="Small">Small (190 g)</option><option value="Big">Big (245 g)</option></select></label>`
+      ? `<label class="od-product-page__refill-size"><span>Size</span><select name="size" aria-label="Refill size"><option value="100 g" selected>100 g · €30.00</option><option value="245 g">245 g · €38.00</option></select></label>`
+      : "";
+  const refillPriceScript =
+    product.id === "refill"
+      ? `<script>
+(() => {
+  const size = document.querySelector('select[name="size"]');
+  if (!size) return;
+  const price = document.querySelector('.od-product-page__price');
+  const addButton = document.querySelector('.od-product-page__buy span');
+  const updatePrice = () => {
+    const amount = size.value === "245 g" ? "38.00" : "30.00";
+    if (price) price.textContent = "€" + amount;
+    if (addButton) addButton.textContent = "Add to cart · €" + amount;
+    const meta = document.querySelector('meta[property="product:price:amount"]');
+    if (meta) meta.setAttribute("content", amount);
+  };
+  size.addEventListener("change", updatePrice);
+  updatePrice();
+})();
+</script>`
       : "";
 
   return `<!doctype html>
@@ -258,6 +294,7 @@ export function renderProductSeoHtml(
         </main>
       </div>
     </div>
+    ${refillPriceScript}
   </body>
 </html>`;
 }

@@ -80,9 +80,9 @@ test("brand names, user content and canonical order values stay unchanged", () =
   for (const name of ["Objet Décoratif", "Barrique", "Thé", "Santal Cruz"]) {
     assert.equal(translate(name, "DE"), name);
   }
-  const canonicalVariant = "Big / Santal Cruz";
-  assert.equal(translate(canonicalVariant, "DE"), "Groß / Santal Cruz");
-  assert.equal(canonicalVariant, "Big / Santal Cruz");
+  const canonicalVariant = "245 g / Santal Cruz";
+  assert.equal(translate(canonicalVariant, "DE"), canonicalVariant);
+  assert.equal(canonicalVariant, "245 g / Santal Cruz");
   assert.equal(translate(canonicalVariant, "EN"), canonicalVariant);
   assert.equal(translate("New customer-written copy", "DE"), "New customer-written copy");
 });
@@ -106,7 +106,7 @@ test("all supplied scent descriptions and notes have German translations", () =>
 test("country labels are localized without changing submitted country values", () => {
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
   assert.match(app, /<option value="Germany">\{t\("Germany"\)\}<\/option>/);
-  assert.match(app, /<option value="Small">\{t\("Small \(190g\)"\)\}<\/option>/);
+  assert.match(app, /REFILL_SIZES\.map/);
   assert.equal(translate("Germany", "DE"), "Deutschland");
 });
 

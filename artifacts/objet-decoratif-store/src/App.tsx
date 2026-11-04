@@ -73,6 +73,15 @@ import {
   type ScentOption,
   type ProductCollection,
 } from "@/lib/catalog";
+import {
+  normalizeRefillVariant,
+  priceForProductVariant,
+  REFILL_SIZES,
+  refillPriceEur,
+  refillSizeFromVariant,
+  refillVariant,
+  type RefillSize,
+} from "@/lib/refill-pricing";
 import { CatalogCms } from "@/components/admin/catalog-cms";
 import { demoOrders, demoUsers } from "@/components/admin/demo-data";
 import { useGetCatalog } from "@workspace/api-client-react";
@@ -200,15 +209,26 @@ function updateStorePageSeo(
         category: product.category,
         ...(images.length ? { image: images } : {}),
         brand: { "@type": "Brand", name: "Objet Décoratif" },
-        offers: {
-          "@type": "Offer",
-          url: canonicalUrl,
-          priceCurrency: "EUR",
-          price: product.price.toFixed(2),
-          availability: "https://schema.org/InStock",
-          itemCondition: "https://schema.org/NewCondition",
-          seller: { "@type": "Organization", name: "Objet Décoratif" },
-        },
+        offers: isRefill
+          ? {
+              "@type": "AggregateOffer",
+              url: canonicalUrl,
+              priceCurrency: "EUR",
+              lowPrice: "30.00",
+              highPrice: "38.00",
+              offerCount: 2,
+              availability: "https://schema.org/InStock",
+              seller: { "@type": "Organization", name: "Objet Décoratif" },
+            }
+          : {
+              "@type": "Offer",
+              url: canonicalUrl,
+              priceCurrency: "EUR",
+              price: product.price.toFixed(2),
+              availability: "https://schema.org/InStock",
+              itemCondition: "https://schema.org/NewCondition",
+              seller: { "@type": "Organization", name: "Objet Décoratif" },
+            },
       },
       {
         "@type": "Organization",
@@ -248,7 +268,13 @@ function readStoredCart(): CartLine[] {
     const stored = window.localStorage.getItem(CART_STORAGE_KEY);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? parsed.map((line: CartLine) =>
+          line.product?.id === "refill"
+            ? { ...line, scent: normalizeRefillVariant(line.scent) }
+            : line,
+        )
+      : [];
   } catch {
     return [];
   }
@@ -515,9 +541,10 @@ function RefillShowcase({
   onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
-  const [size, setSize] = useState<"Small" | "Big">("Small");
+  const [size, setSize] = useState<RefillSize>("100 g");
   const [scent, setScent] = useState("Thé");
-  const selectedVariant = `${size} / ${scent}`;
+  const selectedPrice = refillPriceEur(size);
+  const selectedVariant = refillVariant(size, scent);
 
   return (
     <article
@@ -536,7 +563,7 @@ function RefillShowcase({
             <h3>{t("Refill")}</h3>
             <p>{t("A new atmosphere for the form you already love.")}</p>
           </div>
-          <span className="object-price">€{product.price}</span>
+          <span className="object-price">€{selectedPrice}</span>
         </div>
         <PriceDisclosure className="price-disclosure--catalog" />
         <div className="refill-options">
@@ -548,12 +575,15 @@ function RefillShowcase({
                 className="refill-select"
                 value={size}
                 onChange={(event) =>
-                  setSize(event.target.value as "Small" | "Big")
+                  setSize(event.target.value as RefillSize)
                 }
                 aria-label={t("Refill size")}
               >
-                <option value="Small">{t("Small (190g)")}</option>
-                <option value="Big">{t("Big (245g)")}</option>
+                {REFILL_SIZES.map((refillSize) => (
+                  <option key={refillSize} value={refillSize}>
+                    {refillSize}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
@@ -582,7 +612,7 @@ function RefillShowcase({
           type="button"
           onClick={() => onAdd(product, selectedVariant, 1)}
           data-testid="button-open-object-refill"
-        >{t("Add to cart")} · €{product.price.toFixed(2)}<ArrowRight size={14} />
+        >{t("Add to cart")} · €{selectedPrice.toFixed(2)}<ArrowRight size={14} />
         </button>
       </div>
       <div className="object-explanation">
@@ -700,7 +730,7 @@ function ScentShowcase({
           <button
             className="solid-button object-buy-button scent-buy-button"
             type="button"
-            onClick={() => onAdd(product, `Big / ${selected.name}`, 1)}
+            onClick={() => onAdd(product, refillVariant("245 g", selected.name), 1)}
             data-testid={`button-open-scent-${selected.name.toLowerCase().replace(" ", "-")}`}
           >{t("Add to cart")} · €{product.price.toFixed(2)} <ArrowRight size={14} />
           </button>
@@ -1773,6 +1803,7 @@ function ProductModal({
       product?.scents[0] ??
       "",
   );
+  const [size, setSize] = useState<RefillSize>("100 g");
   const [quantity, setQuantity] = useState(1);
   useEffect(() => {
     setScent(
@@ -1781,9 +1812,15 @@ function ProductModal({
         product?.scents[0] ??
         "",
     );
+    setSize("100 g");
     setQuantity(1);
   }, [initialScent, product]);
   if (!product) return null;
+  const selectedPrice = priceForProductVariant(
+    product.id,
+    product.price,
+    size,
+  );
   const scentOptions =
     product.scentOptions ?? product.scents.map((name) => ({ name }));
   return (
@@ -1821,13 +1858,28 @@ function ProductModal({
           <div className="section-kicker">{product.collection}{t(" collection")}</div>
           <h2>{product.name}</h2>
           <p className="modal-subtitle">{localizedProductDescription(product, locale, t)}</p>
-          <div className="modal-price">€{product.price}{t(" EUR")}</div>
+          <div className="modal-price">€{selectedPrice.toFixed(2)}{t(" EUR")}</div>
           <PriceDisclosure className="price-disclosure--modal" />
           <span className="option-label">
             {product.id === "refill"
               ? t("Choose size & scent")
               : t("Choose your scent")}
           </span>
+          {product.id === "refill" && (
+            <div className="product-card__sizes" role="group" aria-label={t("Refill size")}>
+              {REFILL_SIZES.map((refillSize) => (
+                <button
+                  key={refillSize}
+                  type="button"
+                  className={size === refillSize ? "is-selected" : ""}
+                  onClick={() => setSize(refillSize)}
+                  aria-pressed={size === refillSize}
+                >
+                  {refillSize}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="scent-options">
             {scentOptions.map((item) => (
               <button
@@ -1862,7 +1914,13 @@ function ProductModal({
             <button
               className="solid-button"
               onClick={() => {
-                onAdd(product, scent, quantity);
+                onAdd(
+                  product,
+                  product.id === "refill"
+                    ? refillVariant(size, scent)
+                    : scent,
+                  quantity,
+                );
                 onClose();
               }}
               data-testid="button-add-to-cart"
@@ -1892,7 +1950,10 @@ function CartDrawer({
 }) {
   const { t, locale } = useLanguage();
   const total = lines.reduce(
-    (sum, line) => sum + line.product.price * line.quantity,
+    (sum, line) =>
+      sum +
+      priceForProductVariant(line.product.id, line.product.price, line.scent) *
+        line.quantity,
     0,
   );
   const shippingProgress = freeShippingProgress(total);
@@ -1971,7 +2032,13 @@ function CartDrawer({
                   </div>
                 </div>
                 <span className="cart-item-price">
-                  €{line.product.price * line.quantity}
+                  €{(
+                    priceForProductVariant(
+                      line.product.id,
+                      line.product.price,
+                      line.scent,
+                    ) * line.quantity
+                  ).toFixed(2)}
                 </span>
               </div>
             ))
@@ -2009,12 +2076,14 @@ function CartDrawer({
                 )}
                 <div>
                   <span>{t("Complete the ritual")}</span>
-                  <strong>{t("Add a small refill (190g)")}</strong>
-                  <small>€{refillProduct.price.toFixed(2)}</small>
+                  <strong>{t("Add a 100 g refill")}</strong>
+                  <small>€{refillPriceEur("100 g").toFixed(2)}</small>
                 </div>
                 <button
                   type="button"
-                  onClick={() => onAdd(refillProduct, `Small / ${refillScent}`, 1)}
+                  onClick={() =>
+                    onAdd(refillProduct, refillVariant("100 g", refillScent), 1)
+                  }
                   aria-label={`${t("Add")} ${refillProduct.name}`}
                   data-testid="button-cart-add-refill"
                 >
@@ -2090,7 +2159,10 @@ function CheckoutPage() {
   const [confirmationEmailStatus, setConfirmationEmailStatus] = useState<"sent" | "failed" | "not_applicable">("not_applicable");
   const createOrder = useCreateOrder();
   const subtotal = lines.reduce(
-    (sum, line) => sum + line.product.price * line.quantity,
+    (sum, line) =>
+      sum +
+      priceForProductVariant(line.product.id, line.product.price, line.scent) *
+        line.quantity,
     0,
   );
   const hasAddress = Boolean(
@@ -2152,7 +2224,11 @@ function CheckoutPage() {
             name: line.product.name,
             scent: line.scent,
             quantity: line.quantity,
-            unitPrice: line.product.price,
+            unitPrice: priceForProductVariant(
+              line.product.id,
+              line.product.price,
+              line.scent,
+            ),
           })),
         },
       });
@@ -2546,7 +2622,13 @@ function CheckoutPage() {
                           {t(line.scent)}{t(" · Quantity ")}{line.quantity}
                         </small>
                       </span>
-                      <b>€{(line.product.price * line.quantity).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+                      <b>€{(
+                        priceForProductVariant(
+                          line.product.id,
+                          line.product.price,
+                          line.scent,
+                        ) * line.quantity
+                      ).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                     </div>
                   ))}
                 </div>
@@ -2729,7 +2811,13 @@ function CheckoutPage() {
                       >{t("Remove")}</button>
                     </div>
                   </div>
-                  <b>€{(line.product.price * line.quantity).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+                  <b>€{(
+                    priceForProductVariant(
+                      line.product.id,
+                      line.product.price,
+                      line.scent,
+                    ) * line.quantity
+                  ).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                 </div>
               ))}
             </div>
@@ -2864,9 +2952,12 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
   const handledDirectAdd = useRef(false);
   const addToCart = useCallback(
     (product: Product, scent: string, quantity: number) => {
+      const normalizedScent =
+        product.id === "refill" ? normalizeRefillVariant(scent) : scent;
       setCart((current) => {
         const found = current.find(
-          (line) => line.product.id === product.id && line.scent === scent,
+          (line) =>
+            line.product.id === product.id && line.scent === normalizedScent,
         );
         if (found)
           return current.map((line) =>
@@ -2874,7 +2965,7 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
               ? { ...line, quantity: line.quantity + quantity }
               : line,
           );
-        return [...current, { product, scent, quantity }];
+        return [...current, { product, scent: normalizedScent, quantity }];
       });
       setCartOpen(true);
     },
@@ -2904,10 +2995,12 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
         requestedScent && choices.includes(requestedScent)
           ? requestedScent
           : choices[0] ?? "";
-      const requestedSize = params.get("size");
-      const size = requestedSize === "Big" ? "Big" : "Small";
+      const requestedSize = params.get("size") ?? "";
+      const size = refillSizeFromVariant(requestedSize) ?? "100 g";
       const variant =
-        requestedProduct.id === "refill" ? `${size} / ${scent}` : scent;
+        requestedProduct.id === "refill"
+          ? refillVariant(size, scent)
+          : scent;
       addToCart(requestedProduct, variant, 1);
       const cleanUrl = new URL(window.location.href);
       ["add", "product", "scent", "size"].forEach((key) =>
