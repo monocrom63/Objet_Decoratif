@@ -3919,7 +3919,7 @@ a {
     margin-bottom: 17.5px;
   }
   #collection .section-title {
-    font-size: 32px;
+    font-size: 32px !important;
     line-height: 1;
   }
   .product-card-grid {
