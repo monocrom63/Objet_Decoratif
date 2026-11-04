@@ -2195,7 +2195,7 @@ a {
   }
 }
 .about-principles > div {
-  min-height: 230px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding: 18px 20px 18px 20px;
@@ -2210,14 +2210,15 @@ a {
   font: 10px var(--mono);
 }
 .about-principles h3 {
-  margin: 50px 0 11px;
-  font: 400 25px var(--hero);
+  margin: 18px 0 10px;
+  font: 400 clamp(28px, 3vw, 44px)/0.95 var(--hero);
 }
 .about-principles p {
+  max-width: 340px;
   margin: 0;
   color: #777369;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.55;
 }
 .about-closing {
   display: grid;
@@ -4303,7 +4304,9 @@ a {
     border-bottom: 0;
   }
   .about-principles h3 {
-    margin-top: 30px;
+    margin: 12px 0 10px;
+    font-size: 28px !important;
+    line-height: 0.95;
   }
   .about-closing {
     display: block;

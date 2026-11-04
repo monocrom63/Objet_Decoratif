@@ -836,7 +836,7 @@ function Header({
               className="header-nav-item"
               onSelect={() => navTo("collection")}
               data-testid="link-shop-collection"
-            >{t("Candels")}</DropdownMenuItem>
+            >{t("Candles")}</DropdownMenuItem>
             <DropdownMenuItem
               className="header-nav-item"
               onSelect={() => navTo("scents")}

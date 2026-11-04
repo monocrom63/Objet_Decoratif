@@ -9,7 +9,7 @@ export const german: Record<string, string> = {
   "Upload a separate landscape image or video for the Scents section. Recommended image size: 1920 × 1080 px (16:9). This file is not reused beside the product. Videos loop automatically without player controls.": "Eigenständiges Querformat-Bild oder -Video für den Scents-Bereich hochladen. Empfohlene Bildgröße: 1920 × 1080 px (16:9). Diese Datei wird nicht neben dem Produkt wiederverwendet. Videos starten automatisch als Loop ohne Player-Steuerung.",
   ...catalogGerman,
   "Products": "Produkte",
-  "Candels": "Kerzen",
+  "Candles": "Kerzen",
   "Scents": "Düfte",
   "About": "Über uns",
   "Care": "Pflege",
