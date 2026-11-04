@@ -369,7 +369,7 @@ a {
 }
 .intro-item {
   min-height: 0;
-  padding: 24px 4vw;
+  padding: 44px;
   border-right: 1px solid var(--line);
 }
 .intro-track > .intro-item:nth-child(3) {
