@@ -108,12 +108,30 @@ test("refill product page lists both sizes and starts at the 100 g price", () =>
   };
   const html = renderProductSeoHtml(refill, scents, '<script src="/app.js"></script>');
   assert.match(html, /"@type":"AggregateOffer","url":"https:\/\/objet-decoratif-storefront\.replit\.app\/produkte\/refill","priceCurrency":"EUR","lowPrice":"30\.00","highPrice":"38\.00","offerCount":2/);
-  assert.match(html, /<option value="100 g" selected>100 g · €30\.00<\/option>/);
-  assert.match(html, /<option value="245 g">245 g · €38\.00<\/option>/);
+  assert.match(html, /<option value="100 g" data-price-cents="3000" selected>100 g · €30\.00<\/option>/);
+  assert.match(html, /<option value="245 g" data-price-cents="3800">245 g · €38\.00<\/option>/);
   assert.match(html, /class="od-product-page__price">€30\.00<\/span>/);
   assert.match(html, /Add to cart · €30\.00/);
   assert.match(html, /size\.addEventListener\("change", updatePrice\)/);
-  assert.match(html, /size\.value === "245 g" \? "38\.00" : "30\.00"/);
+  assert.match(html, /size\.selectedOptions\[0\]\?\.dataset\.priceCents/);
+});
+
+test("refill SEO and no-app product page use CMS-configured sizes and prices", () => {
+  const refill = {
+    ...product,
+    id: "refill",
+    name: "Refill",
+    priceCents: 4_100,
+    refillOptions: [
+      { quantityGrams: 90, priceCents: 3_200 },
+      { quantityGrams: 250, priceCents: 4_100 },
+    ],
+  };
+  const html = renderProductSeoHtml(refill, scents, "");
+  assert.match(html, /"lowPrice":"32\.00","highPrice":"41\.00"/);
+  assert.match(html, /<option value="90 g" data-price-cents="3200" selected>90 g · €32\.00<\/option>/);
+  assert.match(html, /<option value="250 g" data-price-cents="4100">250 g · €41\.00<\/option>/);
+  assert.match(html, /class="od-product-page__price">€32\.00<\/span>/);
 });
 
 test("managed object image paths use the public storage URL", () => {

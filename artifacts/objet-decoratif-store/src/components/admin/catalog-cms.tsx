@@ -21,6 +21,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MultiImageUploader, SingleImageUploader } from "./image-uploader";
 import { useLanguage } from "@/lib/language";
 import { omitUnchangedMediaFields } from "@/lib/catalog-form-payload";
+import {
+  DEFAULT_REFILL_OPTIONS,
+  refillOptionsForProduct,
+} from "@/lib/refill-pricing";
 import { formatScentNotes } from "@/lib/scent-copy";
 
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +40,10 @@ const productSchema = z.object({
   explanation: z.string().min(1, "Explanation is required"),
   explanationDe: z.string().optional(),
   priceEuros: z.coerce.number().min(0),
+  refillOptions: z.array(z.object({
+    quantityGrams: z.coerce.number().int().min(1),
+    priceEuros: z.coerce.number().min(0),
+  })).default([]),
   tag: z.string().optional(),
   active: z.boolean().default(true),
   published: z.boolean().default(true),
@@ -84,6 +92,13 @@ function ProductForm({
             descriptionDe: product.descriptionDe ?? "",
             explanationDe: product.explanationDe ?? "",
           priceEuros: product.priceCents / 100,
+          refillOptions:
+            product.id === "refill"
+              ? refillOptionsForProduct(product.refillOptions).map((option) => ({
+                  quantityGrams: option.quantityGrams,
+                  priceEuros: option.priceCents / 100,
+                }))
+              : [],
           tag: product.tag || "",
         }
       : {
@@ -96,6 +111,7 @@ function ProductForm({
           explanation: "",
           explanationDe: "",
           priceEuros: 0,
+          refillOptions: [],
           tag: "",
           active: true,
           published: true,
@@ -105,14 +121,47 @@ function ProductForm({
         },
   });
 
+  const productId = form.watch("id");
+  useEffect(() => {
+    if (
+      productId === "refill" &&
+      form.getValues("refillOptions").length !== 2
+    ) {
+      form.setValue(
+        "refillOptions",
+        DEFAULT_REFILL_OPTIONS.map((option) => ({
+          quantityGrams: option.quantityGrams,
+          priceEuros: option.priceCents / 100,
+        })),
+        { shouldDirty: true },
+      );
+    }
+  }, [form, productId]);
+
   const { dirtyFields } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     if (uploading) return;
     try {
+      const { priceEuros, refillOptions: formRefillOptions, ...productValues } =
+        values;
+      const refillOptions =
+        values.id === "refill"
+          ? formRefillOptions.map((option) => ({
+              quantityGrams: option.quantityGrams,
+              priceCents: Math.round(option.priceEuros * 100),
+            }))
+          : [];
+      const largestRefillOption = [...refillOptions].sort(
+        (a, b) => b.quantityGrams - a.quantityGrams,
+      )[0];
       const data = {
-        ...values,
-        priceCents: Math.round(values.priceEuros * 100),
+        ...productValues,
+        priceCents:
+          values.id === "refill"
+            ? largestRefillOption?.priceCents ?? 0
+            : Math.round(priceEuros * 100),
+        refillOptions,
         tag: values.tag || null,
         descriptionDe: values.descriptionDe ?? null,
         explanationDe: values.explanationDe ?? null,
@@ -153,6 +202,7 @@ function ProductForm({
     handleSubmit,
     getValues,
   } = form;
+  const isRefill = watch("id") === "refill";
 
   return (
     <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="mt-8">
@@ -188,19 +238,75 @@ function ProductForm({
             <span className="error">{errors.category.message}</span>
           )}
         </div>
-        <div className="admin-form-group">
-          <label>Price (€)</label>
-          <input
-            type="number"
-            step="0.01"
-            className="admin-input"
-            {...register("priceEuros")}
-          />
-          {errors.priceEuros && (
-            <span className="error">{errors.priceEuros.message}</span>
+        {isRefill ? (
+          <div className="admin-form-group">
+            <label>Price (€)</label>
+            <p className="text-xs text-[#777369]">
+              The catalog price follows the price of the larger refill size.
+            </p>
+          </div>
+        ) : (
+          <div className="admin-form-group">
+            <label>Price (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              className="admin-input"
+              {...register("priceEuros")}
+            />
+            {errors.priceEuros && (
+              <span className="error">{errors.priceEuros.message}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {isRefill && (
+        <div className="admin-form-group mt-6" data-testid="refill-options-fields">
+          <label>Refill sizes and prices</label>
+          <p className="text-xs text-[#777369] mb-3">
+            Set the amount in grams and the price for each refill option.
+          </p>
+          <div className="admin-form-row">
+            {[0, 1].map((index) => (
+              <div className="admin-form-group" key={index}>
+                <div className="section-kicker">Size {index + 1}</div>
+                <label htmlFor={`refill-quantity-${index}`}>Amount (g)</label>
+                <input
+                  id={`refill-quantity-${index}`}
+                  type="number"
+                  min="1"
+                  step="1"
+                  className="admin-input"
+                  {...register(`refillOptions.${index}.quantityGrams` as const)}
+                />
+                {errors.refillOptions?.[index]?.quantityGrams && (
+                  <span className="error">
+                    {errors.refillOptions[index]?.quantityGrams?.message}
+                  </span>
+                )}
+                <label htmlFor={`refill-price-${index}`}>Price (€)</label>
+                <input
+                  id={`refill-price-${index}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="admin-input"
+                  {...register(`refillOptions.${index}.priceEuros` as const)}
+                />
+                {errors.refillOptions?.[index]?.priceEuros && (
+                  <span className="error">
+                    {errors.refillOptions[index]?.priceEuros?.message}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          {errors.refillOptions?.root && (
+            <span className="error">{errors.refillOptions.root.message}</span>
           )}
         </div>
-      </div>
+      )}
 
       <div className="admin-form-group">
         <label>Short Description</label>
@@ -718,7 +824,16 @@ export function CatalogCms() {
                     <span style={{ color: "var(--ink)" }}>{p.collection}</span>
                     <small>{p.category}</small>
                   </div>
-                  <div>€{(p.priceCents / 100).toFixed(2)}</div>
+                  <div>
+                    {p.id === "refill"
+                      ? refillOptionsForProduct(p.refillOptions)
+                          .map(
+                            (option) =>
+                              `${option.quantityGrams} g · €${(option.priceCents / 100).toFixed(2)}`,
+                          )
+                          .join(" / ")
+                      : `€${(p.priceCents / 100).toFixed(2)}`}
+                  </div>
                   <div>
                     <div className="flex flex-col gap-1 items-start">
                       <span

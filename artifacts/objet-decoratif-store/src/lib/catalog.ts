@@ -8,6 +8,7 @@ import {
   productFallbackFiles,
   scentFallbackFiles,
 } from "./catalog-fallbacks.ts";
+import type { RefillOption } from "./refill-pricing.ts";
 
 export type ProductCollection = string;
 
@@ -33,6 +34,7 @@ export type FrontendProduct = {
   explanation: string;
   explanationDe?: string | null;
   price: number; // in euros
+  refillOptions: RefillOption[];
   art: string; // derived from id/slug
   tag?: string;
   scents: string[];
@@ -120,6 +122,7 @@ export function mapApiCatalogToFrontend(catalog: ApiCatalog | undefined): {
         explanation: p.explanation,
         explanationDe: p.explanationDe,
         price: p.priceCents / 100,
+        refillOptions: p.refillOptions ?? [],
         art: `art-${p.id}`,
         tag: p.tag || undefined,
         scents: pScents.map((s) => s.name),

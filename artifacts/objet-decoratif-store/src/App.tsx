@@ -76,7 +76,7 @@ import {
 import {
   normalizeRefillVariant,
   priceForProductVariant,
-  REFILL_SIZES,
+  refillOptionsForProduct,
   refillPriceEur,
   refillSizeFromVariant,
   refillVariant,
@@ -154,6 +154,11 @@ function updateStorePageSeo(
   const canonicalUrl = product
     ? `${publicStoreOrigin}/produkte/${encodeURIComponent(product.id)}`
     : `${publicStoreOrigin}/`;
+  const refillPrices = isRefill
+    ? refillOptionsForProduct(product?.refillOptions).map(
+        (option) => option.priceCents / 100,
+      )
+    : [];
 
   document.title = title;
   updateMetaTag("name", "description", description);
@@ -163,6 +168,14 @@ function updateStorePageSeo(
   updateMetaTag("property", "og:title", title);
   updateMetaTag("property", "og:description", description);
   updateMetaTag("property", "og:url", canonicalUrl);
+  updateMetaTag(
+    "property",
+    "product:price:amount",
+    product
+      ? (isRefill ? refillPrices[0]! : product.price).toFixed(2)
+      : null,
+  );
+  updateMetaTag("property", "product:price:currency", product ? "EUR" : null);
   updateMetaTag("name", "twitter:card", "summary_large_image");
   updateMetaTag("name", "twitter:title", title);
   updateMetaTag("name", "twitter:description", description);
@@ -214,8 +227,8 @@ function updateStorePageSeo(
               "@type": "AggregateOffer",
               url: canonicalUrl,
               priceCurrency: "EUR",
-              lowPrice: "30.00",
-              highPrice: "38.00",
+              lowPrice: Math.min(...refillPrices).toFixed(2),
+              highPrice: Math.max(...refillPrices).toFixed(2),
               offerCount: 2,
               availability: "https://schema.org/InStock",
               seller: { "@type": "Organization", name: "Objet Décoratif" },
@@ -271,7 +284,13 @@ function readStoredCart(): CartLine[] {
     return Array.isArray(parsed)
       ? parsed.map((line: CartLine) =>
           line.product?.id === "refill"
-            ? { ...line, scent: normalizeRefillVariant(line.scent) }
+            ? {
+                ...line,
+                scent: normalizeRefillVariant(
+                  line.scent,
+                  line.product.refillOptions,
+                ),
+              }
             : line,
         )
       : [];
@@ -541,9 +560,17 @@ function RefillShowcase({
   onAdd: (p: Product, scent: string, quantity: number) => void;
 }) {
   const { t, locale } = useLanguage();
-  const [size, setSize] = useState<RefillSize>("100 g");
+  const refillOptions = refillOptionsForProduct(product.refillOptions);
+  const [size, setSize] = useState<RefillSize>(
+    refillOptions[0]!.quantityGrams,
+  );
+  useEffect(() => {
+    if (!refillOptions.some((option) => option.quantityGrams === size)) {
+      setSize(refillOptions[0]!.quantityGrams);
+    }
+  }, [product.refillOptions, refillOptions, size]);
   const [scent, setScent] = useState("Thé");
-  const selectedPrice = refillPriceEur(size);
+  const selectedPrice = refillPriceEur(size, refillOptions);
   const selectedVariant = refillVariant(size, scent);
 
   return (
@@ -573,15 +600,13 @@ function RefillShowcase({
               <span className="refill-select-label">{t("Size")}</span>
               <select
                 className="refill-select"
-                value={size}
-                onChange={(event) =>
-                  setSize(event.target.value as RefillSize)
-                }
+                value={String(size)}
+                onChange={(event) => setSize(Number(event.target.value))}
                 aria-label={t("Refill size")}
               >
-                {REFILL_SIZES.map((refillSize) => (
-                  <option key={refillSize} value={refillSize}>
-                    {refillSize}
+                {refillOptions.map((option) => (
+                  <option key={option.quantityGrams} value={option.quantityGrams}>
+                    {option.quantityGrams} g
                   </option>
                 ))}
               </select>
@@ -635,7 +660,20 @@ function ScentShowcase({
   const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const selected = scents[activeIndex];
-
+  const refillOptions = refillOptionsForProduct(product.refillOptions);
+  const largestRefill = [...refillOptions].sort(
+    (a, b) => b.quantityGrams - a.quantityGrams,
+  )[0]!;
+  const largestRefillVariant = refillVariant(
+    largestRefill.quantityGrams,
+    selected.name,
+  );
+  const largestRefillPrice = priceForProductVariant(
+    product.id,
+    product.price,
+    largestRefillVariant,
+    refillOptions,
+  );
   const changeScent = (direction: number) => {
     setActiveIndex(
       (current) => (current + direction + scents.length) % scents.length,
@@ -716,9 +754,14 @@ function ScentShowcase({
               <h3 key={selected.name} className="scent-showcase-title">
                 {selected.name}
               </h3>
-              <p>{t("245 gram refill · Up to 65H")}</p>
+              <p>
+                {t("245 gram refill · Up to 65H").replace(
+                  "245",
+                  String(largestRefill.quantityGrams),
+                )}
+              </p>
             </div>
-            <span className="object-price">€{product.price}</span>
+            <span className="object-price">€{largestRefillPrice.toFixed(2)}</span>
           </div>
           <PriceDisclosure className="price-disclosure--catalog" />
           <div className="scent-showcase-copy" key={`${selected.name}-copy`}>
@@ -730,9 +773,9 @@ function ScentShowcase({
           <button
             className="solid-button object-buy-button scent-buy-button"
             type="button"
-            onClick={() => onAdd(product, refillVariant("245 g", selected.name), 1)}
+            onClick={() => onAdd(product, largestRefillVariant, 1)}
             data-testid={`button-open-scent-${selected.name.toLowerCase().replace(" ", "-")}`}
-          >{t("Add to cart")} · €{product.price.toFixed(2)} <ArrowRight size={14} />
+          >{t("Add to cart")} · €{largestRefillPrice.toFixed(2)} <ArrowRight size={14} />
           </button>
         </div>
         <div className="object-explanation">
@@ -1803,7 +1846,10 @@ function ProductModal({
       product?.scents[0] ??
       "",
   );
-  const [size, setSize] = useState<RefillSize>("100 g");
+  const refillOptions = refillOptionsForProduct(product?.refillOptions);
+  const [size, setSize] = useState<RefillSize>(
+    refillOptions[0]!.quantityGrams,
+  );
   const [quantity, setQuantity] = useState(1);
   useEffect(() => {
     setScent(
@@ -1812,14 +1858,15 @@ function ProductModal({
         product?.scents[0] ??
         "",
     );
-    setSize("100 g");
+    setSize(refillOptions[0]!.quantityGrams);
     setQuantity(1);
-  }, [initialScent, product]);
+  }, [initialScent, product, refillOptions]);
   if (!product) return null;
   const selectedPrice = priceForProductVariant(
     product.id,
     product.price,
-    size,
+    `${size} g`,
+    product.refillOptions,
   );
   const scentOptions =
     product.scentOptions ?? product.scents.map((name) => ({ name }));
@@ -1867,15 +1914,15 @@ function ProductModal({
           </span>
           {product.id === "refill" && (
             <div className="product-card__sizes" role="group" aria-label={t("Refill size")}>
-              {REFILL_SIZES.map((refillSize) => (
+              {refillOptions.map((option) => (
                 <button
-                  key={refillSize}
+                  key={option.quantityGrams}
                   type="button"
-                  className={size === refillSize ? "is-selected" : ""}
-                  onClick={() => setSize(refillSize)}
-                  aria-pressed={size === refillSize}
+                  className={size === option.quantityGrams ? "is-selected" : ""}
+                  onClick={() => setSize(option.quantityGrams)}
+                  aria-pressed={size === option.quantityGrams}
                 >
-                  {refillSize}
+                  {option.quantityGrams} g
                 </button>
               ))}
             </div>
@@ -1952,7 +1999,12 @@ function CartDrawer({
   const total = lines.reduce(
     (sum, line) =>
       sum +
-      priceForProductVariant(line.product.id, line.product.price, line.scent) *
+      priceForProductVariant(
+        line.product.id,
+        line.product.price,
+        line.scent,
+        line.product.refillOptions,
+      ) *
         line.quantity,
     0,
   );
@@ -1960,6 +2012,9 @@ function CartDrawer({
   const alreadyHasRefill = lines.some((line) => line.product.id === "refill");
   const refillScent =
     refillProduct?.scentOptions?.[0]?.name ?? refillProduct?.scents[0] ?? "";
+  const refillSuggestionOption = refillProduct
+    ? refillOptionsForProduct(refillProduct.refillOptions)[0]!
+    : undefined;
   return (
     <>
       <div className={`overlay ${open ? "open" : ""}`} onClick={onClose} />
@@ -2037,6 +2092,7 @@ function CartDrawer({
                       line.product.id,
                       line.product.price,
                       line.scent,
+                      line.product.refillOptions,
                     ) * line.quantity
                   ).toFixed(2)}
                 </span>
@@ -2076,13 +2132,30 @@ function CartDrawer({
                 )}
                 <div>
                   <span>{t("Complete the ritual")}</span>
-                  <strong>{t("Add a 100 g refill")}</strong>
-                  <small>€{refillPriceEur("100 g").toFixed(2)}</small>
+                  <strong>
+                    {t("Add a 100 g refill").replace(
+                      "100",
+                      String(refillSuggestionOption?.quantityGrams ?? 100),
+                    )}
+                  </strong>
+                  <small>
+                    €{refillPriceEur(
+                      refillSuggestionOption?.quantityGrams ?? 100,
+                      refillProduct?.refillOptions,
+                    ).toFixed(2)}
+                  </small>
                 </div>
                 <button
                   type="button"
                   onClick={() =>
-                    onAdd(refillProduct, refillVariant("100 g", refillScent), 1)
+                    onAdd(
+                      refillProduct,
+                      refillVariant(
+                        refillSuggestionOption?.quantityGrams ?? 100,
+                        refillScent,
+                      ),
+                      1,
+                    )
                   }
                   aria-label={`${t("Add")} ${refillProduct.name}`}
                   data-testid="button-cart-add-refill"
@@ -2161,7 +2234,12 @@ function CheckoutPage() {
   const subtotal = lines.reduce(
     (sum, line) =>
       sum +
-      priceForProductVariant(line.product.id, line.product.price, line.scent) *
+      priceForProductVariant(
+        line.product.id,
+        line.product.price,
+        line.scent,
+        line.product.refillOptions,
+      ) *
         line.quantity,
     0,
   );
@@ -2228,6 +2306,7 @@ function CheckoutPage() {
               line.product.id,
               line.product.price,
               line.scent,
+              line.product.refillOptions,
             ),
           })),
         },
@@ -2627,6 +2706,7 @@ function CheckoutPage() {
                           line.product.id,
                           line.product.price,
                           line.scent,
+                          line.product.refillOptions,
                         ) * line.quantity
                       ).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                     </div>
@@ -2816,6 +2896,7 @@ function CheckoutPage() {
                       line.product.id,
                       line.product.price,
                       line.scent,
+                      line.product.refillOptions,
                     ) * line.quantity
                   ).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
                 </div>
@@ -2953,7 +3034,9 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
   const addToCart = useCallback(
     (product: Product, scent: string, quantity: number) => {
       const normalizedScent =
-        product.id === "refill" ? normalizeRefillVariant(scent) : scent;
+        product.id === "refill"
+          ? normalizeRefillVariant(scent, product.refillOptions)
+          : scent;
       setCart((current) => {
         const found = current.find(
           (line) =>
@@ -2974,6 +3057,29 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
+  useEffect(() => {
+    if (!products.length) return;
+    setCart((current) =>
+      current.map((line) => {
+        const currentProduct = products.find(
+          (product) => product.id === line.product.id,
+        );
+        if (!currentProduct) return line;
+        return {
+          ...line,
+          product: currentProduct,
+          scent:
+            currentProduct.id === "refill"
+              ? normalizeRefillVariant(
+                  line.scent,
+                  currentProduct.refillOptions,
+                  line.product.refillOptions,
+                )
+              : line.scent,
+        };
+      }),
+    );
+  }, [products]);
   useEffect(() => {
     if (isLoading) return;
     updateStorePageSeo(productPage, locale, t);
@@ -2996,7 +3102,13 @@ function Store({ productSlug }: { productSlug?: string } = {}) {
           ? requestedScent
           : choices[0] ?? "";
       const requestedSize = params.get("size") ?? "";
-      const size = refillSizeFromVariant(requestedSize) ?? "100 g";
+      const size =
+        refillSizeFromVariant(
+          requestedSize,
+          requestedProduct.refillOptions,
+        ) ??
+        refillOptionsForProduct(requestedProduct.refillOptions)[0]!
+          .quantityGrams;
       const variant =
         requestedProduct.id === "refill"
           ? refillVariant(size, scent)

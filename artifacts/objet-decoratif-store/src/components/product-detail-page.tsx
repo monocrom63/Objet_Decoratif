@@ -15,7 +15,7 @@ import {
 import type { FrontendProduct } from "@/lib/catalog";
 import {
   priceForProductVariant,
-  REFILL_SIZES,
+  refillOptionsForProduct,
   refillVariant,
   type RefillSize,
 } from "@/lib/refill-pricing";
@@ -35,7 +35,10 @@ export function ProductDetailPage({
   const scents = product.scentOptions ?? [];
   const [activeImage, setActiveImage] = useState(0);
   const [selectedScent, setSelectedScent] = useState(scents[0]?.name ?? "");
-  const [selectedSize, setSelectedSize] = useState<RefillSize>("100 g");
+  const refillOptions = refillOptionsForProduct(product.refillOptions);
+  const [selectedSize, setSelectedSize] = useState<RefillSize>(
+    refillOptions[0]!.quantityGrams,
+  );
 
   useEffect(() => {
     setActiveImage(0);
@@ -43,12 +46,13 @@ export function ProductDetailPage({
 
   useEffect(() => {
     setSelectedScent(scents[0]?.name ?? "");
-    setSelectedSize("100 g");
-  }, [product.id, product.scentOptions]);
+    setSelectedSize(refillOptions[0]!.quantityGrams);
+  }, [product.id, product.scentOptions, product.refillOptions]);
   const selectedPrice = priceForProductVariant(
     product.id,
     product.price,
-    selectedSize,
+    `${selectedSize} g`,
+    product.refillOptions,
   );
 
   const moveImage = (direction: number) => {
@@ -168,16 +172,16 @@ export function ProductDetailPage({
             <fieldset className="od-product-page__scent-options">
               <legend>{t("Refill size")}</legend>
               <div className="product-card__sizes">
-                {REFILL_SIZES.map((size) => (
+                {refillOptions.map((option) => (
                   <button
-                    key={size}
+                    key={option.quantityGrams}
                     type="button"
-                    className={selectedSize === size ? "is-selected" : ""}
-                    onClick={() => setSelectedSize(size)}
-                    aria-pressed={selectedSize === size}
-                    data-testid={`button-product-detail-size-${size.replace(/\s/g, "")}`}
+                    className={selectedSize === option.quantityGrams ? "is-selected" : ""}
+                    onClick={() => setSelectedSize(option.quantityGrams)}
+                    aria-pressed={selectedSize === option.quantityGrams}
+                    data-testid={`button-product-detail-size-${option.quantityGrams}g`}
                   >
-                    {size}
+                    {option.quantityGrams} g
                   </button>
                 ))}
               </div>

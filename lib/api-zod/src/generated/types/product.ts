@@ -5,6 +5,7 @@
  * Objet Décoratif orders and account API
  * OpenAPI spec version: 0.2.0
  */
+import type { RefillOption } from './refillOption';
 
 export interface Product {
   id: string;
@@ -26,4 +27,5 @@ export interface Product {
   sortOrder: number;
   imagePaths: string[];
   scentIds: string[];
+  refillOptions: RefillOption[];
 }

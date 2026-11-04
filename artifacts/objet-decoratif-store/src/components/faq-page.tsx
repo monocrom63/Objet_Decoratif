@@ -12,11 +12,12 @@ const faqEntries = [
   {
     question: "Which refill sizes are available?",
     answer:
-      "The shop lists a 100 g refill and a 245 g refill. If you are unsure which size is right for your vessel, contact us before ordering.",
+      "The shop displays both refill sizes and their prices. If you are unsure which size is right for your vessel, contact us before ordering.",
   },
   {
-    question: "How long does the 245 g refill burn?",
-    answer: "The 245 g refill burns for up to 65 hours.",
+    question: "How long does a refill burn?",
+    answer:
+      "Burn time depends on the selected refill size and how the candle is used.",
   },
   {
     question: "How long does standard delivery take?",

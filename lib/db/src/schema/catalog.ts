@@ -2,6 +2,11 @@ import { integer, jsonb, pgTable, text, timestamp, boolean } from "drizzle-orm/p
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export type RefillOption = {
+  quantityGrams: number;
+  priceCents: number;
+};
+
 export const scentsTable = pgTable("catalog_scents", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -34,6 +39,7 @@ export const productsTable = pgTable("catalog_products", {
   sortOrder: integer("sort_order").notNull().default(0),
   imagePaths: jsonb("image_paths").$type<string[]>().notNull().default([]),
   scentIds: jsonb("scent_ids").$type<string[]>().notNull().default([]),
+  refillOptions: jsonb("refill_options").$type<RefillOption[]>().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

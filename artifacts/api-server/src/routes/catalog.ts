@@ -26,6 +26,10 @@ import {
   replacedScentImagePaths,
 } from "../lib/catalogImageCleanupPolicy";
 import { initialProducts, initialScents } from "../lib/catalogDefaults";
+import {
+  DEFAULT_REFILL_OPTIONS,
+  isValidRefillOptions,
+} from "../lib/refillPricing.ts";
 
 const router: IRouter = Router();
 async function admin(req: Parameters<typeof currentUser>[0]) {
@@ -123,9 +127,23 @@ router.post("/admin/catalog/products", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Invalid product or scent IDs" });
     return;
   }
+  const refillOptions =
+    body.data.id === "refill"
+      ? body.data.refillOptions ?? DEFAULT_REFILL_OPTIONS
+      : body.data.refillOptions ?? [];
+  if (body.data.id === "refill" && !isValidRefillOptions(refillOptions)) {
+    res.status(400).json({ error: "Refill must have two valid sizes and prices" });
+    return;
+  }
+  const priceCents =
+    body.data.id === "refill"
+      ? [...refillOptions].sort(
+          (a, b) => b.quantityGrams - a.quantityGrams,
+        )[0]!.priceCents
+      : body.data.priceCents;
   const [product] = await db
     .insert(productsTable)
-    .values(body.data)
+    .values({ ...body.data, priceCents, refillOptions })
     .returning();
   res.status(201).json(CreateProductResponse.parse(product));
 });
@@ -149,9 +167,26 @@ router.patch("/admin/catalog/products/:id", async (req, res): Promise<void> => {
     .from(productsTable)
     .where(eq(productsTable.id, params.data.id))
     .limit(1);
+  if (
+    params.data.id === "refill" &&
+    body.data.refillOptions !== undefined &&
+    !isValidRefillOptions(body.data.refillOptions)
+  ) {
+    res.status(400).json({ error: "Refill must have two valid sizes and prices" });
+    return;
+  }
+  const updateData =
+    params.data.id === "refill" && body.data.refillOptions
+      ? {
+          ...body.data,
+          priceCents: [...body.data.refillOptions].sort(
+            (a, b) => b.quantityGrams - a.quantityGrams,
+          )[0]!.priceCents,
+        }
+      : body.data;
   const [product] = await db
     .update(productsTable)
-    .set(body.data)
+    .set(updateData)
     .where(eq(productsTable.id, params.data.id))
     .returning();
   if (!product) {

@@ -1,3 +1,5 @@
+import { refillOptionsForProduct, type RefillOption } from "./refillPricing.ts";
+
 export type SeoProduct = {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export type SeoProduct = {
   description: string;
   explanation: string;
   priceCents: number;
+  refillOptions?: RefillOption[] | null;
   imagePaths: string[];
   updatedAt?: Date | string | null;
 };
@@ -104,19 +107,24 @@ function productJsonLd(
         },
         offers:
           product.id === "refill"
-            ? {
+            ? (() => {
+                const prices = refillOptionsForProduct(
+                  product.refillOptions,
+                ).map((option) => option.priceCents / 100);
+                return {
                 "@type": "AggregateOffer",
                 url: canonicalUrl,
                 priceCurrency: "EUR",
-                lowPrice: "30.00",
-                highPrice: "38.00",
+                lowPrice: Math.min(...prices).toFixed(2),
+                highPrice: Math.max(...prices).toFixed(2),
                 offerCount: 2,
                 availability: "https://schema.org/InStock",
                 seller: {
                   "@type": "Organization",
                   name: "Objet Décoratif",
                 },
-              }
+                };
+              })()
             : {
                 "@type": "Offer",
                 url: canonicalUrl,
@@ -195,11 +203,18 @@ export function renderProductSeoHtml(
         .join("")}</div></fieldset>`
     : "";
   const mediaMarkup = renderMedia(product, origin);
-  const priceCents = product.id === "refill" ? 3_000 : product.priceCents;
+  const refillOptions = refillOptionsForProduct(product.refillOptions);
+  const priceCents =
+    product.id === "refill" ? refillOptions[0]!.priceCents : product.priceCents;
   const price = (priceCents / 100).toFixed(2);
   const refillSizeMarkup =
     product.id === "refill"
-      ? `<label class="od-product-page__refill-size"><span>Size</span><select name="size" aria-label="Refill size"><option value="100 g" selected>100 g · €30.00</option><option value="245 g">245 g · €38.00</option></select></label>`
+      ? `<label class="od-product-page__refill-size"><span>Size</span><select name="size" aria-label="Refill size">${refillOptions
+          .map(
+            (option, index) =>
+              `<option value="${option.quantityGrams} g" data-price-cents="${option.priceCents}"${index === 0 ? " selected" : ""}>${option.quantityGrams} g · €${(option.priceCents / 100).toFixed(2)}</option>`,
+          )
+          .join("")}</select></label>`
       : "";
   const refillPriceScript =
     product.id === "refill"
@@ -210,7 +225,9 @@ export function renderProductSeoHtml(
   const price = document.querySelector('.od-product-page__price');
   const addButton = document.querySelector('.od-product-page__buy span');
   const updatePrice = () => {
-    const amount = size.value === "245 g" ? "38.00" : "30.00";
+    const amount = (
+      Number(size.selectedOptions[0]?.dataset.priceCents ?? 0) / 100
+    ).toFixed(2);
     if (price) price.textContent = "€" + amount;
     if (addButton) addButton.textContent = "Add to cart · €" + amount;
     const meta = document.querySelector('meta[property="product:price:amount"]');

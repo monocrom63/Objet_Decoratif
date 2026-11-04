@@ -26,6 +26,13 @@ test("initial catalog preserves the original seven products, prices and four sce
     assert.equal(product.published, true);
     assert.deepEqual(product.scentIds, scentIds);
   }
+  assert.deepEqual(
+    initialProducts.find(({ id }) => id === "refill")?.refillOptions,
+    [
+      { quantityGrams: 100, priceCents: 3_000 },
+      { quantityGrams: 245, priceCents: 3_800 },
+    ],
+  );
 });
 
 test("all original catalog image files are included in the storefront", () => {

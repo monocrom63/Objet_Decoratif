@@ -233,6 +233,9 @@ export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
 export const getCatalogResponseProductsItemPriceCentsMin = 0;
 
 
+export const getCatalogResponseProductsItemRefillOptionsItemPriceCentsMin = 0;
+
+
 
 export const GetCatalogResponse = zod.object({
   "products": zod.array(zod.object({
@@ -250,7 +253,11 @@ export const GetCatalogResponse = zod.object({
   "published": zod.boolean(),
   "sortOrder": zod.number().int(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(getCatalogResponseProductsItemRefillOptionsItemPriceCentsMin)
+}))
 })),
   "scents": zod.array(zod.object({
   "id": zod.string(),
@@ -309,6 +316,9 @@ export const UpdateAdminPageCopyResponse = zod.array(UpdateAdminPageCopyResponse
 export const initializeCatalogResponseProductsItemPriceCentsMin = 0;
 
 
+export const initializeCatalogResponseProductsItemRefillOptionsItemPriceCentsMin = 0;
+
+
 
 export const InitializeCatalogResponse = zod.object({
   "products": zod.array(zod.object({
@@ -326,7 +336,11 @@ export const InitializeCatalogResponse = zod.object({
   "published": zod.boolean(),
   "sortOrder": zod.number().int(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(initializeCatalogResponseProductsItemRefillOptionsItemPriceCentsMin)
+}))
 })),
   "scents": zod.array(zod.object({
   "id": zod.string(),
@@ -347,6 +361,9 @@ export const InitializeCatalogResponse = zod.object({
 export const listAdminProductsResponsePriceCentsMin = 0;
 
 
+export const listAdminProductsResponseRefillOptionsItemPriceCentsMin = 0;
+
+
 
 export const ListAdminProductsResponseItem = zod.object({
   "id": zod.string(),
@@ -363,13 +380,20 @@ export const ListAdminProductsResponseItem = zod.object({
   "published": zod.boolean(),
   "sortOrder": zod.number().int(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(listAdminProductsResponseRefillOptionsItemPriceCentsMin)
+}))
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)
 
 
 
 export const createProductBodyPriceCentsMin = 0;
+
+
+export const createProductBodyRefillOptionsItemPriceCentsMin = 0;
 
 
 
@@ -388,10 +412,17 @@ export const CreateProductBody = zod.object({
   "published": zod.boolean().optional(),
   "sortOrder": zod.number().int().optional(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(createProductBodyRefillOptionsItemPriceCentsMin)
+})).optional()
 })
 
 export const createProductResponsePriceCentsMin = 0;
+
+
+export const createProductResponseRefillOptionsItemPriceCentsMin = 0;
 
 
 
@@ -410,7 +441,11 @@ export const CreateProductResponse = zod.object({
   "published": zod.boolean(),
   "sortOrder": zod.number().int(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(createProductResponseRefillOptionsItemPriceCentsMin)
+}))
 })
 
 
@@ -419,6 +454,9 @@ export const UpdateProductParams = zod.object({
 })
 
 export const updateProductBodyPriceCentsMin = 0;
+
+
+export const updateProductBodyRefillOptionsItemPriceCentsMin = 0;
 
 
 
@@ -436,10 +474,17 @@ export const UpdateProductBody = zod.object({
   "published": zod.boolean().optional(),
   "sortOrder": zod.number().int().optional(),
   "imagePaths": zod.array(zod.string()).optional(),
-  "scentIds": zod.array(zod.string()).optional()
+  "scentIds": zod.array(zod.string()).optional(),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(updateProductBodyRefillOptionsItemPriceCentsMin)
+})).optional()
 })
 
 export const updateProductResponsePriceCentsMin = 0;
+
+
+export const updateProductResponseRefillOptionsItemPriceCentsMin = 0;
 
 
 
@@ -458,7 +503,11 @@ export const UpdateProductResponse = zod.object({
   "published": zod.boolean(),
   "sortOrder": zod.number().int(),
   "imagePaths": zod.array(zod.string()),
-  "scentIds": zod.array(zod.string())
+  "scentIds": zod.array(zod.string()),
+  "refillOptions": zod.array(zod.object({
+  "quantityGrams": zod.number().int().min(1),
+  "priceCents": zod.number().int().min(updateProductResponseRefillOptionsItemPriceCentsMin)
+}))
 })
 
 

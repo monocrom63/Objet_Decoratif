@@ -250,6 +250,13 @@ export interface ScentUpdate {
   sortOrder?: number;
 }
 
+export interface RefillOption {
+  /** @minimum 1 */
+  quantityGrams: number;
+  /** @minimum 0 */
+  priceCents: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -270,6 +277,7 @@ export interface Product {
   sortOrder: number;
   imagePaths: string[];
   scentIds: string[];
+  refillOptions: RefillOption[];
 }
 
 export interface ProductInput {
@@ -293,6 +301,7 @@ export interface ProductInput {
   sortOrder?: number;
   imagePaths: string[];
   scentIds: string[];
+  refillOptions?: RefillOption[];
 }
 
 export interface ProductUpdate {
@@ -314,6 +323,7 @@ export interface ProductUpdate {
   sortOrder?: number;
   imagePaths?: string[];
   scentIds?: string[];
+  refillOptions?: RefillOption[];
 }
 
 export interface Catalog {

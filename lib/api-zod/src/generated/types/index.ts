@@ -31,6 +31,7 @@ export * from './pageCopyUpdate';
 export * from './product';
 export * from './productInput';
 export * from './productUpdate';
+export * from './refillOption';
 export * from './scent';
 export * from './scentInput';
 export * from './scentUpdate';

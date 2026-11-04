@@ -106,7 +106,7 @@ test("all supplied scent descriptions and notes have German translations", () =>
 test("country labels are localized without changing submitted country values", () => {
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
   assert.match(app, /<option value="Germany">\{t\("Germany"\)\}<\/option>/);
-  assert.match(app, /REFILL_SIZES\.map/);
+  assert.match(app, /refillOptions\.map/);
   assert.equal(translate("Germany", "DE"), "Deutschland");
 });
 

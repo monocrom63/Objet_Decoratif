@@ -121,6 +121,7 @@ router.post("/orders", async (req, res): Promise<void> => {
       product.id,
       product.priceCents,
       item.scent,
+      product.refillOptions,
     );
     return {
       productId: item.productId,

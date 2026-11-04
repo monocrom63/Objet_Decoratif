@@ -442,7 +442,7 @@ components:
         sortOrder: { type: integer }
     Product:
       type: object
-      required: [id, name, collection, category, description, explanation, priceCents, tag, active, published, sortOrder, imagePaths, scentIds]
+      required: [id, name, collection, category, description, explanation, priceCents, tag, active, published, sortOrder, imagePaths, scentIds, refillOptions]
       properties:
         id: { type: string }
         name: { type: string }
@@ -459,6 +459,7 @@ components:
         sortOrder: { type: integer }
         imagePaths: { type: array, items: { type: string } }
         scentIds: { type: array, items: { type: string } }
+        refillOptions: { type: array, items: { $ref: "#/components/schemas/RefillOption" } }
     ProductInput:
       type: object
       required: [id, name, collection, category, description, explanation, priceCents, imagePaths, scentIds]
@@ -478,6 +479,7 @@ components:
         sortOrder: { type: integer }
         imagePaths: { type: array, items: { type: string } }
         scentIds: { type: array, items: { type: string } }
+        refillOptions: { type: array, items: { $ref: "#/components/schemas/RefillOption" } }
     ProductUpdate:
       type: object
       properties:
@@ -495,6 +497,13 @@ components:
         sortOrder: { type: integer }
         imagePaths: { type: array, items: { type: string } }
         scentIds: { type: array, items: { type: string } }
+        refillOptions: { type: array, items: { $ref: "#/components/schemas/RefillOption" } }
+    RefillOption:
+      type: object
+      required: [quantityGrams, priceCents]
+      properties:
+        quantityGrams: { type: integer, minimum: 1 }
+        priceCents: { type: integer, minimum: 0 }
     Catalog:
       type: object
       required: [products, scents]

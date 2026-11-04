@@ -1,4 +1,5 @@
 import type { InsertProduct, InsertScent } from "@workspace/db";
+import { DEFAULT_REFILL_OPTIONS } from "./refillPricing.ts";
 
 export const initialScents: InsertScent[] = [
   {
@@ -42,7 +43,7 @@ export const initialScents: InsertScent[] = [
 type InitialProduct = Pick<
   InsertProduct,
   "id" | "name" | "description" | "explanation" | "priceCents" | "tag"
-> & { images: string[] };
+> & { images: string[]; refillOptions?: InsertProduct["refillOptions"] };
 const products: InitialProduct[] = [
   {
     id: "barrique",
@@ -127,6 +128,7 @@ const products: InitialProduct[] = [
     explanation:
       "Our sculptural candles are designed to last. With a refill, you extend the life of the form quietly and sustainably, without ever replacing the object itself.",
     priceCents: 3800,
+    refillOptions: DEFAULT_REFILL_OPTIONS,
     tag: "Refill",
     images: ["refill-01.webp", "refill-02.webp", "refill-03.webp"],
   },
